@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Online</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            light: '#ffedd5',
+                            DEFAULT: '#f97316',
+                            dark: '#c2410c',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .item-card { transition: transform 0.2s, box-shadow 0.2s; }
+        .item-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .spinner { border: 4px solid #ffedd5; border-top: 4px solid #f97316; border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased p-2">
+
+    <!-- ============ LOADING ============ -->
+    <div id="state-loading" class="min-h-screen flex flex-col items-center justify-center gap-4">
+        <div class="spinner"></div>
+        <p class="text-gray-500 text-sm">Memuatkan kedai...</p>
+    </div>
+
+    <!-- ============ ERROR ============ -->
+    <div id="state-error" class="hidden min-h-screen flex flex-col items-center justify-center gap-3 text-center px-6">
+        <i class="fa-solid fa-store-slash text-5xl text-gray-300"></i>
+        <h2 class="text-xl font-bold">Kedai tidak dijumpai</h2>
+        <p id="error-msg" class="text-gray-500 text-sm">Sila semak semula link yang diberikan oleh peniaga.</p>
+    </div>
+
+    <!-- ============ KEDAI TUTUP ============ -->
+    <div id="state-closed" class="hidden min-h-screen flex flex-col items-center justify-center gap-3 text-center px-6">
+        <i class="fa-solid fa-door-closed text-5xl text-brand"></i>
+        <h2 id="closed-nama" class="text-xl font-bold"></h2>
+        <p class="text-gray-500">Maaf, kedai tutup buat sementara waktu. Sila datang lagi nanti!</p>
+    </div>
+
+    <!-- ============ APP ============ -->
+    <main id="app" class="hidden max-w-3xl mx-auto py-2">
+
+        <!-- Banner / Header -->
+        <div id="banner-wrap" class="hidden mb-6 rounded-2xl overflow-hidden shadow-md bg-white">
+            <img id="banner-img" src="" alt="Banner Kedai" class="w-full h-auto object-cover">
+        </div>
+        <div id="header-text" class="mb-6 text-center">
+            <h1 id="kedai-nama" class="text-2xl font-bold text-brand-dark"></h1>
+            <p id="kedai-tagline" class="text-gray-500 text-sm mt-1"></p>
+        </div>
+
+        <!-- Butang Share -->
+        <div class="text-center mb-6 -mt-2">
+            <button onclick="shareKedai()" class="inline-flex items-center gap-2 bg-white border-2 border-brand-light text-brand-dark text-sm font-bold px-5 py-2.5 rounded-full hover:bg-orange-50 transition-colors shadow-sm">
+                <i class="fa-solid fa-share-nodes"></i> Kongsi Kedai Ini
+            </button>
+        </div>
+
+        <!-- Menu -->
+        <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-utensils text-brand"></i> Menu Kami</h3>
+        <div id="menu-list" class="grid grid-cols-1 gap-4 mb-6"></div>
+
+        <!-- Maklumat Penghantaran -->
+        <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-clipboard-list text-brand"></i> Maklumat Penghantaran</h3>
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama</label>
+                    <input type="text" id="cust-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="Nama anda">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Penuh / Lokasi COD</label>
+                    <textarea id="cust-address" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="Alamat lengkap anda"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Pilihan Pembayaran</label>
+                    <div id="payment-options" class="grid grid-cols-2 gap-3">
+                        <label class="border rounded-lg p-3 flex items-center gap-2 cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="payment_method" value="COD" checked onclick="toggleQR(false)">
+                            <span class="text-sm font-medium">Tunai (COD)</span>
+                        </label>
+                        <label id="online-option" class="border rounded-lg p-3 flex items-center gap-2 cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="payment_method" value="Online Transfer" onclick="toggleQR(true)">
+                            <span class="text-sm font-medium">Online Transfer</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="qr-section" class="hidden mt-4 p-4 border-2 border-brand-light rounded-xl bg-orange-50 text-center">
+                    <p class="font-bold text-brand-dark mb-2">Sila Bayar Dulu melalui QR Kod di bawah:</p>
+                    <img id="qr-img" src="" alt="QR Bayaran" class="mx-auto max-w-xs rounded-lg shadow-md mb-2">
+                    <p class="text-xs text-red-600 font-semibold italic">PENTING: Sila buat pembayaran mengikut jumlah keseluruhan di bawah sebelum menekan butang hantar. Sila sertakan resit transaksi di WhatsApp nanti.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ringkasan -->
+        <div class="bg-white p-5 rounded-xl shadow-lg border border-gray-200">
+            <h3 class="font-bold border-b pb-2 mb-3">Ringkasan Pesanan</h3>
+            <div class="flex justify-between mb-2 text-sm text-gray-600"><span>Subtotal:</span> <span class="font-bold text-gray-800" id="summary-subtotal">RM 0.00</span></div>
+            <div class="flex justify-between mb-3 text-sm text-gray-600"><span>Penghantaran:</span> <span class="font-bold text-gray-800" id="summary-delivery">RM 0.00</span></div>
+            <div class="flex justify-between font-bold text-lg border-t pt-2"><span>Total Keseluruhan:</span> <span class="text-brand-dark" id="summary-total">RM 0.00</span></div>
+
+            <a id="whatsapp-btn" href="#" target="_blank" onclick="return submitOrder()" class="w-full mt-4 bg-brand text-white font-bold py-3 rounded-xl hover:bg-brand-dark flex items-center justify-center gap-2 block text-center transition-colors">
+                <i class="fa-brands fa-whatsapp text-xl"></i> Hantar Pesanan ke WhatsApp
+            </a>
+        </div>
+
+        <p class="text-center text-xs text-gray-400 mt-6 mb-2">
+            <a href="https://orderlah.store" target="_blank" class="hover:text-brand transition-colors">
+                Powered by <span class="font-semibold text-brand-dark">Orderlah</span> &mdash; buat link order untuk kedai anda
+            </a>
+        </p>
+    </main>
+
+    <script>
+        // ============================================
+        // GANTI URL INI DENGAN URL WEB APP GAS ANDA
+        // ============================================
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbww8lWVv-6bFjBvsKijgu2b0SVdfKmBCAlvoWkIFQI2b9L5YZPqZSlJJ7nNiIAHiZWc/exec';
+
+        let KEDAI = null;
+        let MENU = [];
+        let cart = {}; // { itemId: qty }
+
+        const slug = new URLSearchParams(location.search).get('id');
+
+        init();
+
+        async function init() {
+            if (!slug) return showError('Link tidak lengkap. Pastikan link ada ?id=namakedai');
+            try {
+                const res = await fetch(GAS_URL + '?action=config&kedai=' + encodeURIComponent(slug));
+                const data = await res.json();
+                if (!data.success) return showError(data.error || 'Kedai tidak dijumpai');
+
+                KEDAI = data.kedai;
+                MENU = data.menu || [];
+
+                if (KEDAI.status !== 'Aktif') return showClosed();
+                renderApp();
+
+                // Rekod klik untuk statistik peniaga (fire & forget)
+                fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'trackVisit', slug: KEDAI.slug }),
+                    keepalive: true
+                }).catch(function () {});
+            } catch (err) {
+                showError('Masalah sambungan. Sila cuba semula.');
+            }
+        }
+
+        function showError(msg) {
+            document.getElementById('state-loading').classList.add('hidden');
+            document.getElementById('error-msg').innerText = msg;
+            document.getElementById('state-error').classList.remove('hidden');
+        }
+
+        function showClosed() {
+            document.getElementById('state-loading').classList.add('hidden');
+            document.getElementById('closed-nama').innerText = KEDAI.nama;
+            document.getElementById('state-closed').classList.remove('hidden');
+        }
+
+        function renderApp() {
+            document.title = KEDAI.nama + ' | Order Online';
+
+            // Banner atau header teks
+            if (KEDAI.banner) {
+                document.getElementById('banner-img').src = KEDAI.banner;
+                document.getElementById('banner-wrap').classList.remove('hidden');
+                document.getElementById('header-text').classList.add('hidden');
+            } else {
+                document.getElementById('kedai-nama').innerText = KEDAI.nama;
+                document.getElementById('kedai-tagline').innerText = KEDAI.tagline || '';
+            }
+
+            // Sembunyikan Online Transfer jika tiada QR
+            if (!KEDAI.qr) {
+                document.getElementById('online-option').classList.add('hidden');
+                document.getElementById('payment-options').classList.remove('grid-cols-2');
+                document.getElementById('payment-options').classList.add('grid-cols-1');
+            } else {
+                document.getElementById('qr-img').src = KEDAI.qr;
+            }
+
+            // Render menu
+            const list = document.getElementById('menu-list');
+            list.innerHTML = '';
+            MENU.forEach(function (item) {
+                cart[item.id] = 0;
+                list.appendChild(buildItemCard(item));
+            });
+
+            calculateTotal();
+            document.getElementById('state-loading').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+        }
+
+        function buildItemCard(item) {
+            const card = document.createElement('div');
+
+            if (item.promo) {
+                card.className = 'item-card bg-orange-50 border-2 border-brand-light p-4 rounded-xl shadow-sm flex justify-between items-center relative overflow-hidden';
+                const badge = document.createElement('div');
+                badge.className = 'absolute top-0 right-0 bg-brand text-white text-xs font-bold px-2 py-1 rounded-bl-lg';
+                badge.innerText = 'PROMO';
+                card.appendChild(badge);
+            } else {
+                card.className = 'item-card bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center';
+            }
+
+            const info = document.createElement('div');
+            const h4 = document.createElement('h4');
+            h4.className = 'font-bold text-lg';
+            h4.innerText = item.nama;
+            const price = document.createElement('p');
+            price.className = item.promo ? 'text-brand-dark font-semibold' : 'text-brand font-semibold';
+            price.innerText = 'RM ' + item.harga.toFixed(2);
+            info.appendChild(h4);
+            info.appendChild(price);
+
+            if (item.freeDelivery) {
+                const fd = document.createElement('span');
+                fd.className = 'inline-block mt-1 text-xs bg-green-100 text-green-700 px-2 py-1 rounded font-medium';
+                fd.innerHTML = '<i class="fa-solid fa-truck-fast"></i> FREE Delivery';
+                info.appendChild(fd);
+            }
+
+            const controls = document.createElement('div');
+            controls.className = 'flex items-center gap-3 z-10';
+
+            const minus = document.createElement('button');
+            minus.type = 'button';
+            minus.className = item.promo
+                ? 'w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50'
+                : 'w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200';
+            minus.innerHTML = '<i class="fa-solid fa-minus"></i>';
+            minus.onclick = function () { updateQty(item.id, -1); };
+
+            const qty = document.createElement('span');
+            qty.id = 'qty-' + item.id;
+            qty.className = 'font-bold w-4 text-center';
+            qty.innerText = '0';
+
+            const plus = document.createElement('button');
+            plus.type = 'button';
+            plus.className = 'w-8 h-8 rounded-full bg-brand text-white flex items-center justify-center hover:bg-brand-dark';
+            plus.innerHTML = '<i class="fa-solid fa-plus"></i>';
+            plus.onclick = function () { updateQty(item.id, 1); };
+
+            controls.appendChild(minus);
+            controls.appendChild(qty);
+            controls.appendChild(plus);
+
+            card.appendChild(info);
+            card.appendChild(controls);
+            return card;
+        }
+
+        function toggleQR(show) {
+            document.getElementById('qr-section').classList.toggle('hidden', !show);
+        }
+
+        async function shareKedai() {
+            const url = location.origin + '/?id=' + KEDAI.slug;
+            const text = 'Nak makan? Orderlah! 😋\n\n' + KEDAI.nama + ' sekarang boleh order online — pilih menu, terus hantar:\n';
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: KEDAI.nama, text: text, url: url });
+                } catch (e) {
+                    // pengguna batalkan share - tak perlu buat apa-apa
+                }
+            } else {
+                // Fallback: share melalui WhatsApp
+                window.open('https://wa.me/?text=' + encodeURIComponent(text + url), '_blank');
+            }
+        }
+
+        function updateQty(itemId, change) {
+            cart[itemId] = Math.max(0, (cart[itemId] || 0) + change);
+            document.getElementById('qty-' + itemId).innerText = cart[itemId];
+            calculateTotal();
+        }
+
+        function getTotals() {
+            let sub = 0;
+            let hasFreeDelivery = false;
+            MENU.forEach(function (item) {
+                const q = cart[item.id] || 0;
+                sub += q * item.harga;
+                if (q > 0 && item.freeDelivery) hasFreeDelivery = true;
+            });
+            let del = 0;
+            if (sub > 0) del = hasFreeDelivery ? 0 : (KEDAI.cajPenghantaran || 0);
+            return { sub: sub, del: del, total: sub + del };
+        }
+
+        function calculateTotal() {
+            const t = getTotals();
+            document.getElementById('summary-subtotal').innerText = 'RM ' + t.sub.toFixed(2);
+            document.getElementById('summary-delivery').innerText = 'RM ' + t.del.toFixed(2);
+            document.getElementById('summary-total').innerText = 'RM ' + t.total.toFixed(2);
+        }
+
+        function submitOrder() {
+            const name = document.getElementById('cust-name').value.trim();
+            const addr = document.getElementById('cust-address').value.trim();
+            const pay = document.querySelector('input[name="payment_method"]:checked').value;
+            const t = getTotals();
+
+            if (t.sub === 0 || !name || !addr) {
+                alert('Sila pilih menu dan lengkapkan maklumat nama & alamat anda.');
+                return false;
+            }
+
+            let text = '*PESANAN BARU: ' + KEDAI.nama.toUpperCase() + '*\n\n';
+            text += '*Nama:* ' + name + '\n';
+            text += '*Alamat:* ' + addr + '\n\n';
+            text += '*Item Sila Sediakan:*\n';
+
+            MENU.forEach(function (item) {
+                const q = cart[item.id] || 0;
+                if (q > 0) {
+                    text += '- ' + q + 'x ' + item.nama + ' (RM ' + (q * item.harga).toFixed(2) + ')\n';
+                }
+            });
+
+            text += '\n*Subtotal:* RM ' + t.sub.toFixed(2) + '\n';
+            text += '*Cas Penghantaran:* RM ' + t.del.toFixed(2) + '\n';
+            text += '*JUMLAH KESELURUHAN: RM ' + t.total.toFixed(2) + '*\n\n';
+            text += '*Kaedah Pembayaran:* ' + pay + '\n';
+
+            if (pay === 'Online Transfer') {
+                text += '_(Pelanggan telah dimaklumkan untuk sertakan resit bayaran)_\n';
+            }
+
+            const waUrl = 'https://wa.me/' + KEDAI.noWhatsapp + '?text=' + encodeURIComponent(text);
+            document.getElementById('whatsapp-btn').href = waUrl;
+
+            // Rekod order untuk peniaga (fire & forget, tak halang WhatsApp)
+            try {
+                const logItems = [];
+                MENU.forEach(function (item) {
+                    const q = cart[item.id] || 0;
+                    if (q > 0) logItems.push({ nama: item.nama, qty: q });
+                });
+                fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'logOrder',
+                        slug: KEDAI.slug,
+                        order: {
+                            nama: name,
+                            alamat: addr,
+                            bayaran: pay,
+                            items: logItems,
+                            subtotal: t.sub,
+                            caj: t.del,
+                            total: t.total
+                        }
+                    }),
+                    keepalive: true
+                }).catch(function () {});
+            } catch (e) {}
+
+            return true;
+        }
+    </script>
+</body>
+</html>
