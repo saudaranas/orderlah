@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin | Orderlah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            light: '#e0e7ff',
+                            DEFAULT: '#1e3a8a',
+                            dark: '#172554',
+                        },
+                        brand: {
+                            light: '#ffedd5',
+                            DEFAULT: '#f97316',
+                            dark: '#c2410c',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .toast-show { transform: translateY(0); opacity: 1; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased">
+
+    <!-- ============ TOAST ============ -->
+    <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-sm font-medium px-5 py-3 rounded-xl shadow-lg transition-all duration-300 opacity-0 -translate-y-4 pointer-events-none"></div>
+
+    <!-- ============ LOGIN ============ -->
+    <div id="screen-login" class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-sm bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+            <div class="text-center mb-6">
+                <div class="w-14 h-14 bg-navy rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-user-shield text-white text-2xl"></i>
+                </div>
+                <h1 class="text-xl font-bold">Super Admin</h1>
+                <p class="text-gray-500 text-sm">Panel pengurusan Orderlah</p>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">PIN Admin</label>
+                    <input type="password" id="login-pin" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-navy" placeholder="PIN rahsia anda">
+                </div>
+                <button onclick="doLogin()" id="login-btn" class="w-full bg-navy text-white font-bold py-3 rounded-xl hover:bg-navy-dark transition-colors">
+                    Log Masuk
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ DASHBOARD ============ -->
+    <div id="screen-dash" class="hidden max-w-3xl mx-auto p-3 pb-24">
+
+        <!-- Top bar -->
+        <div class="flex items-center justify-between bg-navy text-white p-4 rounded-2xl shadow-sm mb-4">
+            <div>
+                <h1 class="font-bold text-lg leading-tight"><i class="fa-solid fa-user-shield"></i> Super Admin</h1>
+                <p class="text-xs text-blue-200">Pengurusan akaun peniaga</p>
+            </div>
+            <button onclick="doLogout()" class="text-blue-200 hover:text-white text-sm"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-2 mb-4">
+            <div class="bg-white p-3 rounded-xl border border-gray-100 text-center">
+                <p id="stat-total" class="text-2xl font-bold text-navy">0</p>
+                <p class="text-xs text-gray-500">Jumlah Kedai</p>
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-gray-100 text-center">
+                <p id="stat-aktif" class="text-2xl font-bold text-green-600">0</p>
+                <p class="text-xs text-gray-500">Aktif</p>
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-gray-100 text-center">
+                <p id="stat-tutup" class="text-2xl font-bold text-red-500">0</p>
+                <p class="text-xs text-gray-500">Tutup</p>
+            </div>
+        </div>
+
+        <!-- Senarai kedai -->
+        <div id="view-list">
+            <div class="flex gap-2 mb-4">
+                <input type="text" id="search-box" oninput="renderList()" class="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-navy text-sm" placeholder="Cari kedai...">
+                <button onclick="openForm(null)" class="bg-navy text-white font-bold px-4 rounded-xl hover:bg-navy-dark text-sm whitespace-nowrap">
+                    <i class="fa-solid fa-plus"></i> Tambah
+                </button>
+            </div>
+            <div id="kedai-list" class="space-y-3"></div>
+        </div>
+
+        <!-- Borang tambah/edit -->
+        <div id="view-form" class="hidden">
+            <button onclick="closeForm()" class="text-gray-500 text-sm mb-3"><i class="fa-solid fa-arrow-left"></i> Kembali ke senarai</button>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+                <h2 id="form-title" class="font-bold text-lg">Tambah Kedai Baru</h2>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Slug (ID Kedai)</label>
+                    <input type="text" id="f-slug" autocapitalize="none" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-navy" placeholder="cth: laksakriuk">
+                    <p id="f-slug-hint" class="text-xs text-gray-400 mt-1">Huruf kecil, nombor dan - sahaja. Ini jadi link kedai: domain.com/?id=<b>slug</b></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">PIN Peniaga</label>
+                    <input type="text" id="f-pin" inputmode="numeric" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-navy" placeholder="Kosongkan = auto generate 4 digit">
+                    <p id="f-pin-hint" class="text-xs text-gray-400 mt-1"></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Kedai</label>
+                    <input type="text" id="f-nama" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-navy" placeholder="cth: Laksa Kriuk-Kriuk">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tagline (pilihan)</label>
+                    <input type="text" id="f-tagline" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-navy">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">No. WhatsApp Peniaga</label>
+                    <input type="tel" id="f-whatsapp" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-navy" placeholder="60xxxxxxxxx">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Link Banner (pilihan)</label>
+                    <input type="url" id="f-banner" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-navy" placeholder="https://...">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Link QR Bayaran (pilihan)</label>
+                    <input type="url" id="f-qr" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-navy" placeholder="https://...">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Caj Penghantaran (RM)</label>
+                    <input type="number" id="f-caj" step="0.50" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-navy" placeholder="cth: 3.00">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="border rounded-lg p-3 flex items-center gap-2 cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="f-status" value="Aktif" checked>
+                            <span class="text-sm font-medium text-green-700">Aktif</span>
+                        </label>
+                        <label class="border rounded-lg p-3 flex items-center gap-2 cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="f-status" value="Tutup">
+                            <span class="text-sm font-medium text-red-600">Tutup</span>
+                        </label>
+                    </div>
+                </div>
+                <button onclick="saveForm()" id="save-form-btn" class="w-full bg-navy text-white font-bold py-3 rounded-xl hover:bg-navy-dark transition-colors">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // GANTI 2 URL DI BAWAH
+        // ============================================
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbww8lWVv-6bFjBvsKijgu2b0SVdfKmBCAlvoWkIFQI2b9L5YZPqZSlJJ7nNiIAHiZWc/exec';
+        const STORE_URL = 'https://orderlah.store'; // domain anda, tanpa / di hujung
+
+        let ADMIN_PIN_SESSION = null;
+        let LIST = [];
+        let editingSlug = null; // null = mod tambah baru
+
+        // Auto-login jika ada session
+        (function () {
+            const saved = sessionStorage.getItem('orderlah_superadmin');
+            if (saved) {
+                document.getElementById('login-pin').value = saved;
+                doLogin();
+            }
+        })();
+
+        async function api(payload) {
+            const res = await fetch(GAS_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            return res.json();
+        }
+
+        function toast(msg, isError) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.remove('bg-red-600', 'bg-gray-900');
+            t.classList.add(isError ? 'bg-red-600' : 'bg-gray-900');
+            t.classList.add('toast-show');
+            setTimeout(function () { t.classList.remove('toast-show'); }, 2500);
+        }
+
+        function busy(btnId, isBusy, normalHTML) {
+            const b = document.getElementById(btnId);
+            b.disabled = isBusy;
+            b.innerHTML = isBusy ? '<i class="fa-solid fa-circle-notch fa-spin"></i> Sila tunggu...' : normalHTML;
+        }
+
+        /* ================ LOGIN ================ */
+
+        async function doLogin() {
+            const pin = document.getElementById('login-pin').value.trim();
+            if (!pin) return toast('Sila masukkan PIN admin', true);
+
+            busy('login-btn', true, 'Log Masuk');
+            try {
+                const data = await api({ action: 'adminLogin', adminPin: pin });
+                if (!data.success) {
+                    toast(data.error || 'Log masuk gagal', true);
+                    sessionStorage.removeItem('orderlah_superadmin');
+                    return;
+                }
+                ADMIN_PIN_SESSION = pin;
+                sessionStorage.setItem('orderlah_superadmin', pin);
+                LIST = data.kedaiList || [];
+                document.getElementById('screen-login').classList.add('hidden');
+                document.getElementById('screen-dash').classList.remove('hidden');
+                renderList();
+            } catch (err) {
+                toast('Masalah sambungan. Cuba semula.', true);
+            } finally {
+                busy('login-btn', false, 'Log Masuk');
+            }
+        }
+
+        function doLogout() {
+            sessionStorage.removeItem('orderlah_superadmin');
+            location.reload();
+        }
+
+        /* ================ SENARAI ================ */
+
+        function renderList() {
+            // Stats
+            document.getElementById('stat-total').innerText = LIST.length;
+            document.getElementById('stat-aktif').innerText = LIST.filter(function (k) { return k.status === 'Aktif'; }).length;
+            document.getElementById('stat-tutup').innerText = LIST.filter(function (k) { return k.status !== 'Aktif'; }).length;
+
+            const q = document.getElementById('search-box').value.trim().toLowerCase();
+            const wrap = document.getElementById('kedai-list');
+            wrap.innerHTML = '';
+
+            const filtered = LIST.filter(function (k) {
+                if (!q) return true;
+                return (k.nama.toLowerCase().indexOf(q) >= 0 || k.slug.toLowerCase().indexOf(q) >= 0);
+            });
+
+            if (filtered.length === 0) {
+                const empty = document.createElement('p');
+                empty.className = 'text-center text-gray-400 text-sm py-8';
+                empty.innerText = q ? 'Tiada kedai sepadan dengan carian.' : 'Belum ada kedai. Tekan Tambah untuk mula.';
+                wrap.appendChild(empty);
+                return;
+            }
+
+            filtered.forEach(function (k) {
+                wrap.appendChild(buildKedaiCard(k));
+            });
+        }
+
+        function buildKedaiCard(k) {
+            const card = document.createElement('div');
+            card.className = 'bg-white p-4 rounded-2xl shadow-sm border border-gray-100';
+
+            const isAktif = (k.status === 'Aktif');
+
+            const top = document.createElement('div');
+            top.className = 'flex items-start justify-between gap-2 mb-3';
+            top.innerHTML =
+                '<div>' +
+                '  <h3 class="font-bold">' + esc(k.nama) + '</h3>' +
+                '  <p class="text-xs text-gray-400">?id=' + esc(k.slug) + ' &bull; PIN: ' + esc(k.pin) + ' &bull; ' + k.itemCount + ' item</p>' +
+                '</div>' +
+                '<span class="text-xs font-bold px-2 py-1 rounded-lg ' + (isAktif ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600') + '">' + (isAktif ? 'AKTIF' : 'TUTUP') + '</span>';
+
+            const btns = document.createElement('div');
+            btns.className = 'grid grid-cols-4 gap-2';
+
+            btns.appendChild(actionBtn('fa-link', 'Link', function () {
+                copyText(STORE_URL + '/?id=' + k.slug, 'Link kedai disalin');
+            }));
+            btns.appendChild(actionBtn('fa-paper-plane', 'Onboard', function () {
+                copyText(onboardingMsg(k), 'Mesej onboarding disalin. Paste di WhatsApp peniaga.');
+            }));
+            btns.appendChild(actionBtn('fa-pen', 'Edit', function () {
+                openForm(k);
+            }));
+            btns.appendChild(actionBtn('fa-trash', 'Padam', function () {
+                deleteKedai(k);
+            }, true));
+
+            card.appendChild(top);
+            card.appendChild(btns);
+            return card;
+        }
+
+        function actionBtn(icon, label, onClick, danger) {
+            const b = document.createElement('button');
+            b.className = danger
+                ? 'flex flex-col items-center gap-1 py-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 text-xs font-medium'
+                : 'flex flex-col items-center gap-1 py-2 rounded-xl bg-gray-50 text-gray-600 hover:bg-gray-100 text-xs font-medium';
+            b.innerHTML = '<i class="fa-solid ' + icon + '"></i><span>' + label + '</span>';
+            b.onclick = onClick;
+            return b;
+        }
+
+        function esc(s) {
+            const d = document.createElement('div');
+            d.innerText = String(s == null ? '' : s);
+            return d.innerHTML;
+        }
+
+        /* ================ MESEJ ONBOARDING ================ */
+
+        function onboardingMsg(k) {
+            return 'Salam Tuan/Puan ' + k.nama + '!\n\n' +
+                'Alhamdulillah, sistem order online kedai anda dah SIAP & AKTIF.\n\n' +
+                '*LINK KEDAI ANDA (share kepada pelanggan):*\n' +
+                STORE_URL + '/?id=' + k.slug + '\n\n' +
+                '*PANEL ADMIN (urus menu & setting):*\n' +
+                STORE_URL + '/login/?id=' + k.slug + '\n' +
+                'ID kedai dah terisi automatik, masukkan PIN sahaja.\n' +
+                'PIN anda: ' + k.pin + '\n\n' +
+                '*Apa anda boleh buat di panel admin:*\n' +
+                '- Tambah / edit / padam item menu\n' +
+                '- Tukar harga bila-bila masa\n' +
+                '- Set caj penghantaran\n' +
+                '- Tutup kedai sementara (cuti/habis stok)\n\n' +
+                'Order pelanggan akan masuk TERUS ke WhatsApp anda.\n\n' +
+                'Ada soalan, terus reply mesej ini ya. Terima kasih!';
+        }
+
+        function copyText(text, successMsg) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(function () {
+                    toast(successMsg);
+                }).catch(function () {
+                    fallbackCopy(text, successMsg);
+                });
+            } else {
+                fallbackCopy(text, successMsg);
+            }
+        }
+
+        function fallbackCopy(text, successMsg) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand('copy');
+                toast(successMsg);
+            } catch (e) {
+                toast('Gagal salin. Cuba lagi.', true);
+            }
+            document.body.removeChild(ta);
+        }
+
+        /* ================ BORANG TAMBAH / EDIT ================ */
+
+        function openForm(k) {
+            editingSlug = k ? k.slug : null;
+
+            document.getElementById('form-title').innerText = k ? 'Edit Kedai: ' + k.nama : 'Tambah Kedai Baru';
+            document.getElementById('f-slug').value = k ? k.slug : '';
+            document.getElementById('f-slug').disabled = !!k;
+            document.getElementById('f-slug-hint').innerText = k
+                ? 'Slug tidak boleh ditukar (link kedai akan rosak)'
+                : 'Huruf kecil, nombor dan - sahaja. Ini jadi link kedai.';
+            document.getElementById('f-pin').value = k ? k.pin : '';
+            document.getElementById('f-pin-hint').innerText = k
+                ? 'Tukar nilai ini untuk reset PIN peniaga'
+                : 'Kosongkan untuk auto generate 4 digit';
+            document.getElementById('f-nama').value = k ? k.nama : '';
+            document.getElementById('f-tagline').value = k ? k.tagline : '';
+            document.getElementById('f-whatsapp').value = k ? k.noWhatsapp : '';
+            document.getElementById('f-banner').value = k ? k.banner : '';
+            document.getElementById('f-qr').value = k ? k.qr : '';
+            document.getElementById('f-caj').value = k ? k.cajPenghantaran : '';
+            const statusVal = (k && k.status === 'Tutup') ? 'Tutup' : 'Aktif';
+            document.querySelector('input[name="f-status"][value="' + statusVal + '"]').checked = true;
+
+            document.getElementById('view-list').classList.add('hidden');
+            document.getElementById('view-form').classList.remove('hidden');
+            window.scrollTo({ top: 0 });
+        }
+
+        function closeForm() {
+            document.getElementById('view-form').classList.add('hidden');
+            document.getElementById('view-list').classList.remove('hidden');
+        }
+
+        async function saveForm() {
+            const kedai = {
+                slug: document.getElementById('f-slug').value.trim().toLowerCase(),
+                pin: document.getElementById('f-pin').value.trim(),
+                nama: document.getElementById('f-nama').value.trim(),
+                tagline: document.getElementById('f-tagline').value.trim(),
+                noWhatsapp: document.getElementById('f-whatsapp').value.replace(/[^0-9]/g, ''),
+                banner: document.getElementById('f-banner').value.trim(),
+                qr: document.getElementById('f-qr').value.trim(),
+                cajPenghantaran: parseFloat(document.getElementById('f-caj').value) || 0,
+                status: document.querySelector('input[name="f-status"]:checked').value
+            };
+
+            if (!kedai.nama) return toast('Nama kedai diperlukan', true);
+            if (!editingSlug && !kedai.slug) return toast('Slug diperlukan', true);
+
+            const payload = editingSlug
+                ? { action: 'adminUpdateKedai', adminPin: ADMIN_PIN_SESSION, slug: editingSlug, kedai: kedai }
+                : { action: 'adminAddKedai', adminPin: ADMIN_PIN_SESSION, kedai: kedai };
+
+            const normalHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan';
+            busy('save-form-btn', true, normalHTML);
+            try {
+                const data = await api(payload);
+                if (!data.success) return toast(data.error || 'Gagal simpan', true);
+                LIST = data.kedaiList || [];
+                closeForm();
+                renderList();
+                toast(editingSlug ? 'Kedai dikemaskini' : 'Kedai baru ditambah');
+            } catch (err) {
+                toast('Masalah sambungan. Cuba semula.', true);
+            } finally {
+                busy('save-form-btn', false, normalHTML);
+            }
+        }
+
+        async function deleteKedai(k) {
+            if (!confirm('PADAM kedai "' + k.nama + '"?\n\nSemua item menu kedai ini juga akan dipadam. Tindakan ini TIDAK boleh diundur.')) return;
+            if (!confirm('Pasti? Sahkan sekali lagi untuk padam "' + k.slug + '".')) return;
+
+            try {
+                const data = await api({ action: 'adminDeleteKedai', adminPin: ADMIN_PIN_SESSION, slug: k.slug });
+                if (!data.success) return toast(data.error || 'Gagal padam', true);
+                LIST = data.kedaiList || [];
+                renderList();
+                toast('Kedai dipadam');
+            } catch (err) {
+                toast('Masalah sambungan. Cuba semula.', true);
+            }
+        }
+    </script>
+</body>
+</html>
