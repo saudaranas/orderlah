@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Kedai | Orderlah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            light: '#ffedd5',
+                            DEFAULT: '#f97316',
+                            dark: '#c2410c',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .toast-show { transform: translateY(0); opacity: 1; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased">
+
+    <!-- ============ TOAST ============ -->
+    <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-sm font-medium px-5 py-3 rounded-xl shadow-lg transition-all duration-300 opacity-0 -translate-y-4 pointer-events-none"></div>
+
+    <!-- ============ LOGIN ============ -->
+    <div id="screen-login" class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-sm bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+            <div class="text-center mb-6">
+                <div class="w-14 h-14 bg-brand rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-store text-white text-2xl"></i>
+                </div>
+                <h1 class="text-xl font-bold">Admin Kedai</h1>
+                <p class="text-gray-500 text-sm">Log masuk untuk urus kedai anda</p>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">ID Kedai (Slug)</label>
+                    <input type="text" id="login-slug" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: laksakriuk" autocapitalize="none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">PIN</label>
+                    <input type="password" id="login-pin" inputmode="numeric" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="PIN anda">
+                </div>
+                <button onclick="doLogin()" id="login-btn" class="w-full bg-brand text-white font-bold py-3 rounded-xl hover:bg-brand-dark transition-colors">
+                    Log Masuk
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ DASHBOARD ============ -->
+    <div id="screen-dash" class="hidden max-w-3xl mx-auto p-3 pb-24">
+
+        <!-- Top bar -->
+        <div class="flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-4">
+            <div>
+                <h1 id="dash-nama" class="font-bold text-lg leading-tight"></h1>
+                <a id="dash-link" href="#" target="_blank" class="text-brand text-xs font-medium"><i class="fa-solid fa-arrow-up-right-from-square"></i> Lihat Kedai Anda</a>
+            </div>
+            <button onclick="doLogout()" class="text-gray-400 hover:text-red-500 text-sm"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="grid grid-cols-3 gap-2 mb-4">
+            <button id="tab-btn-profil" onclick="showTab('profil')" class="py-2.5 rounded-xl font-bold text-sm bg-brand text-white">Profil</button>
+            <button id="tab-btn-menu" onclick="showTab('menu')" class="py-2.5 rounded-xl font-bold text-sm bg-white text-gray-600 border border-gray-200">Menu</button>
+            <button id="tab-btn-stats" onclick="showTab('stats')" class="py-2.5 rounded-xl font-bold text-sm bg-white text-gray-600 border border-gray-200">Statistik</button>
+        </div>
+
+        <!-- ============ TAB PROFIL ============ -->
+        <div id="tab-profil" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Kedai</label>
+                <input type="text" id="p-nama" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tagline (pilihan)</label>
+                <input type="text" id="p-tagline" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: Laksa paling kriuk di pekan">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">No. WhatsApp (terima order)</label>
+                <input type="tel" id="p-whatsapp" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: 60123456789">
+                <p class="text-xs text-gray-400 mt-1">Mula dengan 60, tanpa + atau jarak</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Link Gambar Banner (pilihan)</label>
+                <input type="url" id="p-banner" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="https://...">
+                <p class="text-xs text-gray-400 mt-1">Upload gambar di postimages.org, copy direct link</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Link Gambar QR Bayaran (pilihan)</label>
+                <input type="url" id="p-qr" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="https://...">
+                <p class="text-xs text-gray-400 mt-1">Jika kosong, pilihan Online Transfer disembunyikan</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Caj Penghantaran / COD (RM)</label>
+                <input type="number" id="p-caj" step="0.50" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: 3.00">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Status Kedai</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="border rounded-lg p-3 flex items-center gap-2 cursor-pointer hover:bg-gray-50">
+                        <input type="radio" name="p-status" value="Aktif">
+                        <span class="text-sm font-medium text-green-700">Buka</span>
+                    </label>
+                    <label class="border rounded-lg p-3 flex items-center gap-2 cursor-pointer hover:bg-gray-50">
+                        <input type="radio" name="p-status" value="Tutup">
+                        <span class="text-sm font-medium text-red-600">Tutup Sementara</span>
+                    </label>
+                </div>
+            </div>
+            <button onclick="saveProfile()" id="save-profil-btn" class="w-full bg-brand text-white font-bold py-3 rounded-xl hover:bg-brand-dark transition-colors">
+                <i class="fa-solid fa-floppy-disk"></i> Simpan Profil
+            </button>
+        </div>
+
+        <!-- ============ TAB MENU ============ -->
+        <div id="tab-menu" class="hidden">
+            <div id="menu-items" class="space-y-3 mb-4"></div>
+
+            <button onclick="addItem()" class="w-full border-2 border-dashed border-brand text-brand font-bold py-3 rounded-xl hover:bg-orange-50 transition-colors mb-3">
+                <i class="fa-solid fa-plus"></i> Tambah Item
+            </button>
+            <button onclick="saveMenu()" id="save-menu-btn" class="w-full bg-brand text-white font-bold py-3 rounded-xl hover:bg-brand-dark transition-colors">
+                <i class="fa-solid fa-floppy-disk"></i> Simpan Menu
+            </button>
+            <p class="text-xs text-gray-400 text-center mt-2">Susunan item di kedai ikut susunan dalam senarai ini</p>
+        </div>
+
+        <!-- ============ TAB STATISTIK ============ -->
+        <div id="tab-stats" class="hidden space-y-4">
+            <div class="grid grid-cols-3 gap-2">
+                <div class="bg-white p-3 rounded-xl border border-gray-100 text-center">
+                    <p id="s-klik" class="text-2xl font-bold text-brand">0</p>
+                    <p class="text-xs text-gray-500">Klik (7 hari)</p>
+                </div>
+                <div class="bg-white p-3 rounded-xl border border-gray-100 text-center">
+                    <p id="s-order" class="text-2xl font-bold text-[#1e3a8a]">0</p>
+                    <p class="text-xs text-gray-500">Order Sah (7 hari)</p>
+                </div>
+                <div class="bg-white p-3 rounded-xl border border-gray-100 text-center">
+                    <p id="s-conv" class="text-2xl font-bold text-green-600">0%</p>
+                    <p class="text-xs text-gray-500">Klik jadi Order</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-bold text-sm">Klik & Order Mingguan</h3>
+                    <button onclick="loadStats(true)" class="text-xs text-brand font-bold"><i class="fa-solid fa-rotate"></i> Refresh</button>
+                </div>
+                <div id="chart-wrap" class="w-full"></div>
+                <div class="flex gap-5 justify-center mt-2 text-xs text-gray-500">
+                    <span class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 bg-orange-300 rounded-sm"></span> Klik link</span>
+                    <span class="flex items-center gap-1.5"><span class="inline-block w-5 h-0.5 bg-[#1e3a8a]"></span> Order disahkan</span>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="font-bold mb-2 text-sm"><i class="fa-solid fa-users text-brand"></i> Rekod Pelanggan (50 terkini)</h3>
+                <div id="orders-list" class="space-y-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // GANTI 2 URL DI BAWAH
+        // ============================================
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbww8lWVv-6bFjBvsKijgu2b0SVdfKmBCAlvoWkIFQI2b9L5YZPqZSlJJ7nNiIAHiZWc/exec';
+        const STORE_URL = 'https://orderlah.store'; // domain anda, tanpa / di hujung
+
+        let SESSION = null; // { slug, pin }
+        let KEDAI = null;
+        let ITEMS = [];
+
+        // Auto-login jika ada session, atau prefill ID dari URL (?id=namakedai)
+        (function () {
+            const saved = sessionStorage.getItem('orderlah_session');
+            if (saved) {
+                const s = JSON.parse(saved);
+                document.getElementById('login-slug').value = s.slug;
+                document.getElementById('login-pin').value = s.pin;
+                doLogin();
+                return;
+            }
+            const pre = new URLSearchParams(location.search).get('id');
+            if (pre) {
+                document.getElementById('login-slug').value = pre.trim().toLowerCase();
+                document.getElementById('login-pin').focus();
+            }
+        })();
+
+        async function api(payload) {
+            const res = await fetch(GAS_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            return res.json();
+        }
+
+        function toast(msg, isError) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.className = t.className.replace(' bg-red-600', '').replace(' bg-gray-900', '');
+            t.classList.add(isError ? 'bg-red-600' : 'bg-gray-900');
+            t.classList.add('toast-show');
+            setTimeout(function () { t.classList.remove('toast-show'); }, 2500);
+        }
+
+        function busy(btnId, isBusy, normalHTML) {
+            const b = document.getElementById(btnId);
+            b.disabled = isBusy;
+            b.innerHTML = isBusy ? '<i class="fa-solid fa-circle-notch fa-spin"></i> Sila tunggu...' : normalHTML;
+        }
+
+        /* ================ LOGIN ================ */
+
+        async function doLogin() {
+            const slug = document.getElementById('login-slug').value.trim().toLowerCase();
+            const pin = document.getElementById('login-pin').value.trim();
+            if (!slug || !pin) return toast('Sila isi ID kedai dan PIN', true);
+
+            busy('login-btn', true, 'Log Masuk');
+            try {
+                const data = await api({ action: 'login', slug: slug, pin: pin });
+                if (!data.success) {
+                    toast(data.error || 'Log masuk gagal', true);
+                    sessionStorage.removeItem('orderlah_session');
+                    return;
+                }
+                SESSION = { slug: slug, pin: pin };
+                sessionStorage.setItem('orderlah_session', JSON.stringify(SESSION));
+                KEDAI = data.kedai;
+                ITEMS = data.menu || [];
+                openDashboard();
+            } catch (err) {
+                toast('Masalah sambungan. Cuba semula.', true);
+            } finally {
+                busy('login-btn', false, 'Log Masuk');
+            }
+        }
+
+        function doLogout() {
+            sessionStorage.removeItem('orderlah_session');
+            location.reload();
+        }
+
+        /* ================ DASHBOARD ================ */
+
+        function openDashboard() {
+            document.getElementById('screen-login').classList.add('hidden');
+            document.getElementById('screen-dash').classList.remove('hidden');
+
+            document.getElementById('dash-nama').innerText = KEDAI.nama;
+            document.getElementById('dash-link').href = STORE_URL + '/?id=' + KEDAI.slug;
+
+            // Isi borang profil
+            document.getElementById('p-nama').value = KEDAI.nama || '';
+            document.getElementById('p-tagline').value = KEDAI.tagline || '';
+            document.getElementById('p-whatsapp').value = KEDAI.noWhatsapp || '';
+            document.getElementById('p-banner').value = KEDAI.banner || '';
+            document.getElementById('p-qr').value = KEDAI.qr || '';
+            document.getElementById('p-caj').value = KEDAI.cajPenghantaran || 0;
+            const statusVal = (KEDAI.status === 'Tutup') ? 'Tutup' : 'Aktif';
+            document.querySelector('input[name="p-status"][value="' + statusVal + '"]').checked = true;
+
+            renderItems();
+        }
+
+        function showTab(tab) {
+            ['profil', 'menu', 'stats'].forEach(function (t) {
+                document.getElementById('tab-' + t).classList.toggle('hidden', t !== tab);
+                document.getElementById('tab-btn-' + t).className = 'py-2.5 rounded-xl font-bold text-sm ' +
+                    (t === tab ? 'bg-brand text-white' : 'bg-white text-gray-600 border border-gray-200');
+            });
+            if (tab === 'stats') loadStats(false);
+        }
+
+        /* ================ PROFIL ================ */
+
+        async function saveProfile() {
+            const profile = {
+                nama: document.getElementById('p-nama').value.trim(),
+                tagline: document.getElementById('p-tagline').value.trim(),
+                noWhatsapp: document.getElementById('p-whatsapp').value.replace(/[^0-9]/g, ''),
+                banner: document.getElementById('p-banner').value.trim(),
+                qr: document.getElementById('p-qr').value.trim(),
+                cajPenghantaran: parseFloat(document.getElementById('p-caj').value) || 0,
+                status: document.querySelector('input[name="p-status"]:checked').value
+            };
+
+            if (!profile.nama) return toast('Nama kedai diperlukan', true);
+            if (!profile.noWhatsapp) return toast('No. WhatsApp diperlukan', true);
+
+            const normalHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Profil';
+            busy('save-profil-btn', true, normalHTML);
+            try {
+                const data = await api({ action: 'saveProfile', slug: SESSION.slug, pin: SESSION.pin, profile: profile });
+                if (!data.success) return toast(data.error || 'Gagal simpan', true);
+                KEDAI = data.kedai;
+                document.getElementById('dash-nama').innerText = KEDAI.nama;
+                toast('Profil disimpan');
+            } catch (err) {
+                toast('Masalah sambungan. Cuba semula.', true);
+            } finally {
+                busy('save-profil-btn', false, normalHTML);
+            }
+        }
+
+        /* ================ MENU ================ */
+
+        function renderItems() {
+            const wrap = document.getElementById('menu-items');
+            wrap.innerHTML = '';
+
+            if (ITEMS.length === 0) {
+                const empty = document.createElement('p');
+                empty.className = 'text-center text-gray-400 text-sm py-6';
+                empty.innerText = 'Belum ada item. Tekan Tambah Item untuk mula.';
+                wrap.appendChild(empty);
+                return;
+            }
+
+            ITEMS.forEach(function (item, idx) {
+                wrap.appendChild(buildItemEditor(item, idx));
+            });
+        }
+
+        function buildItemEditor(item, idx) {
+            const card = document.createElement('div');
+            card.className = 'bg-white p-4 rounded-2xl shadow-sm border border-gray-100 space-y-3';
+
+            // Baris 1: nama + harga
+            const row1 = document.createElement('div');
+            row1.className = 'flex gap-2';
+
+            const nama = document.createElement('input');
+            nama.type = 'text';
+            nama.placeholder = 'Nama item';
+            nama.value = item.nama || '';
+            nama.className = 'flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand text-sm';
+            nama.oninput = function () { ITEMS[idx].nama = nama.value; };
+
+            const harga = document.createElement('input');
+            harga.type = 'number';
+            harga.step = '0.50';
+            harga.min = '0';
+            harga.placeholder = 'RM';
+            harga.value = item.harga || '';
+            harga.className = 'w-24 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand text-sm';
+            harga.oninput = function () { ITEMS[idx].harga = parseFloat(harga.value) || 0; };
+
+            row1.appendChild(nama);
+            row1.appendChild(harga);
+
+            // Baris 2: toggles + buttons
+            const row2 = document.createElement('div');
+            row2.className = 'flex items-center justify-between flex-wrap gap-2';
+
+            const toggles = document.createElement('div');
+            toggles.className = 'flex items-center gap-3 flex-wrap';
+            toggles.appendChild(buildToggle('Promo', item.promo, function (v) { ITEMS[idx].promo = v; }));
+            toggles.appendChild(buildToggle('Free Delivery', item.freeDelivery, function (v) { ITEMS[idx].freeDelivery = v; }));
+            toggles.appendChild(buildToggle('Aktif', item.aktif !== false, function (v) { ITEMS[idx].aktif = v; }));
+
+            const actions = document.createElement('div');
+            actions.className = 'flex items-center gap-1';
+
+            const up = document.createElement('button');
+            up.className = 'w-8 h-8 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200';
+            up.innerHTML = '<i class="fa-solid fa-arrow-up text-xs"></i>';
+            up.onclick = function () { moveItem(idx, -1); };
+
+            const down = document.createElement('button');
+            down.className = 'w-8 h-8 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200';
+            down.innerHTML = '<i class="fa-solid fa-arrow-down text-xs"></i>';
+            down.onclick = function () { moveItem(idx, 1); };
+
+            const del = document.createElement('button');
+            del.className = 'w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100';
+            del.innerHTML = '<i class="fa-solid fa-trash text-xs"></i>';
+            del.onclick = function () {
+                if (confirm('Padam item "' + (ITEMS[idx].nama || 'tanpa nama') + '"?')) {
+                    ITEMS.splice(idx, 1);
+                    renderItems();
+                }
+            };
+
+            actions.appendChild(up);
+            actions.appendChild(down);
+            actions.appendChild(del);
+
+            row2.appendChild(toggles);
+            row2.appendChild(actions);
+
+            card.appendChild(row1);
+            card.appendChild(row2);
+            return card;
+        }
+
+        function buildToggle(label, checked, onChange) {
+            const wrap = document.createElement('label');
+            wrap.className = 'flex items-center gap-1.5 cursor-pointer';
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.checked = !!checked;
+            cb.className = 'accent-orange-500 w-4 h-4';
+            cb.onchange = function () { onChange(cb.checked); };
+            const span = document.createElement('span');
+            span.className = 'text-xs font-medium text-gray-600';
+            span.innerText = label;
+            wrap.appendChild(cb);
+            wrap.appendChild(span);
+            return wrap;
+        }
+
+        function moveItem(idx, dir) {
+            const newIdx = idx + dir;
+            if (newIdx < 0 || newIdx >= ITEMS.length) return;
+            const tmp = ITEMS[idx];
+            ITEMS[idx] = ITEMS[newIdx];
+            ITEMS[newIdx] = tmp;
+            renderItems();
+        }
+
+        function addItem() {
+            ITEMS.push({ id: '', nama: '', harga: 0, promo: false, freeDelivery: false, aktif: true });
+            renderItems();
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        async function saveMenu() {
+            // Validasi ringkas
+            for (let i = 0; i < ITEMS.length; i++) {
+                if (!ITEMS[i].nama || !ITEMS[i].nama.trim()) {
+                    return toast('Item #' + (i + 1) + ' tiada nama', true);
+                }
+                if (!(ITEMS[i].harga > 0)) {
+                    return toast('Item "' + ITEMS[i].nama + '" tiada harga', true);
+                }
+            }
+
+            const normalHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Menu';
+            busy('save-menu-btn', true, normalHTML);
+            try {
+                const data = await api({ action: 'saveMenu', slug: SESSION.slug, pin: SESSION.pin, items: ITEMS });
+                if (!data.success) return toast(data.error || 'Gagal simpan', true);
+                ITEMS = data.menu || [];
+                renderItems();
+                toast('Menu disimpan');
+            } catch (err) {
+                toast('Masalah sambungan. Cuba semula.', true);
+            } finally {
+                busy('save-menu-btn', false, normalHTML);
+            }
+        }
+
+        /* ================ STATISTIK ================ */
+
+        let STATS = null;
+
+        async function loadStats(force) {
+            if (STATS && !force) { renderStats(); return; }
+            document.getElementById('chart-wrap').innerHTML = '<p class="text-center text-gray-400 text-sm py-10"><i class="fa-solid fa-circle-notch fa-spin"></i> Memuatkan...</p>';
+            document.getElementById('orders-list').innerHTML = '';
+            try {
+                const data = await api({ action: 'getStats', slug: SESSION.slug, pin: SESSION.pin });
+                if (!data.success) return toast(data.error || 'Gagal muat statistik', true);
+                STATS = data;
+                renderStats();
+            } catch (err) {
+                toast('Masalah sambungan. Cuba semula.', true);
+            }
+        }
+
+        function renderStats() {
+            const days = STATS.days || [];
+            const orders = STATS.orders || [];
+
+            const totalKlik = days.reduce(function (s, d) { return s + d.klik; }, 0);
+            const totalOrder = days.reduce(function (s, d) { return s + d.order; }, 0);
+            const conv = totalKlik > 0 ? Math.round(totalOrder / totalKlik * 100) : 0;
+
+            document.getElementById('s-klik').innerText = totalKlik;
+            document.getElementById('s-order').innerText = totalOrder;
+            document.getElementById('s-conv').innerText = conv + '%';
+
+            document.getElementById('chart-wrap').innerHTML = buildChart(days);
+            renderOrders(orders);
+        }
+
+        function buildChart(days) {
+            const W = 340, H = 180;
+            const pad = { l: 30, r: 10, t: 12, b: 24 };
+            const innerW = W - pad.l - pad.r;
+            const innerH = H - pad.t - pad.b;
+
+            let maxV = 1;
+            days.forEach(function (d) { maxV = Math.max(maxV, d.klik, d.order); });
+            maxV = Math.ceil(maxV / 5) * 5 || 5; // bundarkan ke gandaan 5
+
+            const slotW = innerW / 7;
+            const barW = slotW * 0.5;
+            const y = function (v) { return pad.t + innerH - (v / maxV * innerH); };
+
+            let svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">';
+
+            // Grid + label paksi-y (0, separuh, max)
+            [0, maxV / 2, maxV].forEach(function (v) {
+                const gy = y(v);
+                svg += '<line x1="' + pad.l + '" y1="' + gy + '" x2="' + (W - pad.r) + '" y2="' + gy + '" stroke="#f3f4f6" stroke-width="1"/>';
+                svg += '<text x="' + (pad.l - 5) + '" y="' + (gy + 3.5) + '" text-anchor="end" font-size="9" fill="#9ca3af">' + Math.round(v) + '</text>';
+            });
+
+            // Bars (klik) + label hari
+            days.forEach(function (d, i) {
+                const cx = pad.l + slotW * i + slotW / 2;
+                const bh = (d.klik / maxV) * innerH;
+                svg += '<rect x="' + (cx - barW / 2) + '" y="' + y(d.klik) + '" width="' + barW + '" height="' + Math.max(bh, 0) + '" rx="3" fill="#fdba74"/>';
+                svg += '<text x="' + cx + '" y="' + (H - 8) + '" text-anchor="middle" font-size="9" fill="#6b7280">' + d.label + '</text>';
+            });
+
+            // Line + dots (order)
+            let pts = '';
+            days.forEach(function (d, i) {
+                const cx = pad.l + slotW * i + slotW / 2;
+                pts += cx + ',' + y(d.order) + ' ';
+            });
+            svg += '<polyline points="' + pts.trim() + '" fill="none" stroke="#1e3a8a" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+            days.forEach(function (d, i) {
+                const cx = pad.l + slotW * i + slotW / 2;
+                svg += '<circle cx="' + cx + '" cy="' + y(d.order) + '" r="3.2" fill="#fff" stroke="#1e3a8a" stroke-width="2"/>';
+            });
+
+            svg += '</svg>';
+            return svg;
+        }
+
+        function renderOrders(orders) {
+            const wrap = document.getElementById('orders-list');
+            wrap.innerHTML = '';
+
+            if (orders.length === 0) {
+                const empty = document.createElement('p');
+                empty.className = 'text-center text-gray-400 text-sm py-6 bg-white rounded-2xl border border-gray-100';
+                empty.innerText = 'Belum ada rekod order. Share link kedai anda untuk mula terima order!';
+                wrap.appendChild(empty);
+                return;
+            }
+
+            // Banner order baru menunggu pengesahan
+            const pending = orders.filter(function (o) { return o.status === 'Baru'; }).length;
+            if (pending > 0) {
+                const banner = document.createElement('div');
+                banner.className = 'bg-amber-50 border border-amber-200 text-amber-800 text-sm font-medium rounded-xl px-4 py-3';
+                banner.innerHTML = '<i class="fa-solid fa-bell"></i> ' + pending + ' order baru menunggu pengesahan anda';
+                wrap.appendChild(banner);
+            }
+
+            orders.forEach(function (o) {
+                const d = document.createElement('details');
+                d.className = 'bg-white rounded-2xl border border-gray-100 p-3.5 group';
+                if (o.status === 'Baru') d.className += ' border-amber-200';
+
+                let badge;
+                if (o.status === 'Sah') {
+                    badge = '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-green-100 text-green-700">SAH</span>';
+                } else if (o.status === 'Batal') {
+                    badge = '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-gray-100 text-gray-500">BATAL</span>';
+                } else {
+                    badge = '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">BARU</span>';
+                }
+
+                const sahActive = (o.status === 'Sah');
+                const batalActive = (o.status === 'Batal');
+                const btnSah = '<button onclick="setStatus(\'' + escText(o.id) + '\', \'Sah\')" class="flex-1 py-2 rounded-lg text-xs font-bold transition-colors ' +
+                    (sahActive ? 'bg-green-600 text-white' : 'bg-green-50 text-green-700 hover:bg-green-100') + '">' +
+                    '<i class="fa-solid fa-check"></i> ' + (sahActive ? 'Order Disahkan' : 'Sahkan Order') + '</button>';
+                const btnBatal = '<button onclick="setStatus(\'' + escText(o.id) + '\', \'Batal\')" class="flex-1 py-2 rounded-lg text-xs font-bold transition-colors ' +
+                    (batalActive ? 'bg-gray-500 text-white' : 'bg-gray-50 text-gray-500 hover:bg-gray-100') + '">' +
+                    '<i class="fa-solid fa-xmark"></i> ' + (batalActive ? 'Dibatalkan' : 'Batal / Tak Jadi') + '</button>';
+
+                d.innerHTML =
+                    '<summary class="cursor-pointer list-none flex justify-between items-center gap-2">' +
+                    '  <div class="min-w-0">' +
+                    '    <p class="font-bold text-sm truncate">' + escText(o.nama) + '</p>' +
+                    '    <p class="text-xs text-gray-400">' + escText(o.masa) + '</p>' +
+                    '  </div>' +
+                    '  <div class="text-right shrink-0">' +
+                    '    <p class="font-bold text-brand-dark text-sm">RM ' + (Number(o.total) || 0).toFixed(2) + '</p>' +
+                    '    ' + badge +
+                    '  </div>' +
+                    '</summary>' +
+                    '<div class="mt-3 pt-3 border-t border-gray-100 text-sm space-y-1.5">' +
+                    '  <p class="text-gray-700"><i class="fa-solid fa-utensils text-brand text-xs"></i> ' + escText(o.items) + '</p>' +
+                    '  <p class="text-gray-500 text-xs"><i class="fa-solid fa-location-dot text-brand"></i> ' + escText(o.alamat) + '</p>' +
+                    '  <p class="text-gray-500 text-xs"><i class="fa-solid fa-money-bill text-brand"></i> ' + escText(o.bayaran) + '</p>' +
+                    '  <div class="flex gap-2 pt-2">' + btnSah + btnBatal + '</div>' +
+                    '</div>';
+
+                wrap.appendChild(d);
+            });
+        }
+
+        async function setStatus(orderId, status) {
+            try {
+                const data = await api({ action: 'setOrderStatus', slug: SESSION.slug, pin: SESSION.pin, orderId: orderId, status: status });
+                if (!data.success) return toast(data.error || 'Gagal kemaskini', true);
+                STATS = data;
+                renderStats();
+                toast(status === 'Sah' ? 'Order disahkan ✓' : 'Order ditanda batal');
+            } catch (err) {
+                toast('Masalah sambungan. Cuba semula.', true);
+            }
+        }
+
+        function escText(s) {
+            const d = document.createElement('div');
+            d.innerText = String(s == null ? '' : s);
+            return d.innerHTML;
+        }
+    </script>
+</body>
+</html>
