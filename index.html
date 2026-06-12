@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <script>
+        // ROUTER: jika URL ada ?id=namakedai, terus ke page kedai
+        (function () {
+            var id = new URLSearchParams(location.search).get('id');
+            if (id) location.replace('/kedai/?id=' + encodeURIComponent(id));
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orderlah — Sistem Order Online Untuk Kedai Makan Anda</title>
+    <meta name="description" content="Kedai anda boleh terima order online hari ini juga. Link sendiri, order terus masuk WhatsApp, tanpa komisen.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            light: '#ffedd5',
+                            DEFAULT: '#f97316',
+                            dark: '#c2410c',
+                        },
+                        navy: {
+                            DEFAULT: '#1e3a8a',
+                            dark: '#172554',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .phone-shadow { box-shadow: 0 25px 50px -12px rgba(194, 65, 12, 0.35); }
+        html { scroll-behavior: smooth; }
+    </style>
+</head>
+<body class="bg-white text-gray-800 antialiased">
+
+    <!-- ====================================================
+         GANTI 3 BENDA DALAM FAIL INI:
+         1. Cari "NO_WHATSAPP_ANDA"  -> no WhatsApp anda (60xxxxxxxxx)
+         2. Cari "LINK_DEMO"         -> link kedai demo anda
+         3. Bahagian HARGA           -> ubah ikut harga jualan anda
+    ===================================================== -->
+
+    <!-- ============ HERO ============ -->
+    <header class="bg-gradient-to-b from-orange-50 to-white px-4 pt-10 pb-12">
+        <div class="max-w-3xl mx-auto text-center">
+            <span class="inline-block bg-brand-light text-brand-dark text-xs font-bold px-3 py-1.5 rounded-full mb-4">UNTUK PENIAGA MAKANAN & MINUMAN</span>
+            <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mb-4">
+                Kedai Anda Boleh Terima<br>
+                <span class="text-brand">Order Online</span> Hari Ini Juga
+            </h1>
+            <p class="text-gray-600 mb-6 max-w-xl mx-auto">
+                Satu link untuk kedai anda. Pelanggan pilih menu, isi alamat, tekan satu butang — order terus masuk WhatsApp anda. <b>Tanpa app. Tanpa komisen.</b>
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center mb-10">
+                <a href="https://wa.me/60167388358?text=Saya%20berminat%20nak%20sistem%20order%20online%20Orderlah%20untuk%20kedai%20saya" class="bg-brand text-white font-bold py-3.5 px-8 rounded-xl hover:bg-brand-dark transition-colors">
+                    <i class="fa-brands fa-whatsapp"></i> Saya Nak Sistem Ini
+                </a>
+                <a href="https://orderlah.store/?id=demo" target="_blank" class="bg-white border-2 border-brand text-brand-dark font-bold py-3.5 px-8 rounded-xl hover:bg-orange-50 transition-colors">
+                    <i class="fa-solid fa-eye"></i> Tengok Demo Live
+                </a>
+            </div>
+
+            <!-- Phone mockup -->
+            <div class="max-w-[280px] mx-auto">
+                <div class="phone-shadow bg-gray-900 rounded-[2.2rem] p-2.5">
+                    <div class="bg-gray-50 rounded-[1.8rem] overflow-hidden text-left">
+                        <div class="bg-brand text-white text-center py-3 px-4">
+                            <p class="font-bold text-sm">Kedai Makan Anda</p>
+                            <p class="text-[10px] text-orange-100">order online &bull; COD &bull; QR</p>
+                        </div>
+                        <div class="p-3 space-y-2">
+                            <div class="bg-white rounded-xl p-2.5 flex justify-between items-center shadow-sm">
+                                <div>
+                                    <p class="font-bold text-xs">Nasi Lemak Special</p>
+                                    <p class="text-brand text-xs font-semibold">RM 6.00</p>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="w-5 h-5 rounded-full bg-gray-100 text-gray-500 text-[10px] flex items-center justify-center">-</span>
+                                    <span class="text-xs font-bold">2</span>
+                                    <span class="w-5 h-5 rounded-full bg-brand text-white text-[10px] flex items-center justify-center">+</span>
+                                </div>
+                            </div>
+                            <div class="bg-orange-50 border border-brand-light rounded-xl p-2.5 flex justify-between items-center relative overflow-hidden">
+                                <span class="absolute top-0 right-0 bg-brand text-white text-[8px] font-bold px-1.5 py-0.5 rounded-bl-lg">PROMO</span>
+                                <div>
+                                    <p class="font-bold text-xs">Kombo Jimat</p>
+                                    <p class="text-brand-dark text-xs font-semibold">RM 9.00</p>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="w-5 h-5 rounded-full bg-white border text-gray-500 text-[10px] flex items-center justify-center">-</span>
+                                    <span class="text-xs font-bold">1</span>
+                                    <span class="w-5 h-5 rounded-full bg-brand text-white text-[10px] flex items-center justify-center">+</span>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-xl p-2.5 shadow-sm">
+                                <div class="flex justify-between text-[10px] text-gray-500 mb-1"><span>Total Keseluruhan:</span><span class="font-bold text-brand-dark text-xs">RM 21.00</span></div>
+                                <div class="bg-brand text-white text-center text-[10px] font-bold py-2 rounded-lg"><i class="fa-brands fa-whatsapp"></i> Hantar Pesanan ke WhatsApp</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-400 mt-3">Inilah yang pelanggan anda akan nampak</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============ MASALAH ============ -->
+    <section class="px-4 py-12 bg-navy-dark text-white">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-2xl font-extrabold text-center mb-2">Kenal Tak Situasi Ni?</h2>
+            <p class="text-blue-200 text-center text-sm mb-8">Setiap hari, masa anda habis layan benda yang sama...</p>
+            <div class="space-y-4">
+                <div class="bg-white/10 rounded-2xl p-4 flex gap-4 items-start">
+                    <i class="fa-solid fa-comments text-brand text-xl mt-1"></i>
+                    <p class="text-sm text-blue-50">Pelanggan tanya <b>"menu apa ada hari ni? harga berapa?"</b> — anda taip benda sama 20 kali sehari, tangan tengah sibuk masak.</p>
+                </div>
+                <div class="bg-white/10 rounded-2xl p-4 flex gap-4 items-start">
+                    <i class="fa-solid fa-circle-question text-brand text-xl mt-1"></i>
+                    <p class="text-sm text-blue-50">Order masuk bersepah — <b>"nak 2 bungkus"</b> tapi tak bagitahu alamat, tak bagitahu nak bayar macam mana. Kena tanya balik satu-satu.</p>
+                </div>
+                <div class="bg-white/10 rounded-2xl p-4 flex gap-4 items-start">
+                    <i class="fa-solid fa-percent text-brand text-xl mt-1"></i>
+                    <p class="text-sm text-blue-50">Nak masuk platform delivery besar? <b>Komisen sampai 25-30% setiap order.</b> Untung nipis terus jadi hampir tiada.</p>
+                </div>
+                <div class="bg-white/10 rounded-2xl p-4 flex gap-4 items-start">
+                    <i class="fa-solid fa-calculator text-brand text-xl mt-1"></i>
+                    <p class="text-sm text-blue-50">Silap kira total, terlupa satu item dalam order panjang — <b>pelanggan tak puas hati</b>, anda yang rugi.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ PENYELESAIAN / CARA KERJA ============ -->
+    <section class="px-4 py-12">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-2xl font-extrabold text-center mb-2">Penyelesaiannya Sangat Mudah</h2>
+            <p class="text-gray-500 text-center text-sm mb-8">3 langkah sahaja, dan anda tak perlu pandai IT langsung</p>
+            <div class="grid md:grid-cols-3 gap-4">
+                <div class="bg-orange-50 rounded-2xl p-5 text-center">
+                    <div class="w-12 h-12 bg-brand text-white rounded-2xl flex items-center justify-center mx-auto mb-3 font-extrabold text-lg">1</div>
+                    <h3 class="font-bold mb-1">Kami Setupkan</h3>
+                    <p class="text-sm text-gray-600">Bagi kami nama kedai, menu & harga, dan no WhatsApp anda. Kami siapkan semuanya.</p>
+                </div>
+                <div class="bg-orange-50 rounded-2xl p-5 text-center">
+                    <div class="w-12 h-12 bg-brand text-white rounded-2xl flex items-center justify-center mx-auto mb-3 font-extrabold text-lg">2</div>
+                    <h3 class="font-bold mb-1">Anda Dapat Link</h3>
+                    <p class="text-sm text-gray-600">Link khas untuk kedai anda. Share di WhatsApp Status, Facebook, TikTok — mana-mana.</p>
+                </div>
+                <div class="bg-orange-50 rounded-2xl p-5 text-center">
+                    <div class="w-12 h-12 bg-brand text-white rounded-2xl flex items-center justify-center mx-auto mb-3 font-extrabold text-lg">3</div>
+                    <h3 class="font-bold mb-1">Order Masuk WhatsApp</h3>
+                    <p class="text-sm text-gray-600">Pelanggan order, anda terima mesej lengkap: item, jumlah, alamat, cara bayaran. Terus sediakan.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ FEATURES ============ -->
+    <section class="px-4 py-12 bg-gray-50">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-2xl font-extrabold text-center mb-8">Apa Yang Anda Dapat</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white rounded-2xl p-5 border border-gray-100">
+                    <i class="fa-solid fa-link text-brand text-xl mb-2"></i>
+                    <h3 class="font-bold mb-1">Link Kedai Sendiri</h3>
+                    <p class="text-sm text-gray-600">Bukan nombor giliran dalam app orang lain. Ini page kedai ANDA, dengan nama dan banner kedai anda.</p>
+                </div>
+                <div class="bg-white rounded-2xl p-5 border border-gray-100">
+                    <i class="fa-solid fa-pen-to-square text-brand text-xl mb-2"></i>
+                    <h3 class="font-bold mb-1">Panel Admin Sendiri</h3>
+                    <p class="text-sm text-gray-600">Tukar menu, harga, gambar — bila-bila masa, dari telefon. Tak perlu tunggu sesiapa.</p>
+                </div>
+                <div class="bg-white rounded-2xl p-5 border border-gray-100">
+                    <i class="fa-solid fa-money-bill-wave text-brand text-xl mb-2"></i>
+                    <h3 class="font-bold mb-1">COD & QR Pay</h3>
+                    <p class="text-sm text-gray-600">Pelanggan pilih tunai semasa terima, atau scan QR DuitNow anda dan bayar dulu. Duit masuk terus akaun anda.</p>
+                </div>
+                <div class="bg-white rounded-2xl p-5 border border-gray-100">
+                    <i class="fa-solid fa-tags text-brand text-xl mb-2"></i>
+                    <h3 class="font-bold mb-1">Promo & Free Delivery</h3>
+                    <p class="text-sm text-gray-600">Highlight item promo dengan badge istimewa. Set item kombo dengan free delivery untuk naikkan nilai setiap order.</p>
+                </div>
+                <div class="bg-white rounded-2xl p-5 border border-gray-100">
+                    <i class="fa-solid fa-door-closed text-brand text-xl mb-2"></i>
+                    <h3 class="font-bold mb-1">Tutup Kedai Sekelip Mata</h3>
+                    <p class="text-sm text-gray-600">Cuti? Habis stok? Satu tekan, page anda papar "kedai tutup sementara". Buka balik bila sedia.</p>
+                </div>
+                <div class="bg-white rounded-2xl p-5 border border-gray-100">
+                    <i class="fa-solid fa-mobile-screen text-brand text-xl mb-2"></i>
+                    <h3 class="font-bold mb-1">Pelanggan Tak Perlu Install Apa-apa</h3>
+                    <p class="text-sm text-gray-600">Bukan app. Pelanggan klik link, terus boleh order. Makcik pakcik pun boleh guna.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ PERBANDINGAN ============ -->
+    <section class="px-4 py-12">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-2xl font-extrabold text-center mb-8">Kira Sendiri</h2>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div class="rounded-2xl border-2 border-gray-200 p-5">
+                    <h3 class="font-bold text-gray-500 mb-3"><i class="fa-solid fa-xmark text-red-400"></i> Platform Delivery Besar</h3>
+                    <p class="text-sm text-gray-600 mb-2">Jual RM1,000 sebulan, komisen 25%:</p>
+                    <p class="text-3xl font-extrabold text-red-500 mb-1">-RM250</p>
+                    <p class="text-xs text-gray-400">hilang setiap bulan, makin laris makin banyak hilang</p>
+                </div>
+                <div class="rounded-2xl border-2 border-brand p-5 bg-orange-50">
+                    <h3 class="font-bold text-brand-dark mb-3"><i class="fa-solid fa-check text-green-500"></i> Orderlah</h3>
+                    <p class="text-sm text-gray-600 mb-2">Jual RM1,000 atau RM10,000 sebulan:</p>
+                    <p class="text-3xl font-extrabold text-green-600 mb-1">Yuran Tetap</p>
+                    <p class="text-xs text-gray-500">0% komisen. Setiap sen jualan, anda punya.</p>
+                </div>
+            </div>
+            <p class="text-xs text-gray-400 text-center mt-4">Nota: platform delivery sesuai untuk capai pelanggan baru. Orderlah sesuai untuk pelanggan setia & kawasan anda sendiri — tanpa bagi komisen.</p>
+        </div>
+    </section>
+
+    <!-- ============ HARGA (UBAH IKUT OFFER ANDA) ============ -->
+    <section id="harga" class="px-4 py-12 bg-navy-dark text-white">
+        <div class="max-w-md mx-auto text-center">
+            <h2 class="text-2xl font-extrabold mb-2">Pelaburan Anda</h2>
+            <p class="text-blue-200 text-sm mb-8">Lebih murah dari sekali bayar komisen platform delivery</p>
+
+            <div class="bg-white text-gray-800 rounded-3xl p-6 shadow-2xl">
+                <span class="inline-block bg-brand-light text-brand-dark text-xs font-bold px-3 py-1 rounded-full mb-3">PAKEJ LENGKAP</span>
+                <div class="mb-4">
+                    <p class="text-gray-400 text-sm line-through">Setup RM100</p>
+                    <p class="text-4xl font-extrabold text-brand-dark">RM50 <span class="text-base font-semibold text-gray-500">setup sekali</span></p>
+                    <p class="text-xl font-bold mt-1">+ RM15<span class="text-sm font-semibold text-gray-500">/bulan</span></p>
+                </div>
+                <ul class="text-left text-sm space-y-2.5 mb-6">
+                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Link kedai khas untuk anda</li>
+                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Kami setupkan menu penuh (siap dalam 24 jam)</li>
+                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Panel admin urus sendiri</li>
+                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> COD + QR DuitNow</li>
+                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> 0% komisen, unlimited order</li>
+                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Support WhatsApp terus dengan kami</li>
+                </ul>
+                <a href="https://wa.me/60167388358?text=Saya%20berminat%20nak%20sistem%20order%20online%20Orderlah%20untuk%20kedai%20saya" class="block bg-brand text-white font-bold py-3.5 rounded-xl hover:bg-brand-dark transition-colors">
+                    <i class="fa-brands fa-whatsapp"></i> WhatsApp Kami Sekarang
+                </a>
+                <p class="text-xs text-gray-400 mt-3">Tiada kontrak. Berhenti bila-bila masa.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ DEMO ============ -->
+    <section class="px-4 py-12">
+        <div class="max-w-xl mx-auto text-center">
+            <h2 class="text-2xl font-extrabold mb-2">Jangan Percaya Cakap Kami.<br>Cuba Sendiri.</h2>
+            <p class="text-gray-500 text-sm mb-6">Ini kedai demo yang berfungsi 100%. Tekan, pilih menu, tengok sendiri macam mana pelanggan anda akan order.</p>
+            <a href="LINK_DEMO" target="_blank" class="inline-block bg-white border-2 border-brand text-brand-dark font-bold py-3.5 px-10 rounded-xl hover:bg-orange-50 transition-colors">
+                <i class="fa-solid fa-eye"></i> Buka Kedai Demo
+            </a>
+        </div>
+    </section>
+
+    <!-- ============ FAQ ============ -->
+    <section class="px-4 py-12 bg-gray-50">
+        <div class="max-w-2xl mx-auto">
+            <h2 class="text-2xl font-extrabold text-center mb-8">Soalan Lazim</h2>
+            <div class="space-y-3">
+                <details class="bg-white rounded-2xl border border-gray-100 p-4 group">
+                    <summary class="font-bold text-sm cursor-pointer list-none flex justify-between items-center">Saya tak pandai IT. Susah tak nak guna?<i class="fa-solid fa-chevron-down text-gray-400 text-xs group-open:rotate-180 transition-transform"></i></summary>
+                    <p class="text-sm text-gray-600 mt-3">Kami yang setupkan semuanya. Anda cuma perlu bagi menu dan harga. Lepas siap, nak tukar harga pun semudah isi borang — kalau boleh guna WhatsApp, boleh guna sistem ini.</p>
+                </details>
+                <details class="bg-white rounded-2xl border border-gray-100 p-4 group">
+                    <summary class="font-bold text-sm cursor-pointer list-none flex justify-between items-center">Pelanggan saya kena download app ke?<i class="fa-solid fa-chevron-down text-gray-400 text-xs group-open:rotate-180 transition-transform"></i></summary>
+                    <p class="text-sm text-gray-600 mt-3">Tidak. Pelanggan cuma klik link — page terus terbuka dalam browser telefon. Tiada app, tiada daftar akaun, tiada password.</p>
+                </details>
+                <details class="bg-white rounded-2xl border border-gray-100 p-4 group">
+                    <summary class="font-bold text-sm cursor-pointer list-none flex justify-between items-center">Duit bayaran masuk mana?<i class="fa-solid fa-chevron-down text-gray-400 text-xs group-open:rotate-180 transition-transform"></i></summary>
+                    <p class="text-sm text-gray-600 mt-3">Terus kepada anda. COD = pelanggan bayar tunai semasa terima. QR = pelanggan scan QR DuitNow anda sendiri, duit masuk terus akaun bank anda. Kami tak pegang duit anda langsung.</p>
+                </details>
+                <details class="bg-white rounded-2xl border border-gray-100 p-4 group">
+                    <summary class="font-bold text-sm cursor-pointer list-none flex justify-between items-center">Berapa lama nak siap?<i class="fa-solid fa-chevron-down text-gray-400 text-xs group-open:rotate-180 transition-transform"></i></summary>
+                    <p class="text-sm text-gray-600 mt-3">Selalunya dalam 24 jam selepas anda hantar menu lengkap. Ada yang siap hari yang sama.</p>
+                </details>
+                <details class="bg-white rounded-2xl border border-gray-100 p-4 group">
+                    <summary class="font-bold text-sm cursor-pointer list-none flex justify-between items-center">Boleh tukar menu dan harga sendiri tak?<i class="fa-solid fa-chevron-down text-gray-400 text-xs group-open:rotate-180 transition-transform"></i></summary>
+                    <p class="text-sm text-gray-600 mt-3">Boleh, bila-bila masa melalui panel admin anda. Tambah item baru, tukar harga, tanda promo, atau tutup kedai sementara — semua dari telefon anda sendiri.</p>
+                </details>
+                <details class="bg-white rounded-2xl border border-gray-100 p-4 group">
+                    <summary class="font-bold text-sm cursor-pointer list-none flex justify-between items-center">Saya nak rekod jualan & resit sekali, ada tak?<i class="fa-solid fa-chevron-down text-gray-400 text-xs group-open:rotate-180 transition-transform"></i></summary>
+                    <p class="text-sm text-gray-600 mt-3">Untuk rekod jualan penuh, resit, dan dashboard bisnes, kami ada sistem POS lengkap (POSKedai). Boleh mula dengan Orderlah dulu, upgrade bila bisnes makin besar — tanya kami di WhatsApp.</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ CTA AKHIR ============ -->
+    <section class="px-4 py-14 bg-gradient-to-b from-white to-orange-50">
+        <div class="max-w-xl mx-auto text-center">
+            <h2 class="text-2xl md:text-3xl font-extrabold mb-3">Malam Ini, Bila Pelanggan Tanya<br>"Menu Apa Ada?"...</h2>
+            <p class="text-gray-600 mb-6">...anda cuma perlu hantar satu link. Itu sahaja.</p>
+            <a href="https://wa.me/60167388358?text=Saya%20berminat%20nak%20sistem%20order%20online%20Orderlah%20untuk%20kedai%20saya" class="inline-block bg-brand text-white font-bold py-4 px-10 rounded-xl hover:bg-brand-dark transition-colors text-lg">
+                <i class="fa-brands fa-whatsapp"></i> Mula Sekarang — WhatsApp Kami
+            </a>
+            <p class="text-xs text-gray-400 mt-4">Balas dalam masa bekerja. Tiada bayaran sehingga anda sahkan setup.</p>
+        </div>
+    </section>
+
+    <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
+        <p class="text-sm font-bold text-brand-dark mb-1">Nak makan? Orderlah.</p>
+        <p><b>Orderlah</b> &mdash; Sistem order online untuk peniaga F&amp;B Malaysia</p>
+    </footer>
+
+</body>
+</html>
