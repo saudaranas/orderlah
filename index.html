@@ -571,8 +571,31 @@
                 info.appendChild(fd);
             }
 
+            const habis = (item.stok === 0);
+            const stokRendah = (item.stok > 0 && item.stok <= 5);
+
+            if (habis) {
+                const hb = document.createElement('span');
+                hb.className = 'block mt-1 text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded font-bold w-max';
+                hb.innerHTML = '<i class="fa-solid fa-ban"></i> HABIS STOK';
+                info.appendChild(hb);
+            } else if (stokRendah) {
+                const lr = document.createElement('span');
+                lr.className = 'block mt-1 text-xs text-amber-600 font-bold';
+                lr.innerHTML = '<i class="fa-solid fa-fire"></i> Tinggal ' + item.stok + ' je!';
+                info.appendChild(lr);
+            }
+
             const controls = document.createElement('div');
             controls.className = 'flex items-center gap-3 z-10';
+
+            if (habis) {
+                // Item habis: tiada butang qty
+                card.classList.add('opacity-60');
+                card.appendChild(info);
+                card.appendChild(controls);
+                return card;
+            }
 
             const minus = document.createElement('button');
             minus.type = 'button';
@@ -672,8 +695,17 @@
         }
 
         function updateQty(itemId, change) {
-            cart[itemId] = Math.max(0, (cart[itemId] || 0) + change);
-            document.getElementById('qty-' + itemId).innerText = cart[itemId];
+            const item = MENU.find(function (m) { return m.id === itemId; });
+            let next = Math.max(0, (cart[itemId] || 0) + change);
+
+            // Had ikut stok (jika ada had)
+            if (item && item.stok >= 0 && next > item.stok) {
+                next = item.stok;
+                if (change > 0) alert('Maaf, stok ' + item.nama + ' tinggal ' + item.stok + ' sahaja.');
+            }
+
+            cart[itemId] = next;
+            document.getElementById('qty-' + itemId).innerText = next;
             calculateTotal();
         }
 
