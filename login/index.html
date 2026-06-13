@@ -93,18 +93,36 @@
                 <p class="text-xs text-gray-400 mt-1">Mula dengan 60, tanpa + atau jarak</p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Link Gambar Banner (pilihan)</label>
-                <input type="url" id="p-banner" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="https://...">
-                <p class="text-xs text-gray-400 mt-1">Upload gambar di postimages.org, copy direct link</p>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Gambar Banner / Poster Kedai (pilihan)</label>
+                <div class="flex gap-2">
+                    <input type="url" id="p-banner" class="flex-1 min-w-0 px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="Upload atau paste link gambar">
+                    <button onclick="pickImage('banner')" id="up-banner-btn" class="bg-brand-light text-brand-dark font-bold px-3 rounded-lg text-sm whitespace-nowrap hover:bg-orange-200"><i class="fa-solid fa-upload"></i> Upload</button>
+                </div>
+                <img id="prev-banner" class="hidden mt-2 rounded-lg max-h-32 border border-gray-200" alt="Preview banner">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Link Gambar QR Bayaran (pilihan)</label>
-                <input type="url" id="p-qr" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="https://...">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Gambar QR Bayaran / DuitNow (pilihan)</label>
+                <div class="flex gap-2">
+                    <input type="url" id="p-qr" class="flex-1 min-w-0 px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="Upload atau paste link gambar">
+                    <button onclick="pickImage('qr')" id="up-qr-btn" class="bg-brand-light text-brand-dark font-bold px-3 rounded-lg text-sm whitespace-nowrap hover:bg-orange-200"><i class="fa-solid fa-upload"></i> Upload</button>
+                </div>
+                <img id="prev-qr" class="hidden mt-2 rounded-lg max-h-32 border border-gray-200" alt="Preview QR">
                 <p class="text-xs text-gray-400 mt-1">Jika kosong, pilihan Online Transfer disembunyikan</p>
             </div>
+            <input type="file" id="file-input" accept="image/*" class="hidden">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Caj Penghantaran / COD (RM)</label>
-                <input type="number" id="p-caj" step="0.50" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: 3.00">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Caj Penghantaran (RM)</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <input type="number" id="p-caj-cod" step="0.50" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: 3.00">
+                        <p class="text-xs text-gray-400 mt-1">Bayar Tunai (COD)</p>
+                    </div>
+                    <div>
+                        <input type="number" id="p-caj-online" step="0.50" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: 0.00">
+                        <p class="text-xs text-gray-400 mt-1">Online Transfer</p>
+                    </div>
+                </div>
+                <p class="text-xs text-amber-600 mt-1"><i class="fa-solid fa-lightbulb"></i> Tip: set caj Online RM0 untuk galakkan pelanggan bayar dulu — kurangkan risiko order tak jadi</p>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Status Kedai</label>
@@ -271,7 +289,10 @@
             document.getElementById('p-whatsapp').value = KEDAI.noWhatsapp || '';
             document.getElementById('p-banner').value = KEDAI.banner || '';
             document.getElementById('p-qr').value = KEDAI.qr || '';
-            document.getElementById('p-caj').value = KEDAI.cajPenghantaran || 0;
+            document.getElementById('p-caj-cod').value = KEDAI.cajPenghantaran || 0;
+            document.getElementById('p-caj-online').value = (KEDAI.cajOnline === undefined || KEDAI.cajOnline === null) ? (KEDAI.cajPenghantaran || 0) : KEDAI.cajOnline;
+            showPreview('banner', KEDAI.banner);
+            showPreview('qr', KEDAI.qr);
             const statusVal = (KEDAI.status === 'Tutup') ? 'Tutup' : 'Aktif';
             document.querySelector('input[name="p-status"][value="' + statusVal + '"]').checked = true;
 
@@ -296,7 +317,8 @@
                 noWhatsapp: document.getElementById('p-whatsapp').value.replace(/[^0-9]/g, ''),
                 banner: document.getElementById('p-banner').value.trim(),
                 qr: document.getElementById('p-qr').value.trim(),
-                cajPenghantaran: parseFloat(document.getElementById('p-caj').value) || 0,
+                cajPenghantaran: parseFloat(document.getElementById('p-caj-cod').value) || 0,
+                cajOnline: parseFloat(document.getElementById('p-caj-online').value) || 0,
                 status: document.querySelector('input[name="p-status"]:checked').value
             };
 
@@ -622,6 +644,79 @@
                 toast(status === 'Sah' ? 'Order disahkan ✓' : 'Order ditanda batal');
             } catch (err) {
                 toast('Masalah sambungan. Cuba semula.', true);
+            }
+        }
+
+        /* ================ UPLOAD GAMBAR ================ */
+
+        let uploadJenis = null;
+
+        function pickImage(jenis) {
+            uploadJenis = jenis;
+            const fi = document.getElementById('file-input');
+            fi.value = '';
+            fi.click();
+        }
+
+        document.getElementById('file-input').addEventListener('change', async function (e) {
+            const f = e.target.files[0];
+            if (!f) return;
+
+            const btnId = (uploadJenis === 'qr') ? 'up-qr-btn' : 'up-banner-btn';
+            const normalHTML = '<i class="fa-solid fa-upload"></i> Upload';
+            busy(btnId, true, normalHTML);
+
+            try {
+                // Kecilkan gambar di telefon dulu supaya upload laju
+                const maxW = (uploadJenis === 'qr') ? 800 : 1280;
+                const b64 = await resizeToBase64(f, maxW, 0.82);
+
+                const data = await api({
+                    action: 'uploadImage',
+                    slug: SESSION.slug,
+                    pin: SESSION.pin,
+                    jenis: uploadJenis,
+                    mime: 'image/jpeg',
+                    data: b64
+                });
+
+                if (!data.success) return toast(data.error || 'Upload gagal', true);
+
+                const input = document.getElementById(uploadJenis === 'qr' ? 'p-qr' : 'p-banner');
+                input.value = data.url;
+                showPreview(uploadJenis, data.url);
+                toast('Gambar diupload! Jangan lupa tekan Simpan Profil');
+            } catch (err) {
+                toast('Masalah sambungan. Cuba semula.', true);
+            } finally {
+                busy(btnId, false, normalHTML);
+            }
+        });
+
+        function resizeToBase64(file, maxW, quality) {
+            return new Promise(function (resolve, reject) {
+                const img = new Image();
+                img.onload = function () {
+                    const scale = Math.min(1, maxW / img.width);
+                    const c = document.createElement('canvas');
+                    c.width = Math.round(img.width * scale);
+                    c.height = Math.round(img.height * scale);
+                    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                    const dataUrl = c.toDataURL('image/jpeg', quality);
+                    resolve(dataUrl.split(',')[1]);
+                };
+                img.onerror = function () { reject(new Error('Gagal baca gambar')); };
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        function showPreview(jenis, url) {
+            const prev = document.getElementById(jenis === 'qr' ? 'prev-qr' : 'prev-banner');
+            if (url) {
+                prev.src = url;
+                prev.classList.remove('hidden');
+            } else {
+                prev.classList.add('hidden');
             }
         }
 
