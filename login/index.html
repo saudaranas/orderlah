@@ -12,9 +12,9 @@
                 extend: {
                     colors: {
                         brand: {
-                            light: '#ffedd5',
-                            DEFAULT: '#f97316',
-                            dark: '#c2410c',
+                            light: '#dcfce7',
+                            DEFAULT: '#22c55e',
+                            dark: '#15803d',
                         }
                     }
                 }
@@ -88,6 +88,19 @@
                 <input type="text" id="p-tagline" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: Laksa paling kriuk di pekan">
             </div>
             <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Gerai (pilihan)</label>
+                <textarea id="p-alamat" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="Alamat penuh gerai anda"></textarea>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Link Peta (pilihan)</label>
+                <input type="url" id="p-peta" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="Link Waze atau Google Maps">
+                <p class="text-xs text-gray-400 mt-1">Buka Google Maps/Waze, cari gerai, Share, copy link</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Jam Operasi (pilihan)</label>
+                <input type="text" id="p-jam" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: Isnin - Sabtu: 8 pagi - 5 petang">
+            </div>
+            <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">No. WhatsApp (terima order)</label>
                 <input type="tel" id="p-whatsapp" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: 60123456789">
                 <p class="text-xs text-gray-400 mt-1">Mula dengan 60, tanpa + atau jarak</p>
@@ -96,7 +109,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Gambar Banner / Poster Kedai (pilihan)</label>
                 <div class="flex gap-2">
                     <input type="url" id="p-banner" class="flex-1 min-w-0 px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="Upload atau paste link gambar">
-                    <button onclick="pickImage('banner')" id="up-banner-btn" class="bg-brand-light text-brand-dark font-bold px-3 rounded-lg text-sm whitespace-nowrap hover:bg-orange-200"><i class="fa-solid fa-upload"></i> Upload</button>
+                    <button onclick="pickImage('banner')" id="up-banner-btn" class="bg-brand-light text-brand-dark font-bold px-3 rounded-lg text-sm whitespace-nowrap hover:bg-green-200"><i class="fa-solid fa-upload"></i> Upload</button>
                 </div>
                 <img id="prev-banner" class="hidden mt-2 rounded-lg max-h-32 border border-gray-200" alt="Preview banner">
             </div>
@@ -104,7 +117,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Gambar QR Bayaran / DuitNow (pilihan)</label>
                 <div class="flex gap-2">
                     <input type="url" id="p-qr" class="flex-1 min-w-0 px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="Upload atau paste link gambar">
-                    <button onclick="pickImage('qr')" id="up-qr-btn" class="bg-brand-light text-brand-dark font-bold px-3 rounded-lg text-sm whitespace-nowrap hover:bg-orange-200"><i class="fa-solid fa-upload"></i> Upload</button>
+                    <button onclick="pickImage('qr')" id="up-qr-btn" class="bg-brand-light text-brand-dark font-bold px-3 rounded-lg text-sm whitespace-nowrap hover:bg-green-200"><i class="fa-solid fa-upload"></i> Upload</button>
                 </div>
                 <img id="prev-qr" class="hidden mt-2 rounded-lg max-h-32 border border-gray-200" alt="Preview QR">
                 <p class="text-xs text-gray-400 mt-1">Jika kosong, pilihan Online Transfer disembunyikan</p>
@@ -146,7 +159,7 @@
         <div id="tab-menu" class="hidden">
             <div id="menu-items" class="space-y-3 mb-4"></div>
 
-            <button onclick="addItem()" class="w-full border-2 border-dashed border-brand text-brand font-bold py-3 rounded-xl hover:bg-orange-50 transition-colors mb-3">
+            <button onclick="addItem()" class="w-full border-2 border-dashed border-brand text-brand font-bold py-3 rounded-xl hover:bg-green-50 transition-colors mb-3">
                 <i class="fa-solid fa-plus"></i> Tambah Item
             </button>
             <button onclick="saveMenu()" id="save-menu-btn" class="w-full bg-brand text-white font-bold py-3 rounded-xl hover:bg-brand-dark transition-colors">
@@ -163,7 +176,7 @@
                     <p class="text-xs text-gray-500">Klik (7 hari)</p>
                 </div>
                 <div class="bg-white p-3 rounded-xl border border-gray-100 text-center">
-                    <p id="s-order" class="text-2xl font-bold text-[#1e3a8a]">0</p>
+                    <p id="s-order" class="text-2xl font-bold text-[#16a34a]">0</p>
                     <p class="text-xs text-gray-500">Order Sah (7 hari)</p>
                 </div>
                 <div class="bg-white p-3 rounded-xl border border-gray-100 text-center">
@@ -179,8 +192,8 @@
                 </div>
                 <div id="chart-wrap" class="w-full"></div>
                 <div class="flex gap-5 justify-center mt-2 text-xs text-gray-500">
-                    <span class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 bg-orange-300 rounded-sm"></span> Klik link</span>
-                    <span class="flex items-center gap-1.5"><span class="inline-block w-5 h-0.5 bg-[#1e3a8a]"></span> Order disahkan</span>
+                    <span class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 bg-[#172554] rounded-sm"></span> Klik link</span>
+                    <span class="flex items-center gap-1.5"><span class="inline-block w-5 h-0.5 bg-[#22c55e]"></span> Order disahkan</span>
                 </div>
             </div>
 
@@ -286,6 +299,9 @@
             // Isi borang profil
             document.getElementById('p-nama').value = KEDAI.nama || '';
             document.getElementById('p-tagline').value = KEDAI.tagline || '';
+            document.getElementById('p-alamat').value = KEDAI.alamat || '';
+            document.getElementById('p-peta').value = KEDAI.linkPeta || '';
+            document.getElementById('p-jam').value = KEDAI.jamOperasi || '';
             document.getElementById('p-whatsapp').value = KEDAI.noWhatsapp || '';
             document.getElementById('p-banner').value = KEDAI.banner || '';
             document.getElementById('p-qr').value = KEDAI.qr || '';
@@ -314,6 +330,9 @@
             const profile = {
                 nama: document.getElementById('p-nama').value.trim(),
                 tagline: document.getElementById('p-tagline').value.trim(),
+                alamat: document.getElementById('p-alamat').value.trim(),
+                linkPeta: document.getElementById('p-peta').value.trim(),
+                jamOperasi: document.getElementById('p-jam').value.trim(),
                 noWhatsapp: document.getElementById('p-whatsapp').value.replace(/[^0-9]/g, ''),
                 banner: document.getElementById('p-banner').value.trim(),
                 qr: document.getElementById('p-qr').value.trim(),
@@ -437,7 +456,7 @@
             const cb = document.createElement('input');
             cb.type = 'checkbox';
             cb.checked = !!checked;
-            cb.className = 'accent-orange-500 w-4 h-4';
+            cb.className = 'accent-green-500 w-4 h-4';
             cb.onchange = function () { onChange(cb.checked); };
             const span = document.createElement('span');
             span.className = 'text-xs font-medium text-gray-600';
@@ -549,7 +568,7 @@
             days.forEach(function (d, i) {
                 const cx = pad.l + slotW * i + slotW / 2;
                 const bh = (d.klik / maxV) * innerH;
-                svg += '<rect x="' + (cx - barW / 2) + '" y="' + y(d.klik) + '" width="' + barW + '" height="' + Math.max(bh, 0) + '" rx="3" fill="#fdba74"/>';
+                svg += '<rect x="' + (cx - barW / 2) + '" y="' + y(d.klik) + '" width="' + barW + '" height="' + Math.max(bh, 0) + '" rx="3" fill="#172554"/>';
                 svg += '<text x="' + cx + '" y="' + (H - 8) + '" text-anchor="middle" font-size="9" fill="#6b7280">' + d.label + '</text>';
             });
 
@@ -559,10 +578,10 @@
                 const cx = pad.l + slotW * i + slotW / 2;
                 pts += cx + ',' + y(d.order) + ' ';
             });
-            svg += '<polyline points="' + pts.trim() + '" fill="none" stroke="#1e3a8a" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+            svg += '<polyline points="' + pts.trim() + '" fill="none" stroke="#22c55e" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
             days.forEach(function (d, i) {
                 const cx = pad.l + slotW * i + slotW / 2;
-                svg += '<circle cx="' + cx + '" cy="' + y(d.order) + '" r="3.2" fill="#fff" stroke="#1e3a8a" stroke-width="2"/>';
+                svg += '<circle cx="' + cx + '" cy="' + y(d.order) + '" r="3.2" fill="#fff" stroke="#22c55e" stroke-width="2"/>';
             });
 
             svg += '</svg>';
