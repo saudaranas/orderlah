@@ -166,6 +166,7 @@
                 <i class="fa-solid fa-floppy-disk"></i> Simpan Menu
             </button>
             <p class="text-xs text-gray-400 text-center mt-2">Susunan item di kedai ikut susunan dalam senarai ini</p>
+            <p class="text-xs text-gray-400 text-center mt-1">Stok berkurang automatik bila anda <b>Sahkan</b> order. "Tanpa had" untuk item yang sentiasa ada.</p>
         </div>
 
         <!-- ============ TAB STATISTIK ============ -->
@@ -405,6 +406,53 @@
             row1.appendChild(nama);
             row1.appendChild(harga);
 
+            // Baris stok
+            const stokRow = document.createElement('div');
+            stokRow.className = 'flex items-center gap-2';
+
+            const stokLabel = document.createElement('span');
+            stokLabel.className = 'text-xs font-medium text-gray-500 whitespace-nowrap';
+            stokLabel.innerHTML = '<i class="fa-solid fa-boxes-stacked text-gray-400"></i> Stok:';
+
+            const tanpaHad = (item.stok === undefined || item.stok === null || item.stok < 0);
+
+            const stokInput = document.createElement('input');
+            stokInput.type = 'number';
+            stokInput.min = '0';
+            stokInput.placeholder = '0';
+            stokInput.value = tanpaHad ? '' : item.stok;
+            stokInput.disabled = tanpaHad;
+            stokInput.className = 'w-20 px-3 py-1.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand text-sm disabled:bg-gray-100 disabled:text-gray-400';
+            stokInput.oninput = function () { ITEMS[idx].stok = parseInt(stokInput.value) || 0; };
+
+            const hadWrap = document.createElement('label');
+            hadWrap.className = 'flex items-center gap-1.5 cursor-pointer ml-1';
+            const hadCb = document.createElement('input');
+            hadCb.type = 'checkbox';
+            hadCb.checked = tanpaHad;
+            hadCb.className = 'accent-green-500 w-4 h-4';
+            hadCb.onchange = function () {
+                if (hadCb.checked) {
+                    ITEMS[idx].stok = -1;
+                    stokInput.disabled = true;
+                    stokInput.value = '';
+                } else {
+                    ITEMS[idx].stok = 0;
+                    stokInput.disabled = false;
+                    stokInput.value = 0;
+                    stokInput.focus();
+                }
+            };
+            const hadSpan = document.createElement('span');
+            hadSpan.className = 'text-xs font-medium text-gray-600';
+            hadSpan.innerText = 'Tanpa had';
+            hadWrap.appendChild(hadCb);
+            hadWrap.appendChild(hadSpan);
+
+            stokRow.appendChild(stokLabel);
+            stokRow.appendChild(stokInput);
+            stokRow.appendChild(hadWrap);
+
             // Baris 2: toggles + buttons
             const row2 = document.createElement('div');
             row2.className = 'flex items-center justify-between flex-wrap gap-2';
@@ -446,6 +494,7 @@
             row2.appendChild(actions);
 
             card.appendChild(row1);
+            card.appendChild(stokRow);
             card.appendChild(row2);
             return card;
         }
@@ -476,7 +525,7 @@
         }
 
         function addItem() {
-            ITEMS.push({ id: '', nama: '', harga: 0, promo: false, freeDelivery: false, aktif: true });
+            ITEMS.push({ id: '', nama: '', harga: 0, promo: false, freeDelivery: false, aktif: true, stok: -1 });
             renderItems();
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         }
