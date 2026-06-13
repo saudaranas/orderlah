@@ -135,7 +135,16 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Caj Penghantaran (RM)</label>
-                    <input type="number" id="f-caj" step="0.50" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-navy" placeholder="cth: 3.00">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <input type="number" id="f-caj" step="0.50" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-navy" placeholder="cth: 3.00">
+                            <p class="text-xs text-gray-400 mt-1">COD</p>
+                        </div>
+                        <div>
+                            <input type="number" id="f-caj-online" step="0.50" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-navy" placeholder="cth: 0.00">
+                            <p class="text-xs text-gray-400 mt-1">Online Transfer</p>
+                        </div>
+                    </div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
@@ -383,6 +392,7 @@
             document.getElementById('f-banner').value = k ? k.banner : '';
             document.getElementById('f-qr').value = k ? k.qr : '';
             document.getElementById('f-caj').value = k ? k.cajPenghantaran : '';
+            document.getElementById('f-caj-online').value = k ? ((k.cajOnline === undefined || k.cajOnline === null) ? k.cajPenghantaran : k.cajOnline) : '';
             const statusVal = (k && k.status === 'Tutup') ? 'Tutup' : 'Aktif';
             document.querySelector('input[name="f-status"][value="' + statusVal + '"]').checked = true;
 
@@ -406,6 +416,7 @@
                 banner: document.getElementById('f-banner').value.trim(),
                 qr: document.getElementById('f-qr').value.trim(),
                 cajPenghantaran: parseFloat(document.getElementById('f-caj').value) || 0,
+                cajOnline: (document.getElementById('f-caj-online').value === '') ? '' : (parseFloat(document.getElementById('f-caj-online').value) || 0),
                 status: document.querySelector('input[name="f-status"]:checked').value
             };
 
