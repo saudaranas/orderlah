@@ -13,9 +13,9 @@
                 extend: {
                     colors: {
                         brand: {
-                            light: '#ffedd5',
-                            DEFAULT: '#f97316',
-                            dark: '#c2410c',
+                            light: '#dcfce7',
+                            DEFAULT: '#22c55e',
+                            dark: '#15803d',
                         },
                         navy: {
                             DEFAULT: '#1e3a8a',
@@ -31,9 +31,9 @@
         body { font-family: 'Inter', sans-serif; }
         .item-card { transition: transform 0.2s, box-shadow 0.2s; }
         .item-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        .spinner { border: 4px solid #ffedd5; border-top: 4px solid #f97316; border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite; }
+        .spinner { border: 4px solid #dcfce7; border-top: 4px solid #22c55e; border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .phone-shadow { box-shadow: 0 25px 50px -12px rgba(194, 65, 12, 0.35); }
+        .phone-shadow { box-shadow: 0 25px 50px -12px rgba(23, 37, 84, 0.35); }
         html { scroll-behavior: smooth; }
     </style>
 </head>
@@ -71,13 +71,13 @@
             <img id="banner-img" src="" alt="Banner Kedai" class="w-full h-auto object-cover">
         </div>
         <div id="header-text" class="mb-6 text-center">
-            <h1 id="kedai-nama" class="text-2xl font-bold text-brand-dark"></h1>
+            <h1 id="kedai-nama" class="text-2xl font-bold text-navy-dark"></h1>
             <p id="kedai-tagline" class="text-gray-500 text-sm mt-1"></p>
         </div>
 
         <!-- Butang Share -->
         <div class="text-center mb-6 -mt-2">
-            <button onclick="shareKedai()" class="inline-flex items-center gap-2 bg-white border-2 border-brand-light text-brand-dark text-sm font-bold px-5 py-2.5 rounded-full hover:bg-orange-50 transition-colors shadow-sm">
+            <button onclick="shareKedai()" class="inline-flex items-center gap-2 bg-white border-2 border-brand-light text-brand-dark text-sm font-bold px-5 py-2.5 rounded-full hover:bg-green-50 transition-colors shadow-sm">
                 <i class="fa-solid fa-share-nodes"></i> Kongsi Kedai Ini
             </button>
         </div>
@@ -85,6 +85,16 @@
         <!-- Menu -->
         <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-utensils text-brand"></i> Menu Kami</h3>
         <div id="menu-list" class="grid grid-cols-1 gap-4 mb-6"></div>
+
+        <!-- Card Alamat Gerai -->
+        <div id="alamat-card" class="hidden bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6">
+            <h3 class="font-bold mb-3 flex items-center gap-2"><i class="fa-solid fa-store text-brand"></i> Lokasi Gerai</h3>
+            <div class="space-y-2.5 text-sm">
+                <p id="alamat-teks" class="hidden text-gray-600 flex items-start gap-2"><i class="fa-solid fa-location-dot text-brand mt-1"></i> <span></span></p>
+                <p id="alamat-jam" class="hidden text-gray-600 flex items-start gap-2"><i class="fa-solid fa-clock text-brand mt-1"></i> <span></span></p>
+                <a id="alamat-peta" href="#" target="_blank" class="hidden items-center gap-2 text-brand-dark font-bold mt-1"><i class="fa-solid fa-map-location-dot"></i> Buka di Peta</a>
+            </div>
+        </div>
 
         <!-- Maklumat Penghantaran -->
         <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-clipboard-list text-brand"></i> Maklumat Penghantaran</h3>
@@ -119,7 +129,7 @@
                     </div>
                 </div>
 
-                <div id="qr-section" class="hidden mt-4 p-4 border-2 border-brand-light rounded-xl bg-orange-50 text-center">
+                <div id="qr-section" class="hidden mt-4 p-4 border-2 border-brand-light rounded-xl bg-green-50 text-center">
                     <p class="font-bold text-brand-dark mb-2">Sila Bayar Dulu melalui QR Kod di bawah:</p>
                     <img id="qr-img" src="" alt="QR Bayaran" class="mx-auto max-w-xs rounded-lg shadow-md mb-2">
                     <p class="text-xs text-red-600 font-semibold italic">PENTING: Sila buat pembayaran mengikut jumlah keseluruhan di bawah sebelum menekan butang hantar. Sila sertakan resit transaksi di WhatsApp nanti.</p>
@@ -132,7 +142,7 @@
             <h3 class="font-bold border-b pb-2 mb-3">Ringkasan Pesanan</h3>
             <div class="flex justify-between mb-2 text-sm text-gray-600"><span>Subtotal:</span> <span class="font-bold text-gray-800" id="summary-subtotal">RM 0.00</span></div>
             <div class="flex justify-between mb-3 text-sm text-gray-600"><span>Penghantaran:</span> <span class="font-bold text-gray-800" id="summary-delivery">RM 0.00</span></div>
-            <div class="flex justify-between font-bold text-lg border-t pt-2"><span>Total Keseluruhan:</span> <span class="text-brand-dark" id="summary-total">RM 0.00</span></div>
+            <div class="flex justify-between font-bold text-lg border-t pt-2"><span>Total Keseluruhan:</span> <span class="text-navy-dark" id="summary-total">RM 0.00</span></div>
 
             <a id="whatsapp-btn" href="#" target="_blank" onclick="return submitOrder()" class="w-full mt-4 bg-brand text-white font-bold py-3 rounded-xl hover:bg-brand-dark flex items-center justify-center gap-2 block text-center transition-colors">
                 <i class="fa-brands fa-whatsapp text-xl"></i> Hantar Pesanan ke WhatsApp
@@ -161,12 +171,12 @@
     ===================================================== -->
 
     <!-- ============ HERO ============ -->
-    <header class="bg-gradient-to-b from-orange-50 to-white px-4 pt-10 pb-12">
+    <header class="bg-gradient-to-b from-green-50 to-white px-4 pt-10 pb-12">
         <div class="max-w-3xl mx-auto text-center">
             <span class="inline-block bg-brand-light text-brand-dark text-xs font-bold px-3 py-1.5 rounded-full mb-4">UNTUK PENIAGA MAKANAN & MINUMAN</span>
             <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mb-4">
                 Kedai Anda Boleh Terima<br>
-                <span class="text-brand">Order Online</span> Hari Ini Juga
+                <span class="text-navy">Order Online</span> Hari Ini Juga
             </h1>
             <p class="text-gray-600 mb-6 max-w-xl mx-auto">
                 Satu link untuk kedai anda. Pelanggan pilih menu, isi alamat, tekan satu butang — order terus masuk WhatsApp anda. <b>Tanpa app. Tanpa komisen.</b>
@@ -175,7 +185,7 @@
                 <a href="https://wa.me/60167388358?text=Saya%20berminat%20nak%20sistem%20order%20online%20Orderlah%20untuk%20kedai%20saya" class="bg-brand text-white font-bold py-3.5 px-8 rounded-xl hover:bg-brand-dark transition-colors">
                     <i class="fa-brands fa-whatsapp"></i> Saya Nak Sistem Ini
                 </a>
-                <a href="https://orderlah.store/?id=demo" target="_blank" class="bg-white border-2 border-brand text-brand-dark font-bold py-3.5 px-8 rounded-xl hover:bg-orange-50 transition-colors">
+                <a href="https://orderlah.store/?id=demo" target="_blank" class="bg-white border-2 border-brand text-brand-dark font-bold py-3.5 px-8 rounded-xl hover:bg-green-50 transition-colors">
                     <i class="fa-solid fa-eye"></i> Tengok Demo Live
                 </a>
             </div>
@@ -186,7 +196,7 @@
                     <div class="bg-gray-50 rounded-[1.8rem] overflow-hidden text-left">
                         <div class="bg-brand text-white text-center py-3 px-4">
                             <p class="font-bold text-sm">Kedai Makan Anda</p>
-                            <p class="text-[10px] text-orange-100">order online &bull; COD &bull; QR</p>
+                            <p class="text-[10px] text-green-100">order online &bull; COD &bull; QR</p>
                         </div>
                         <div class="p-3 space-y-2">
                             <div class="bg-white rounded-xl p-2.5 flex justify-between items-center shadow-sm">
@@ -200,7 +210,7 @@
                                     <span class="w-5 h-5 rounded-full bg-brand text-white text-[10px] flex items-center justify-center">+</span>
                                 </div>
                             </div>
-                            <div class="bg-orange-50 border border-brand-light rounded-xl p-2.5 flex justify-between items-center relative overflow-hidden">
+                            <div class="bg-green-50 border border-brand-light rounded-xl p-2.5 flex justify-between items-center relative overflow-hidden">
                                 <span class="absolute top-0 right-0 bg-brand text-white text-[8px] font-bold px-1.5 py-0.5 rounded-bl-lg">PROMO</span>
                                 <div>
                                     <p class="font-bold text-xs">Kombo Jimat</p>
@@ -256,17 +266,17 @@
             <h2 class="text-2xl font-extrabold text-center mb-2">Penyelesaiannya Sangat Mudah</h2>
             <p class="text-gray-500 text-center text-sm mb-8">3 langkah sahaja, dan anda tak perlu pandai IT langsung</p>
             <div class="grid md:grid-cols-3 gap-4">
-                <div class="bg-orange-50 rounded-2xl p-5 text-center">
+                <div class="bg-green-50 rounded-2xl p-5 text-center">
                     <div class="w-12 h-12 bg-brand text-white rounded-2xl flex items-center justify-center mx-auto mb-3 font-extrabold text-lg">1</div>
                     <h3 class="font-bold mb-1">Kami Setupkan</h3>
                     <p class="text-sm text-gray-600">Bagi kami nama kedai, menu & harga, dan no WhatsApp anda. Kami siapkan semuanya.</p>
                 </div>
-                <div class="bg-orange-50 rounded-2xl p-5 text-center">
+                <div class="bg-green-50 rounded-2xl p-5 text-center">
                     <div class="w-12 h-12 bg-brand text-white rounded-2xl flex items-center justify-center mx-auto mb-3 font-extrabold text-lg">2</div>
                     <h3 class="font-bold mb-1">Anda Dapat Link</h3>
                     <p class="text-sm text-gray-600">Link khas untuk kedai anda. Share di WhatsApp Status, Facebook, TikTok — mana-mana.</p>
                 </div>
-                <div class="bg-orange-50 rounded-2xl p-5 text-center">
+                <div class="bg-green-50 rounded-2xl p-5 text-center">
                     <div class="w-12 h-12 bg-brand text-white rounded-2xl flex items-center justify-center mx-auto mb-3 font-extrabold text-lg">3</div>
                     <h3 class="font-bold mb-1">Order Masuk WhatsApp</h3>
                     <p class="text-sm text-gray-600">Pelanggan order, anda terima mesej lengkap: item, jumlah, alamat, cara bayaran. Terus sediakan.</p>
@@ -325,7 +335,7 @@
                     <p class="text-3xl font-extrabold text-red-500 mb-1">-RM250</p>
                     <p class="text-xs text-gray-400">hilang setiap bulan, makin laris makin banyak hilang</p>
                 </div>
-                <div class="rounded-2xl border-2 border-brand p-5 bg-orange-50">
+                <div class="rounded-2xl border-2 border-brand p-5 bg-green-50">
                     <h3 class="font-bold text-brand-dark mb-3"><i class="fa-solid fa-check text-green-500"></i> Orderlah</h3>
                     <p class="text-sm text-gray-600 mb-2">Jual RM1,000 atau RM10,000 sebulan:</p>
                     <p class="text-3xl font-extrabold text-green-600 mb-1">Yuran Tetap</p>
@@ -370,7 +380,7 @@
         <div class="max-w-xl mx-auto text-center">
             <h2 class="text-2xl font-extrabold mb-2">Jangan Percaya Cakap Kami.<br>Cuba Sendiri.</h2>
             <p class="text-gray-500 text-sm mb-6">Ini kedai demo yang berfungsi 100%. Tekan, pilih menu, tengok sendiri macam mana pelanggan anda akan order.</p>
-            <a href="https://orderlah.store/?id=demo" target="_blank" class="inline-block bg-white border-2 border-brand text-brand-dark font-bold py-3.5 px-10 rounded-xl hover:bg-orange-50 transition-colors">
+            <a href="https://orderlah.store/?id=demo" target="_blank" class="inline-block bg-white border-2 border-brand text-brand-dark font-bold py-3.5 px-10 rounded-xl hover:bg-green-50 transition-colors">
                 <i class="fa-solid fa-eye"></i> Buka Kedai Demo
             </a>
         </div>
@@ -410,7 +420,7 @@
     </section>
 
     <!-- ============ CTA AKHIR ============ -->
-    <section class="px-4 py-14 bg-gradient-to-b from-white to-orange-50">
+    <section class="px-4 py-14 bg-gradient-to-b from-white to-green-50">
         <div class="max-w-xl mx-auto text-center">
             <h2 class="text-2xl md:text-3xl font-extrabold mb-3">Malam Ini, Bila Pelanggan Tanya<br>"Menu Apa Ada?"...</h2>
             <p class="text-gray-600 mb-6">...anda cuma perlu hantar satu link. Itu sahaja.</p>
@@ -515,6 +525,9 @@
             setCajLabel('cod-caj', KEDAI.cajPenghantaran);
             setCajLabel('online-caj', KEDAI.cajOnline);
 
+            // Card alamat gerai (papar hanya jika ada maklumat)
+            renderAlamat();
+
             // Render menu
             const list = document.getElementById('menu-list');
             list.innerHTML = '';
@@ -532,7 +545,7 @@
             const card = document.createElement('div');
 
             if (item.promo) {
-                card.className = 'item-card bg-orange-50 border-2 border-brand-light p-4 rounded-xl shadow-sm flex justify-between items-center relative overflow-hidden';
+                card.className = 'item-card bg-green-50 border-2 border-brand-light p-4 rounded-xl shadow-sm flex justify-between items-center relative overflow-hidden';
                 const badge = document.createElement('div');
                 badge.className = 'absolute top-0 right-0 bg-brand text-white text-xs font-bold px-2 py-1 rounded-bl-lg';
                 badge.innerText = 'PROMO';
@@ -608,6 +621,30 @@
             } else {
                 el.innerText = 'Penghantaran: RM ' + v.toFixed(2);
                 el.className = 'block text-xs text-gray-400 mt-1';
+            }
+        }
+
+        function renderAlamat() {
+            const adaAlamat = KEDAI.alamat || KEDAI.jamOperasi || KEDAI.linkPeta;
+            if (!adaAlamat) return;
+
+            document.getElementById('alamat-card').classList.remove('hidden');
+
+            if (KEDAI.alamat) {
+                const p = document.getElementById('alamat-teks');
+                p.classList.remove('hidden');
+                p.querySelector('span').innerText = KEDAI.alamat;
+            }
+            if (KEDAI.jamOperasi) {
+                const p = document.getElementById('alamat-jam');
+                p.classList.remove('hidden');
+                p.querySelector('span').innerText = KEDAI.jamOperasi;
+            }
+            if (KEDAI.linkPeta) {
+                const a = document.getElementById('alamat-peta');
+                a.classList.remove('hidden');
+                a.classList.add('flex');
+                a.href = KEDAI.linkPeta;
             }
         }
 
