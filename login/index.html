@@ -12,9 +12,9 @@
                 extend: {
                     colors: {
                         brand: {
-                            light: '#dcfce7',
-                            DEFAULT: '#22c55e',
-                            dark: '#15803d',
+                            light: '#ffe4e6',
+                            DEFAULT: '#fb7185',
+                            dark: '#e11d48',
                         }
                     }
                 }
@@ -109,7 +109,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Gambar Banner / Poster Kedai (pilihan)</label>
                 <div class="flex gap-2">
                     <input type="url" id="p-banner" class="flex-1 min-w-0 px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="Upload atau paste link gambar">
-                    <button onclick="pickImage('banner')" id="up-banner-btn" class="bg-brand-light text-brand-dark font-bold px-3 rounded-lg text-sm whitespace-nowrap hover:bg-green-200"><i class="fa-solid fa-upload"></i> Upload</button>
+                    <button onclick="pickImage('banner')" id="up-banner-btn" class="bg-brand-light text-brand-dark font-bold px-3 rounded-lg text-sm whitespace-nowrap hover:bg-rose-200"><i class="fa-solid fa-upload"></i> Upload</button>
                 </div>
                 <img id="prev-banner" class="hidden mt-2 rounded-lg max-h-32 border border-gray-200" alt="Preview banner">
             </div>
@@ -117,7 +117,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Gambar QR Bayaran / DuitNow (pilihan)</label>
                 <div class="flex gap-2">
                     <input type="url" id="p-qr" class="flex-1 min-w-0 px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="Upload atau paste link gambar">
-                    <button onclick="pickImage('qr')" id="up-qr-btn" class="bg-brand-light text-brand-dark font-bold px-3 rounded-lg text-sm whitespace-nowrap hover:bg-green-200"><i class="fa-solid fa-upload"></i> Upload</button>
+                    <button onclick="pickImage('qr')" id="up-qr-btn" class="bg-brand-light text-brand-dark font-bold px-3 rounded-lg text-sm whitespace-nowrap hover:bg-rose-200"><i class="fa-solid fa-upload"></i> Upload</button>
                 </div>
                 <img id="prev-qr" class="hidden mt-2 rounded-lg max-h-32 border border-gray-200" alt="Preview QR">
                 <p class="text-xs text-gray-400 mt-1">Jika kosong, pilihan Online Transfer disembunyikan</p>
@@ -149,7 +149,7 @@
                 </div>
                 <p class="text-xs text-gray-400 mb-2">Jika aktif, pelanggan pilih kawasan & caj ikut zon (ganti caj flat di atas)</p>
                 <div id="zon-list" class="space-y-2"></div>
-                <button onclick="addZon()" id="add-zon-btn" class="hidden w-full border-2 border-dashed border-brand text-brand font-bold py-2 rounded-xl hover:bg-green-50 transition-colors text-sm mt-2">
+                <button onclick="addZon()" id="add-zon-btn" class="hidden w-full border-2 border-dashed border-brand text-brand font-bold py-2 rounded-xl hover:bg-rose-50 transition-colors text-sm mt-2">
                     <i class="fa-solid fa-plus"></i> Tambah Zon
                 </button>
             </div>
@@ -175,7 +175,7 @@
         <div id="tab-menu" class="hidden">
             <div id="menu-items" class="space-y-3 mb-4"></div>
 
-            <button onclick="addItem()" class="w-full border-2 border-dashed border-brand text-brand font-bold py-3 rounded-xl hover:bg-green-50 transition-colors mb-3">
+            <button onclick="addItem()" class="w-full border-2 border-dashed border-brand text-brand font-bold py-3 rounded-xl hover:bg-rose-50 transition-colors mb-3">
                 <i class="fa-solid fa-plus"></i> Tambah Item
             </button>
             <button onclick="saveMenu()" id="save-menu-btn" class="w-full bg-brand text-white font-bold py-3 rounded-xl hover:bg-brand-dark transition-colors">
@@ -210,7 +210,7 @@
                 <div id="chart-wrap" class="w-full"></div>
                 <div class="flex gap-5 justify-center mt-2 text-xs text-gray-500">
                     <span class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 bg-[#172554] rounded-sm"></span> Klik link</span>
-                    <span class="flex items-center gap-1.5"><span class="inline-block w-5 h-0.5 bg-[#22c55e]"></span> Order disahkan</span>
+                    <span class="flex items-center gap-1.5"><span class="inline-block w-5 h-0.5 bg-[#fb7185]"></span> Order disahkan</span>
                 </div>
             </div>
 
@@ -730,10 +730,10 @@
                 const cx = pad.l + slotW * i + slotW / 2;
                 pts += cx + ',' + y(d.order) + ' ';
             });
-            svg += '<polyline points="' + pts.trim() + '" fill="none" stroke="#22c55e" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+            svg += '<polyline points="' + pts.trim() + '" fill="none" stroke="#fb7185" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
             days.forEach(function (d, i) {
                 const cx = pad.l + slotW * i + slotW / 2;
-                svg += '<circle cx="' + cx + '" cy="' + y(d.order) + '" r="3.2" fill="#fff" stroke="#22c55e" stroke-width="2"/>';
+                svg += '<circle cx="' + cx + '" cy="' + y(d.order) + '" r="3.2" fill="#fff" stroke="#fb7185" stroke-width="2"/>';
             });
 
             svg += '</svg>';
@@ -778,7 +778,7 @@
                 const sahActive = (o.status === 'Sah');
                 const batalActive = (o.status === 'Batal');
                 const btnSah = '<button onclick="setStatus(\'' + escText(o.id) + '\', \'Sah\')" class="flex-1 py-2 rounded-lg text-xs font-bold transition-colors ' +
-                    (sahActive ? 'bg-green-600 text-white' : 'bg-green-50 text-green-700 hover:bg-green-100') + '">' +
+                    (sahActive ? 'bg-green-600 text-white' : 'bg-rose-50 text-green-700 hover:bg-green-100') + '">' +
                     '<i class="fa-solid fa-check"></i> ' + (sahActive ? 'Order Disahkan' : 'Sahkan Order') + '</button>';
                 const btnBatal = '<button onclick="setStatus(\'' + escText(o.id) + '\', \'Batal\')" class="flex-1 py-2 rounded-lg text-xs font-bold transition-colors ' +
                     (batalActive ? 'bg-gray-500 text-white' : 'bg-gray-50 text-gray-500 hover:bg-gray-100') + '">' +
