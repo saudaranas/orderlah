@@ -42,6 +42,17 @@
 <!-- ==================== PAGE KEDAI (?id=namakedai) ==================== -->
 <div id="page-kedai" class="hidden">
 
+    <!-- Social Proof Popup -->
+    <div id="social-proof" class="hidden fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-xs z-40 bg-white rounded-2xl shadow-lg border border-gray-100 p-3 flex items-center gap-3 transition-all duration-500 translate-y-24 opacity-0">
+        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-bag-shopping text-brand"></i>
+        </div>
+        <div class="min-w-0">
+            <p id="sp-text" class="text-sm font-semibold text-gray-800 truncate"></p>
+            <p id="sp-time" class="text-xs text-gray-400"></p>
+        </div>
+    </div>
+
 
     <!-- ============ LOADING ============ -->
     <div id="state-loading" class="min-h-screen flex flex-col items-center justify-center gap-4">
@@ -482,6 +493,9 @@
                     body: JSON.stringify({ action: 'trackVisit', slug: KEDAI.slug }),
                     keepalive: true
                 }).catch(function () {});
+
+                // Muat social proof (order sebenar terkini)
+                loadSocialProof();
             } catch (err) {
                 showError('Masalah sambungan. Sila cuba semula.');
             }
@@ -692,6 +706,46 @@
                 // Fallback: share melalui WhatsApp
                 window.open('https://wa.me/?text=' + encodeURIComponent(text + url), '_blank');
             }
+        }
+
+        /* ================ SOCIAL PROOF ================ */
+        let SP_ITEMS = [];
+        let spIndex = 0;
+
+        async function loadSocialProof() {
+            try {
+                const res = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'socialProof', slug: KEDAI.slug })
+                });
+                const data = await res.json();
+                if (data.success && data.items && data.items.length > 0) {
+                    SP_ITEMS = data.items;
+                    setTimeout(rotateSocialProof, 4000); // mula selepas 4 saat
+                }
+            } catch (e) {}
+        }
+
+        function rotateSocialProof() {
+            if (SP_ITEMS.length === 0) return;
+            const sp = document.getElementById('social-proof');
+            const it = SP_ITEMS[spIndex % SP_ITEMS.length];
+            spIndex++;
+
+            document.getElementById('sp-text').innerText = it.nama + ' baru order ' + it.item;
+            document.getElementById('sp-time').innerText = '🔥 ' + it.lalu;
+
+            // Masuk
+            sp.classList.remove('hidden');
+            requestAnimationFrame(function () {
+                sp.classList.remove('translate-y-24', 'opacity-0');
+            });
+
+            // Keluar selepas 5 saat, ulang selepas 8 saat
+            setTimeout(function () {
+                sp.classList.add('translate-y-24', 'opacity-0');
+            }, 5000);
+            setTimeout(rotateSocialProof, 8000);
         }
 
         function updateQty(itemId, change) {
