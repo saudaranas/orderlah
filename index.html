@@ -120,6 +120,13 @@
                     <textarea id="cust-address" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="Alamat lengkap anda"></textarea>
                 </div>
 
+                <div id="zon-wrap" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kawasan Penghantaran</label>
+                    <select id="cust-zon" onchange="calculateTotal()" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand bg-white">
+                    </select>
+                    <p class="text-xs text-gray-400 mt-1">Caj penghantaran berbeza ikut kawasan</p>
+                </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Pilihan Pembayaran</label>
                     <div id="payment-options" class="grid grid-cols-2 gap-3">
@@ -539,6 +546,9 @@
             setCajLabel('cod-caj', KEDAI.cajPenghantaran);
             setCajLabel('online-caj', KEDAI.cajOnline);
 
+            // Zon penghantaran (jika ada)
+            renderZon();
+
             // Card alamat gerai (papar hanya jika ada maklumat)
             renderAlamat();
 
@@ -687,9 +697,38 @@
 
         function cajIkutBayaran() {
             const pay = document.querySelector('input[name="payment_method"]:checked').value;
+
+            // Jika ada zon, guna caj zon yang dipilih
+            if (KEDAI.zon && KEDAI.zon.length > 0) {
+                const sel = document.getElementById('cust-zon');
+                const idx = sel ? parseInt(sel.value) : 0;
+                const z = KEDAI.zon[idx] || KEDAI.zon[0];
+                return (pay === 'Online Transfer') ? (Number(z.online) || 0) : (Number(z.cod) || 0);
+            }
+
+            // Fallback: caj flat
             return (pay === 'Online Transfer')
                 ? (Number(KEDAI.cajOnline) || 0)
                 : (Number(KEDAI.cajPenghantaran) || 0);
+        }
+
+        function renderZon() {
+            if (!KEDAI.zon || KEDAI.zon.length === 0) return;
+
+            const wrap = document.getElementById('zon-wrap');
+            const sel = document.getElementById('cust-zon');
+            sel.innerHTML = '';
+            KEDAI.zon.forEach(function (z, i) {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.innerText = z.nama;
+                sel.appendChild(opt);
+            });
+            wrap.classList.remove('hidden');
+
+            // Bila ada zon, sembunyikan label caj flat (caj ikut zon)
+            document.getElementById('cod-caj').classList.add('hidden');
+            document.getElementById('online-caj').classList.add('hidden');
         }
 
         async function shareKedai() {
@@ -796,7 +835,13 @@
 
             let text = '*PESANAN BARU: ' + KEDAI.nama.toUpperCase() + '*\n\n';
             text += '*Nama:* ' + name + '\n';
-            text += '*Alamat:* ' + addr + '\n\n';
+            text += '*Alamat:* ' + addr + '\n';
+            if (KEDAI.zon && KEDAI.zon.length > 0) {
+                const sel = document.getElementById('cust-zon');
+                const z = KEDAI.zon[sel ? parseInt(sel.value) : 0];
+                if (z) text += '*Kawasan:* ' + z.nama + '\n';
+            }
+            text += '\n';
             text += '*Item Sila Sediakan:*\n';
 
             MENU.forEach(function (item) {
