@@ -13,9 +13,9 @@
                 extend: {
                     colors: {
                         brand: {
-                            light: '#dcfce7',
-                            DEFAULT: '#22c55e',
-                            dark: '#15803d',
+                            light: '#ffe4e6',
+                            DEFAULT: '#fb7185',
+                            dark: '#e11d48',
                         },
                         navy: {
                             DEFAULT: '#1e3a8a',
@@ -31,10 +31,15 @@
         body { font-family: 'Inter', sans-serif; }
         .item-card { transition: transform 0.2s, box-shadow 0.2s; }
         .item-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        .spinner { border: 4px solid #dcfce7; border-top: 4px solid #22c55e; border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite; }
+        .spinner { border: 4px solid #ffe4e6; border-top: 4px solid #fb7185; border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .phone-shadow { box-shadow: 0 25px 50px -12px rgba(23, 37, 84, 0.35); }
         html { scroll-behavior: smooth; }
+        @keyframes floatA { 0%,100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-16px) rotate(-5deg); } }
+        @keyframes floatB { 0%,100% { transform: translateY(0) rotate(4deg); } 50% { transform: translateY(-22px) rotate(4deg); } }
+        .float-a { animation: floatA 5s ease-in-out infinite; }
+        .float-b { animation: floatB 6s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) { .float-a, .float-b { animation: none; } }
     </style>
 </head>
 <body class="text-gray-800 antialiased">
@@ -88,7 +93,7 @@
 
         <!-- Butang Share -->
         <div class="text-center mb-6 -mt-2">
-            <button onclick="shareKedai()" class="inline-flex items-center gap-2 bg-white border-2 border-brand-light text-brand-dark text-sm font-bold px-5 py-2.5 rounded-full hover:bg-green-50 transition-colors shadow-sm">
+            <button onclick="shareKedai()" class="inline-flex items-center gap-2 bg-white border-2 border-brand-light text-brand-dark text-sm font-bold px-5 py-2.5 rounded-full hover:bg-rose-50 transition-colors shadow-sm">
                 <i class="fa-solid fa-share-nodes"></i> Kongsi Kedai Ini
             </button>
         </div>
@@ -147,7 +152,7 @@
                     </div>
                 </div>
 
-                <div id="qr-section" class="hidden mt-4 p-4 border-2 border-brand-light rounded-xl bg-green-50 text-center">
+                <div id="qr-section" class="hidden mt-4 p-4 border-2 border-brand-light rounded-xl bg-rose-50 text-center">
                     <p class="font-bold text-brand-dark mb-2">Sila Bayar Dulu melalui QR Kod di bawah:</p>
                     <img id="qr-img" src="" alt="QR Bayaran" class="mx-auto max-w-xs rounded-lg shadow-md mb-2">
                     <p class="text-xs text-red-600 font-semibold italic">PENTING: Sila buat pembayaran mengikut jumlah keseluruhan di bawah sebelum menekan butang hantar. Sila sertakan resit transaksi di WhatsApp nanti.</p>
@@ -189,65 +194,107 @@
     ===================================================== -->
 
     <!-- ============ HERO ============ -->
-    <header class="bg-gradient-to-b from-green-50 to-white px-4 pt-10 pb-12">
-        <div class="max-w-3xl mx-auto text-center">
-            <span class="inline-block bg-brand-light text-brand-dark text-xs font-bold px-3 py-1.5 rounded-full mb-4">UNTUK PENIAGA MAKANAN & MINUMAN</span>
-            <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mb-4">
+    <header class="relative overflow-hidden bg-gradient-to-b from-navy-dark via-navy to-navy-dark text-white px-4 pt-10 pb-16">
+        <!-- hiasan blob coral -->
+        <div class="absolute top-10 -left-20 w-64 h-64 bg-brand/20 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 -right-16 w-72 h-72 bg-brand/10 rounded-full blur-3xl"></div>
+
+        <div class="relative max-w-3xl mx-auto text-center">
+            <span class="inline-block bg-white/10 text-brand-light text-xs font-bold px-3 py-1.5 rounded-full mb-4 backdrop-blur">UNTUK PENIAGA MAKANAN & MINUMAN</span>
+            <h1 class="text-3xl md:text-5xl font-extrabold leading-tight mb-4">
                 Kedai Anda Boleh Terima<br>
-                <span class="text-navy">Order Online</span> Hari Ini Juga
+                <span class="text-brand">Order Online</span> Hari Ini Juga
             </h1>
-            <p class="text-gray-600 mb-6 max-w-xl mx-auto">
-                Satu link untuk kedai anda. Pelanggan pilih menu, isi alamat, tekan satu butang — order terus masuk WhatsApp anda. <b>Tanpa app. Tanpa komisen.</b>
+            <p class="text-blue-100 mb-7 max-w-xl mx-auto">
+                Satu link untuk kedai anda. Pelanggan pilih menu, isi alamat, tekan satu butang — order terus masuk WhatsApp anda. <b class="text-white">Tanpa app. Tanpa komisen.</b>
             </p>
-            <div class="flex flex-col sm:flex-row gap-3 justify-center mb-10">
-                <a href="https://wa.me/60167388358?text=Saya%20berminat%20nak%20sistem%20order%20online%20Orderlah%20untuk%20kedai%20saya" class="bg-brand text-white font-bold py-3.5 px-8 rounded-xl hover:bg-brand-dark transition-colors">
+            <div class="flex flex-col sm:flex-row gap-3 justify-center mb-12">
+                <a href="https://wa.me/60167388358?text=Saya%20berminat%20nak%20sistem%20order%20online%20Orderlah%20untuk%20kedai%20saya" class="bg-brand text-white font-bold py-3.5 px-8 rounded-xl hover:bg-brand-dark transition-colors shadow-lg shadow-brand/30">
                     <i class="fa-brands fa-whatsapp"></i> Saya Nak Sistem Ini
                 </a>
-                <a href="https://orderlah.store/?id=demo" target="_blank" class="bg-white border-2 border-brand text-brand-dark font-bold py-3.5 px-8 rounded-xl hover:bg-green-50 transition-colors">
+                <a href="https://orderlah.store/?id=demo" target="_blank" class="bg-white/10 border border-white/30 text-white font-bold py-3.5 px-8 rounded-xl hover:bg-white/20 transition-colors backdrop-blur">
                     <i class="fa-solid fa-eye"></i> Tengok Demo Live
                 </a>
             </div>
 
-            <!-- Phone mockup -->
-            <div class="max-w-[280px] mx-auto">
-                <div class="phone-shadow bg-gray-900 rounded-[2.2rem] p-2.5">
-                    <div class="bg-gray-50 rounded-[1.8rem] overflow-hidden text-left">
-                        <div class="bg-brand text-white text-center py-3 px-4">
-                            <p class="font-bold text-sm">Kedai Makan Anda</p>
-                            <p class="text-[10px] text-green-100">order online &bull; COD &bull; QR</p>
-                        </div>
-                        <div class="p-3 space-y-2">
-                            <div class="bg-white rounded-xl p-2.5 flex justify-between items-center shadow-sm">
-                                <div>
-                                    <p class="font-bold text-xs">Nasi Lemak Special</p>
-                                    <p class="text-brand text-xs font-semibold">RM 6.00</p>
-                                </div>
-                                <div class="flex items-center gap-1.5">
-                                    <span class="w-5 h-5 rounded-full bg-gray-100 text-gray-500 text-[10px] flex items-center justify-center">-</span>
-                                    <span class="text-xs font-bold">2</span>
-                                    <span class="w-5 h-5 rounded-full bg-brand text-white text-[10px] flex items-center justify-center">+</span>
-                                </div>
+            <!-- Dua mockup bertindih & floating -->
+            <div class="relative h-[420px] sm:h-[460px] flex justify-center items-start">
+
+                <!-- Mockup A (BELAKANG): Dashboard Peniaga -->
+                <div class="float-a absolute left-1/2 -translate-x-[58%] sm:-translate-x-[72%] top-6 w-[200px] sm:w-[230px] z-10">
+                    <div class="phone-shadow bg-gray-900 rounded-[2rem] p-2">
+                        <div class="bg-gray-50 rounded-[1.6rem] overflow-hidden text-left">
+                            <div class="bg-navy text-white px-3 py-2.5">
+                                <p class="font-bold text-[11px]">Laksa Kriuk-Kriuk</p>
+                                <p class="text-[8px] text-blue-200">Panel Peniaga • Statistik</p>
                             </div>
-                            <div class="bg-green-50 border border-brand-light rounded-xl p-2.5 flex justify-between items-center relative overflow-hidden">
-                                <span class="absolute top-0 right-0 bg-brand text-white text-[8px] font-bold px-1.5 py-0.5 rounded-bl-lg">PROMO</span>
-                                <div>
-                                    <p class="font-bold text-xs">Kombo Jimat</p>
-                                    <p class="text-brand-dark text-xs font-semibold">RM 9.00</p>
+                            <div class="p-2.5 space-y-2">
+                                <div class="grid grid-cols-3 gap-1.5">
+                                    <div class="bg-white rounded-lg p-1.5 text-center border border-gray-100"><p class="text-sm font-extrabold text-navy">48</p><p class="text-[7px] text-gray-400">Klik</p></div>
+                                    <div class="bg-white rounded-lg p-1.5 text-center border border-gray-100"><p class="text-sm font-extrabold text-brand">12</p><p class="text-[7px] text-gray-400">Order</p></div>
+                                    <div class="bg-white rounded-lg p-1.5 text-center border border-gray-100"><p class="text-sm font-extrabold text-green-600">25%</p><p class="text-[7px] text-gray-400">Tukar</p></div>
                                 </div>
-                                <div class="flex items-center gap-1.5">
-                                    <span class="w-5 h-5 rounded-full bg-white border text-gray-500 text-[10px] flex items-center justify-center">-</span>
-                                    <span class="text-xs font-bold">1</span>
-                                    <span class="w-5 h-5 rounded-full bg-brand text-white text-[10px] flex items-center justify-center">+</span>
+                                <div class="bg-white rounded-lg p-2 border border-gray-100">
+                                    <svg viewBox="0 0 120 56" class="w-full h-auto">
+                                        <rect x="6" y="30" width="9" height="22" rx="2" fill="#172554"/>
+                                        <rect x="24" y="20" width="9" height="32" rx="2" fill="#172554"/>
+                                        <rect x="42" y="34" width="9" height="18" rx="2" fill="#172554"/>
+                                        <rect x="60" y="14" width="9" height="38" rx="2" fill="#172554"/>
+                                        <rect x="78" y="26" width="9" height="26" rx="2" fill="#172554"/>
+                                        <rect x="96" y="18" width="9" height="34" rx="2" fill="#172554"/>
+                                        <polyline points="10,34 28,24 46,30 64,12 82,22 100,16" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
                                 </div>
-                            </div>
-                            <div class="bg-white rounded-xl p-2.5 shadow-sm">
-                                <div class="flex justify-between text-[10px] text-gray-500 mb-1"><span>Total Keseluruhan:</span><span class="font-bold text-brand-dark text-xs">RM 21.00</span></div>
-                                <div class="bg-brand text-white text-center text-[10px] font-bold py-2 rounded-lg"><i class="fa-brands fa-whatsapp"></i> Hantar Pesanan ke WhatsApp</div>
+                                <div class="bg-amber-50 border border-amber-200 rounded-lg px-2 py-1.5">
+                                    <p class="text-[8px] font-bold text-amber-700"><i class="fa-solid fa-bell"></i> 2 order baru menunggu</p>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    <p class="text-[10px] text-blue-200 text-center mt-2 font-medium">Panel peniaga</p>
                 </div>
-                <p class="text-xs text-gray-400 mt-3">Inilah yang pelanggan anda akan nampak</p>
+
+                <!-- Mockup B (DEPAN): Page Kedai Pelanggan -->
+                <div class="float-b absolute left-1/2 -translate-x-[42%] sm:-translate-x-[28%] top-0 w-[210px] sm:w-[240px] z-20">
+                    <div class="phone-shadow bg-gray-900 rounded-[2rem] p-2">
+                        <div class="bg-gray-50 rounded-[1.6rem] overflow-hidden text-left">
+                            <div class="bg-brand text-white text-center py-2.5 px-3">
+                                <p class="font-bold text-xs">Kedai Makan Anda</p>
+                                <p class="text-[8px] text-rose-100">order online • COD • QR</p>
+                            </div>
+                            <div class="p-2.5 space-y-2">
+                                <div class="bg-white rounded-lg p-2 flex justify-between items-center shadow-sm">
+                                    <div>
+                                        <p class="font-bold text-[10px]">Nasi Lemak Special</p>
+                                        <p class="text-brand text-[10px] font-semibold">RM 6.00</p>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <span class="w-4 h-4 rounded-full bg-gray-100 text-gray-500 text-[9px] flex items-center justify-center">-</span>
+                                        <span class="text-[10px] font-bold">2</span>
+                                        <span class="w-4 h-4 rounded-full bg-brand text-white text-[9px] flex items-center justify-center">+</span>
+                                    </div>
+                                </div>
+                                <div class="bg-rose-50 border border-brand-light rounded-lg p-2 flex justify-between items-center relative overflow-hidden">
+                                    <span class="absolute top-0 right-0 bg-brand text-white text-[7px] font-bold px-1 py-0.5 rounded-bl-lg">PROMO</span>
+                                    <div>
+                                        <p class="font-bold text-[10px]">Kombo Jimat</p>
+                                        <p class="text-brand-dark text-[10px] font-semibold">RM 9.00</p>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <span class="w-4 h-4 rounded-full bg-white border text-gray-500 text-[9px] flex items-center justify-center">-</span>
+                                        <span class="text-[10px] font-bold">1</span>
+                                        <span class="w-4 h-4 rounded-full bg-brand text-white text-[9px] flex items-center justify-center">+</span>
+                                    </div>
+                                </div>
+                                <div class="bg-white rounded-lg p-2 shadow-sm">
+                                    <div class="flex justify-between text-[9px] text-gray-500 mb-1.5"><span>Total:</span><span class="font-bold text-navy text-[10px]">RM 21.00</span></div>
+                                    <div class="bg-green-500 text-white text-center text-[9px] font-bold py-1.5 rounded-md"><i class="fa-brands fa-whatsapp"></i> Hantar ke WhatsApp</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-rose-100 text-center mt-2 font-medium">Page pelanggan</p>
+                </div>
             </div>
         </div>
     </header>
@@ -284,17 +331,17 @@
             <h2 class="text-2xl font-extrabold text-center mb-2">Penyelesaiannya Sangat Mudah</h2>
             <p class="text-gray-500 text-center text-sm mb-8">3 langkah sahaja, dan anda tak perlu pandai IT langsung</p>
             <div class="grid md:grid-cols-3 gap-4">
-                <div class="bg-green-50 rounded-2xl p-5 text-center">
+                <div class="bg-rose-50 rounded-2xl p-5 text-center">
                     <div class="w-12 h-12 bg-brand text-white rounded-2xl flex items-center justify-center mx-auto mb-3 font-extrabold text-lg">1</div>
                     <h3 class="font-bold mb-1">Kami Setupkan</h3>
                     <p class="text-sm text-gray-600">Bagi kami nama kedai, menu & harga, dan no WhatsApp anda. Kami siapkan semuanya.</p>
                 </div>
-                <div class="bg-green-50 rounded-2xl p-5 text-center">
+                <div class="bg-rose-50 rounded-2xl p-5 text-center">
                     <div class="w-12 h-12 bg-brand text-white rounded-2xl flex items-center justify-center mx-auto mb-3 font-extrabold text-lg">2</div>
                     <h3 class="font-bold mb-1">Anda Dapat Link</h3>
                     <p class="text-sm text-gray-600">Link khas untuk kedai anda. Share di WhatsApp Status, Facebook, TikTok — mana-mana.</p>
                 </div>
-                <div class="bg-green-50 rounded-2xl p-5 text-center">
+                <div class="bg-rose-50 rounded-2xl p-5 text-center">
                     <div class="w-12 h-12 bg-brand text-white rounded-2xl flex items-center justify-center mx-auto mb-3 font-extrabold text-lg">3</div>
                     <h3 class="font-bold mb-1">Order Masuk WhatsApp</h3>
                     <p class="text-sm text-gray-600">Pelanggan order, anda terima mesej lengkap: item, jumlah, alamat, cara bayaran. Terus sediakan.</p>
@@ -353,7 +400,7 @@
                     <p class="text-3xl font-extrabold text-red-500 mb-1">-RM250</p>
                     <p class="text-xs text-gray-400">hilang setiap bulan, makin laris makin banyak hilang</p>
                 </div>
-                <div class="rounded-2xl border-2 border-brand p-5 bg-green-50">
+                <div class="rounded-2xl border-2 border-brand p-5 bg-rose-50">
                     <h3 class="font-bold text-brand-dark mb-3"><i class="fa-solid fa-check text-green-500"></i> Orderlah</h3>
                     <p class="text-sm text-gray-600 mb-2">Jual RM1,000 atau RM10,000 sebulan:</p>
                     <p class="text-3xl font-extrabold text-green-600 mb-1">Yuran Tetap</p>
@@ -398,7 +445,7 @@
         <div class="max-w-xl mx-auto text-center">
             <h2 class="text-2xl font-extrabold mb-2">Jangan Percaya Cakap Kami.<br>Cuba Sendiri.</h2>
             <p class="text-gray-500 text-sm mb-6">Ini kedai demo yang berfungsi 100%. Tekan, pilih menu, tengok sendiri macam mana pelanggan anda akan order.</p>
-            <a href="https://orderlah.store/?id=demo" target="_blank" class="inline-block bg-white border-2 border-brand text-brand-dark font-bold py-3.5 px-10 rounded-xl hover:bg-green-50 transition-colors">
+            <a href="https://orderlah.store/?id=demo" target="_blank" class="inline-block bg-white border-2 border-brand text-brand-dark font-bold py-3.5 px-10 rounded-xl hover:bg-rose-50 transition-colors">
                 <i class="fa-solid fa-eye"></i> Buka Kedai Demo
             </a>
         </div>
@@ -438,7 +485,7 @@
     </section>
 
     <!-- ============ CTA AKHIR ============ -->
-    <section class="px-4 py-14 bg-gradient-to-b from-white to-green-50">
+    <section class="px-4 py-14 bg-gradient-to-b from-white to-rose-50">
         <div class="max-w-xl mx-auto text-center">
             <h2 class="text-2xl md:text-3xl font-extrabold mb-3">Malam Ini, Bila Pelanggan Tanya<br>"Menu Apa Ada?"...</h2>
             <p class="text-gray-600 mb-6">...anda cuma perlu hantar satu link. Itu sahaja.</p>
@@ -569,7 +616,7 @@
             const card = document.createElement('div');
 
             if (item.promo) {
-                card.className = 'item-card bg-green-50 border-2 border-brand-light p-4 rounded-xl shadow-sm flex justify-between items-center relative overflow-hidden';
+                card.className = 'item-card bg-rose-50 border-2 border-brand-light p-4 rounded-xl shadow-sm flex justify-between items-center relative overflow-hidden';
                 const badge = document.createElement('div');
                 badge.className = 'absolute top-0 right-0 bg-brand text-white text-xs font-bold px-2 py-1 rounded-bl-lg';
                 badge.innerText = 'PROMO';
