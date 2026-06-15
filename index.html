@@ -83,17 +83,14 @@
     <main id="app" class="hidden max-w-3xl mx-auto py-2">
 
         <!-- Banner / Header -->
-        <div id="banner-wrap" class="hidden mb-6 rounded-2xl overflow-hidden shadow-md bg-white relative">
-            <img id="banner-img" src="" alt="Banner Kedai" class="w-full h-auto object-cover">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-            <div class="absolute bottom-0 left-0 right-0 p-4">
-                <h1 id="banner-nama" class="text-white text-xl font-extrabold drop-shadow-lg"></h1>
-                <p id="banner-tagline" class="text-white/90 text-xs drop-shadow"></p>
-            </div>
-        </div>
-        <div id="header-text" class="mb-6 text-center">
-            <h1 id="kedai-nama" class="text-2xl font-bold text-navy-dark"></h1>
+        <!-- Tajuk kedai di atas, center -->
+        <div id="header-text" class="mb-4 text-center">
+            <h1 id="kedai-nama" class="text-2xl font-bold text-brand-dark"></h1>
             <p id="kedai-tagline" class="text-gray-500 text-sm mt-1"></p>
+        </div>
+
+        <div id="banner-wrap" class="hidden mb-6 rounded-2xl overflow-hidden shadow-md bg-white">
+            <img id="banner-img" src="" alt="Banner Kedai" class="w-full h-auto object-cover">
         </div>
 
         <!-- Butang Share -->
@@ -208,30 +205,28 @@
         <div class="absolute top-10 -left-20 w-64 h-64 bg-brand/20 rounded-full blur-3xl"></div>
         <div class="absolute bottom-0 -right-16 w-72 h-72 bg-amber-500/15 rounded-full blur-3xl"></div>
 
-        <div class="relative max-w-5xl mx-auto grid md:grid-cols-2 gap-10 items-center">
+        <div class="relative max-w-2xl mx-auto text-center">
 
-            <!-- Kolum kiri: teks -->
-            <div class="text-center md:text-left">
-                <span class="inline-block bg-white/10 text-brand-light text-xs font-bold px-3 py-1.5 rounded-full mb-4 backdrop-blur">UNTUK PENIAGA KECIL & SEDERHANA</span>
-                <h1 class="text-3xl md:text-5xl font-extrabold leading-tight mb-4">
-                    Kedai Anda Boleh Terima<br>
-                    <span class="text-brand">Order Online</span> Hari Ini Juga
-                </h1>
-                <p class="text-blue-100 mb-7 max-w-xl mx-auto md:mx-0">
-                    Satu link untuk kedai anda. Pelanggan pilih menu, isi alamat, tekan satu butang — order terus masuk WhatsApp anda. <b class="text-white">Tanpa app. Tanpa caj tambahan.</b>
-                </p>
-                <div class="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
-                    <a href="https://wa.me/60167388358?text=Saya%20berminat%20nak%20sistem%20order%20online%20Orderlah%20untuk%20kedai%20saya" class="bg-brand text-white font-bold py-3.5 px-8 rounded-xl hover:bg-brand-dark transition-colors shadow-lg shadow-brand/30">
-                        <i class="fa-brands fa-whatsapp"></i> Saya Nak Sistem Ini
-                    </a>
-                    <a href="https://orderlah.store/?id=demo" target="_blank" class="bg-white/10 border border-white/30 text-white font-bold py-3.5 px-8 rounded-xl hover:bg-white/20 transition-colors backdrop-blur">
-                        <i class="fa-solid fa-eye"></i> Tengok Demo Live
-                    </a>
-                </div>
+            <!-- Tajuk dulu (atas) -->
+            <span class="inline-block bg-white/10 text-brand-light text-xs font-bold px-3 py-1.5 rounded-full mb-4 backdrop-blur">UNTUK PENIAGA KECIL & SEDERHANA</span>
+            <h1 class="text-3xl md:text-5xl font-extrabold leading-tight mb-4">
+                Kedai Anda Boleh Terima<br>
+                <span class="text-brand">Order Online</span> Hari Ini Juga
+            </h1>
+            <p class="text-blue-100 mb-7 max-w-xl mx-auto">
+                Satu link untuk kedai anda. Pelanggan pilih menu, isi alamat, tekan satu butang — order terus masuk WhatsApp anda. <b class="text-white">Tanpa app. Tanpa caj tambahan.</b>
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center mb-12">
+                <a href="https://wa.me/60167388358?text=Saya%20berminat%20nak%20sistem%20order%20online%20Orderlah%20untuk%20kedai%20saya" class="bg-brand text-white font-bold py-3.5 px-8 rounded-xl hover:bg-brand-dark transition-colors shadow-lg shadow-brand/30">
+                    <i class="fa-brands fa-whatsapp"></i> Saya Nak Sistem Ini
+                </a>
+                <a href="https://orderlah.store/?id=demo" target="_blank" class="bg-white/10 border border-white/30 text-white font-bold py-3.5 px-8 rounded-xl hover:bg-white/20 transition-colors backdrop-blur">
+                    <i class="fa-solid fa-eye"></i> Tengok Demo Live
+                </a>
             </div>
 
-            <!-- Kolum kanan: mockup gambar page peniaga -->
-            <div class="flex justify-center md:justify-end">
+            <!-- Gambar mockup (bawah, center) -->
+            <div class="flex justify-center">
                 <div class="float-a w-[280px] sm:w-[310px]">
                     <div class="phone-shadow bg-gray-900 rounded-[2.5rem] p-2.5">
                         <div class="bg-gray-50 rounded-[2rem] overflow-hidden">
@@ -699,15 +694,14 @@
             }
 
             // Banner atau header teks
+            // Nama kedai sentiasa di atas (center)
+            document.getElementById('kedai-nama').innerText = KEDAI.nama;
+            document.getElementById('kedai-tagline').innerText = KEDAI.tagline || '';
+
+            // Banner di bawah nama (jika ada)
             if (KEDAI.banner) {
                 document.getElementById('banner-img').src = KEDAI.banner;
-                document.getElementById('banner-nama').innerText = KEDAI.nama;
-                document.getElementById('banner-tagline').innerText = KEDAI.tagline || '';
                 document.getElementById('banner-wrap').classList.remove('hidden');
-                document.getElementById('header-text').classList.add('hidden');
-            } else {
-                document.getElementById('kedai-nama').innerText = KEDAI.nama;
-                document.getElementById('kedai-tagline').innerText = KEDAI.tagline || '';
             }
 
             // Sembunyikan Online Transfer jika tiada QR
