@@ -281,7 +281,7 @@
             <p class="text-gray-500 text-center text-sm mb-8">Inilah yang berubah untuk kedai anda</p>
             <div class="grid md:grid-cols-3 gap-4">
                 <div class="bg-white rounded-2xl p-5 border border-gray-100 text-center shadow-sm">
-                    <div class="w-14 h-14 bg-brand-light rounded-2xl flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-sack-dollar text-brand text-2xl"></i></div>
+                    <div class="w-14 h-14 bg-brand-light rounded-2xl flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-hand-holding-dollar text-brand text-2xl"></i></div>
                     <h3 class="font-bold mb-1">Untung Penuh Masuk Poket</h3>
                     <p class="text-sm text-gray-600">Tiada caj potongan. Tak macam platform delivery yang potong 25-30% setiap order. Setiap sen jualan, anda punya.</p>
                 </div>
@@ -607,10 +607,10 @@
         <div class="max-w-xl mx-auto text-center">
             <h2 class="text-2xl md:text-3xl font-extrabold mb-3">Malam Ini, Bila Pelanggan Tanya<br>"Menu Apa Ada?"...</h2>
             <p class="text-gray-600 mb-6">...anda cuma perlu hantar satu link. Itu sahaja.</p>
-            <a href="https://wa.me/60167388358?text=Saya%20berminat%20nak%20sistem%20order%20online%20Orderlah%20untuk%20kedai%20saya" class="inline-block bg-brand text-white font-bold py-4 px-10 rounded-xl hover:bg-brand-dark transition-colors text-lg">
-                <i class="fa-brands fa-whatsapp"></i> Mula Sekarang — WhatsApp Kami
-            </a>
-            <p class="text-xs text-gray-400 mt-4">Balas dalam masa bekerja. Tiada bayaran sehingga anda sahkan setup.</p>
+            <button onclick="bukaLanggan()" class="inline-block bg-brand text-white font-bold py-4 px-10 rounded-xl hover:bg-brand-dark transition-colors text-lg">
+                <i class="fa-solid fa-bolt"></i> Langgan Sekarang
+            </button>
+            <p class="text-xs text-gray-400 mt-4">Setup RM15 + RM10 bulan pertama = RM25. Tiada kontrak.</p>
         </div>
     </section>
 
@@ -618,6 +618,84 @@
         <p class="text-sm font-bold text-brand-dark mb-1">Senang nak order? Orderlah.</p>
         <p><b>Orderlah</b> &mdash; Sistem order online untuk peniaga F&amp;B Malaysia</p>
     </footer>
+
+    <!-- ============ MODAL LANGGANAN ============ -->
+    <div id="modal-langgan" class="hidden fixed inset-0 z-50 bg-black/60 overflow-y-auto p-4">
+        <div class="max-w-md mx-auto my-4 bg-white rounded-3xl shadow-2xl overflow-hidden">
+            <!-- Header -->
+            <div class="bg-brand text-white p-5 relative">
+                <button onclick="tutupLanggan()" class="absolute top-4 right-4 text-white/80 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <h3 class="text-xl font-extrabold">Langgan Orderlah</h3>
+                <p class="text-sm text-rose-100">Setup RM15 + RM10 bulan pertama</p>
+            </div>
+
+            <!-- Langkah 1: Bayar -->
+            <div id="langgan-step1" class="p-5">
+                <div class="text-center mb-4">
+                    <p class="text-gray-500 text-sm mb-1">Jumlah bayaran pertama</p>
+                    <p class="text-4xl font-extrabold text-brand-dark">RM25</p>
+                </div>
+                <div class="bg-gray-50 rounded-2xl p-4 text-center mb-4">
+                    <p class="text-sm font-bold text-gray-700 mb-2"><i class="fa-solid fa-qrcode text-brand"></i> Scan QR DuitNow untuk bayar</p>
+                    <img src="GAMBAR_QR_BAYARAN" alt="QR Pembayaran" class="w-48 h-48 object-contain mx-auto rounded-xl border border-gray-200 bg-white" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                    <div style="display:none" class="w-48 h-48 mx-auto rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400">
+                        <i class="fa-solid fa-qrcode text-4xl mb-2"></i>
+                        <p class="text-xs px-4">Letak QR DuitNow anda<br>(GAMBAR_QR_BAYARAN)</p>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">Selepas bayar, isi borang di bawah</p>
+                </div>
+                <button onclick="langganStep(2)" class="w-full bg-brand text-white font-bold py-3 rounded-xl hover:bg-brand-dark transition-colors">
+                    Saya Dah Bayar <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <!-- Langkah 2: Borang -->
+            <div id="langgan-step2" class="hidden p-5 space-y-3">
+                <p class="text-sm text-gray-600">Isi maklumat untuk kami setupkan kedai anda:</p>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Nama Anda</label>
+                    <input type="text" id="lg-nama" class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="Nama penuh">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Email (untuk resit & pengesahan)</label>
+                    <input type="email" id="lg-email" class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="email@contoh.com">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">No. WhatsApp</label>
+                    <input type="tel" id="lg-whatsapp" inputmode="numeric" class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="0123456789">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Nama Kedai</label>
+                    <input type="text" id="lg-kedai" class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: Warung Pak Mat">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Jenis Bisnes</label>
+                    <select id="lg-jenis" class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand">
+                        <option value="makanan">Makanan & Minuman</option>
+                        <option value="general">Produk / Servis Lain</option>
+                    </select>
+                </div>
+                <div class="flex gap-2 pt-1">
+                    <button onclick="langganStep(1)" class="px-4 py-3 rounded-xl border border-gray-200 text-gray-500 font-bold"><i class="fa-solid fa-arrow-left"></i></button>
+                    <button id="lg-submit" onclick="hantarLanggan()" class="flex-1 bg-brand text-white font-bold py-3 rounded-xl hover:bg-brand-dark transition-colors">Hantar Permohonan</button>
+                </div>
+            </div>
+
+            <!-- Langkah 3: Ringkasan -->
+            <div id="langgan-step3" class="hidden p-5 text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-check text-green-600 text-2xl"></i>
+                </div>
+                <h4 class="text-xl font-bold mb-2">Permohonan Diterima! 🎉</h4>
+                <p class="text-sm text-gray-600 mb-4">Kami sedang sahkan bayaran anda. Kedai anda akan siap dalam 24 jam. Pengesahan dihantar ke email anda.</p>
+                <div id="lg-ringkasan" class="bg-gray-50 rounded-2xl p-4 text-left text-sm space-y-1 mb-4"></div>
+                <a id="lg-wa-btn" href="#" target="_blank" class="block w-full text-white font-bold py-3 rounded-xl mb-2" style="background-color:#25D366">
+                    <i class="fa-brands fa-whatsapp"></i> Hubungi Kami di WhatsApp
+                </a>
+                <button onclick="tutupLanggan()" class="text-sm text-gray-400">Tutup</button>
+            </div>
+        </div>
+    </div>
 
 
 </div>
@@ -644,6 +722,60 @@
         } else {
             document.body.classList.add('bg-white');
             document.getElementById('page-sales').classList.remove('hidden');
+        }
+
+        /* ============ MODAL LANGGANAN (salespage) ============ */
+        function bukaLanggan() {
+            document.getElementById('modal-langgan').classList.remove('hidden');
+            langganStep(1);
+            document.body.style.overflow = 'hidden';
+        }
+        function tutupLanggan() {
+            document.getElementById('modal-langgan').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        function langganStep(n) {
+            document.getElementById('langgan-step1').classList.toggle('hidden', n !== 1);
+            document.getElementById('langgan-step2').classList.toggle('hidden', n !== 2);
+            document.getElementById('langgan-step3').classList.toggle('hidden', n !== 3);
+        }
+        async function hantarLanggan() {
+            const nama = document.getElementById('lg-nama').value.trim();
+            const email = document.getElementById('lg-email').value.trim();
+            const whatsapp = document.getElementById('lg-whatsapp').value.replace(/[^0-9]/g, '');
+            const kedai = document.getElementById('lg-kedai').value.trim();
+            const jenis = document.getElementById('lg-jenis').value;
+
+            if (!nama || !whatsapp || !kedai) {
+                alert('Sila lengkapkan nama, no WhatsApp & nama kedai.');
+                return;
+            }
+            if (whatsapp.length < 9) { alert('No WhatsApp tidak sah.'); return; }
+
+            const btn = document.getElementById('lg-submit');
+            const orig = btn.innerHTML;
+            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Menghantar...';
+
+            try {
+                await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'langgan', nama: nama, email: email, noWhatsapp: whatsapp, namaKedai: kedai, jenisBisnes: jenis })
+                });
+            } catch (e) {}
+
+            // Papar ringkasan
+            document.getElementById('lg-ringkasan').innerHTML =
+                '<p><b>Nama:</b> ' + nama + '</p>' +
+                '<p><b>Kedai:</b> ' + kedai + '</p>' +
+                '<p><b>WhatsApp:</b> ' + whatsapp + '</p>' +
+                (email ? '<p><b>Email:</b> ' + email + '</p>' : '') +
+                '<p><b>Bayaran:</b> RM25</p>';
+
+            const waText = 'Salam, saya ' + nama + ' baru langgan Orderlah untuk kedai ' + kedai + '. Saya dah bayar RM25.';
+            document.getElementById('lg-wa-btn').href = 'https://wa.me/60167388358?text=' + encodeURIComponent(waText);
+
+            btn.disabled = false; btn.innerHTML = orig;
+            langganStep(3);
         }
 
         async function init() {
