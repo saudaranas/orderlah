@@ -80,6 +80,19 @@
             <button id="tab-btn-stats" onclick="showTab('stats')" class="py-2.5 rounded-xl font-bold text-sm bg-white text-gray-600 border border-gray-200">Statistik</button>
         </div>
 
+        <!-- ============ KOMPAS BISNES (ringkasan 7 hari, semua tab kecuali statistik) ============ -->
+        <div id="kompas" class="hidden mb-4 bg-gradient-to-r from-brand to-brand-dark text-white rounded-2xl p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-xs font-bold uppercase tracking-wide opacity-90"><i class="fa-solid fa-compass"></i> Kompas Bisnes — 7 Hari</p>
+                <button onclick="showTab('stats')" class="text-xs bg-white/20 px-2 py-1 rounded-lg hover:bg-white/30">Lihat Penuh <i class="fa-solid fa-arrow-right text-[10px]"></i></button>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-center">
+                <div><p id="k-klik" class="text-2xl font-extrabold">—</p><p class="text-[10px] opacity-80">Klik Link</p></div>
+                <div><p id="k-order" class="text-2xl font-extrabold">—</p><p class="text-[10px] opacity-80">Order Sah</p></div>
+                <div><p id="k-jualan" class="text-2xl font-extrabold">—</p><p class="text-[10px] opacity-80">Jualan (RM)</p></div>
+            </div>
+        </div>
+
         <!-- ============ TAB PROFIL ============ -->
         <div id="tab-profil" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4">
             <div>
@@ -252,6 +265,12 @@
                 <button onclick="downloadExcel()" class="py-2.5 rounded-xl font-bold text-sm bg-green-50 text-green-700 border border-green-100 flex items-center justify-center gap-2"><i class="fa-solid fa-file-excel"></i> Download Excel</button>
             </div>
 
+            <!-- Ringkasan jualan item -->
+            <div>
+                <h3 class="font-bold mb-2 text-sm"><i class="fa-solid fa-ranking-star text-brand"></i> Jualan Ikut Item</h3>
+                <div id="item-summary" class="space-y-1.5"></div>
+            </div>
+
             <div>
                 <h3 id="rekod-title" class="font-bold mb-2 text-sm"><i class="fa-solid fa-users text-brand"></i> Rekod Pelanggan</h3>
                 <div id="orders-list" class="space-y-2"></div>
@@ -349,6 +368,8 @@
             document.getElementById('screen-dash').classList.remove('hidden');
 
             setupFilters();
+            loadKompas();
+            document.getElementById('kompas').classList.remove('hidden');
 
             document.getElementById('dash-nama').innerText = KEDAI.nama;
             document.getElementById('dash-link').href = STORE_URL + '/?id=' + KEDAI.slug;
@@ -383,7 +404,25 @@
                 document.getElementById('tab-btn-' + t).className = 'py-2.5 rounded-xl font-bold text-sm ' +
                     (t === tab ? 'bg-brand text-white' : 'bg-white text-gray-600 border border-gray-200');
             });
+            // Kompas Bisnes nampak di semua tab kecuali statistik
+            document.getElementById('kompas').classList.toggle('hidden', tab === 'stats');
             if (tab === 'stats') loadStats(false);
+        }
+
+        /* ================ KOMPAS BISNES ================ */
+        async function loadKompas() {
+            try {
+                const data = await api({ action: 'getStats', slug: SESSION.slug, pin: SESSION.pin, mode: 'minggu', val: '' });
+                if (!data.success) return;
+                const days = data.days || [];
+                const orders = data.orders || [];
+                const totalKlik = days.reduce(function (s, d) { return s + d.klik; }, 0);
+                const totalOrder = days.reduce(function (s, d) { return s + d.order; }, 0);
+                const totalJualan = orders.filter(function (o) { return o.status === 'Sah'; }).reduce(function (s, o) { return s + o.total; }, 0);
+                document.getElementById('k-klik').innerText = totalKlik;
+                document.getElementById('k-order').innerText = totalOrder;
+                document.getElementById('k-jualan').innerText = totalJualan.toFixed(0);
+            } catch (e) {}
         }
 
         /* ================ PROFIL ================ */
@@ -814,7 +853,30 @@
             document.getElementById('rekod-title').innerHTML = '<i class="fa-solid fa-users text-brand"></i> Rekod Pelanggan (' + orders.length + ')';
 
             document.getElementById('chart-wrap').innerHTML = buildChart(days);
+            renderItemSummary(STATS.itemSummary || []);
             renderOrders(orders);
+        }
+
+        function renderItemSummary(items) {
+            const wrap = document.getElementById('item-summary');
+            wrap.innerHTML = '';
+            if (!items.length) {
+                wrap.innerHTML = '<p class="text-center text-gray-400 text-sm py-4 bg-white rounded-2xl border border-gray-100">Belum ada jualan dalam tempoh ini.</p>';
+                return;
+            }
+            const maxQty = items[0].qty || 1;
+            items.forEach(function (it, i) {
+                const pct = Math.round((it.qty / maxQty) * 100);
+                const row = document.createElement('div');
+                row.className = 'bg-white rounded-xl border border-gray-100 p-2.5';
+                row.innerHTML =
+                    '<div class="flex justify-between items-center mb-1">' +
+                    '  <span class="text-sm font-semibold text-gray-700">' + (i + 1) + '. ' + escText(it.nama) + '</span>' +
+                    '  <span class="text-sm font-bold text-brand">' + it.qty + ' unit</span>' +
+                    '</div>' +
+                    '<div class="w-full bg-gray-100 rounded-full h-1.5"><div class="bg-brand h-1.5 rounded-full" style="width:' + pct + '%"></div></div>';
+                wrap.appendChild(row);
+            });
         }
 
         function buildChart(days) {
@@ -915,6 +977,19 @@
                     headStyles: { fillColor: [220, 38, 38] },
                     columnStyles: { 4: { cellWidth: 45 } }
                 });
+
+                // Ringkasan jualan item
+                const items = STATS.itemSummary || [];
+                if (items.length) {
+                    doc.autoTable({
+                        head: [['#', 'Item', 'Unit Terjual']],
+                        body: items.map(function (it, i) { return [i + 1, it.nama, it.qty]; }),
+                        startY: doc.lastAutoTable.finalY + 8,
+                        styles: { fontSize: 8, cellPadding: 2 },
+                        headStyles: { fillColor: [124, 45, 18] }
+                    });
+                }
+
                 doc.save('Laporan-' + SESSION.slug + '-' + FILTER.mode + '.pdf');
             };
 
@@ -957,6 +1032,13 @@
             const ws = XLSX.utils.json_to_sheet(rows.length ? rows : [{ Nota: 'Tiada rekod dalam tempoh ini' }]);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Jualan');
+
+            // Sheet ringkasan item
+            const items = STATS.itemSummary || [];
+            const itemRows = items.map(function (it, i) { return { Bil: i + 1, Item: it.nama, 'Unit Terjual': it.qty }; });
+            const ws2 = XLSX.utils.json_to_sheet(itemRows.length ? itemRows : [{ Nota: 'Tiada jualan' }]);
+            XLSX.utils.book_append_sheet(wb, ws2, 'Ringkasan Item');
+
             XLSX.writeFile(wb, 'Jualan-' + SESSION.slug + '-' + FILTER.mode + '.xlsx');
         }
 
