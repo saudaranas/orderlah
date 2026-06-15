@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orderlah — Sistem Order Online Untuk Bisnes Anda</title>
-    <meta name="description" content="Kedai anda boleh terima order online hari ini juga. Link sendiri, order terus masuk WhatsApp, tanpa caj.">
+    <title>Admin Kedai | Orderlah</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -16,10 +15,6 @@
                             light: '#fee2e2',
                             DEFAULT: '#dc2626',
                             dark: '#991b1b',
-                        },
-                        navy: {
-                            DEFAULT: '#7c2d12',
-                            dark: '#431407',
                         }
                     }
                 }
@@ -27,1056 +22,906 @@
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
-        .item-card { transition: transform 0.2s, box-shadow 0.2s; }
-        .item-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        .spinner { border: 4px solid #fee2e2; border-top: 4px solid #dc2626; border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .phone-shadow { box-shadow: 0 25px 50px -12px rgba(23, 37, 84, 0.35); }
-        html { scroll-behavior: smooth; }
-        @keyframes floatA { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
-        @keyframes floatB { 0%,100% { transform: translateY(0) rotate(4deg); } 50% { transform: translateY(-22px) rotate(4deg); } }
-        .float-a { animation: floatA 4.5s ease-in-out infinite; }
-        .float-b { animation: floatB 6s ease-in-out infinite; }
-        @media (prefers-reduced-motion: reduce) { .float-a, .float-b { animation: none; } }
+        .toast-show { transform: translateY(0); opacity: 1; }
     </style>
 </head>
-<body class="text-gray-800 antialiased">
+<body class="bg-gray-50 text-gray-800 antialiased">
 
-<!-- ==================== PAGE KEDAI (?id=namakedai) ==================== -->
-<div id="page-kedai" class="hidden">
+    <!-- ============ TOAST ============ -->
+    <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-sm font-medium px-5 py-3 rounded-xl shadow-lg transition-all duration-300 opacity-0 -translate-y-4 pointer-events-none"></div>
 
-    <!-- Social Proof Popup -->
-    <div id="social-proof" class="hidden fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-xs z-40 bg-white rounded-2xl shadow-lg border border-gray-100 p-3 flex items-center gap-3 transition-all duration-500 translate-y-24 opacity-0">
-        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-            <i class="fa-solid fa-bag-shopping text-brand"></i>
-        </div>
-        <div class="min-w-0">
-            <p id="sp-text" class="text-sm font-semibold text-gray-800 truncate"></p>
-            <p id="sp-time" class="text-xs text-gray-400"></p>
-        </div>
-    </div>
-
-
-    <!-- ============ LOADING ============ -->
-    <div id="state-loading" class="min-h-screen flex flex-col items-center justify-center gap-4">
-        <div class="spinner"></div>
-        <p class="text-gray-500 text-sm">Memuatkan kedai...</p>
-    </div>
-
-    <!-- ============ ERROR ============ -->
-    <div id="state-error" class="hidden min-h-screen flex flex-col items-center justify-center gap-3 text-center px-6">
-        <i class="fa-solid fa-store-slash text-5xl text-gray-300"></i>
-        <h2 class="text-xl font-bold">Kedai tidak dijumpai</h2>
-        <p id="error-msg" class="text-gray-500 text-sm">Sila semak semula link yang diberikan oleh peniaga.</p>
-    </div>
-
-    <!-- ============ KEDAI TUTUP ============ -->
-    <div id="state-closed" class="hidden min-h-screen flex flex-col items-center justify-center gap-3 text-center px-6">
-        <i class="fa-solid fa-door-closed text-5xl text-brand"></i>
-        <h2 id="closed-nama" class="text-xl font-bold"></h2>
-        <p class="text-gray-500">Maaf, kedai tutup buat sementara waktu. Sila datang lagi nanti!</p>
-    </div>
-
-    <!-- ============ APP ============ -->
-    <main id="app" class="hidden max-w-3xl mx-auto py-2">
-
-        <!-- Banner / Header -->
-        <div id="banner-wrap" class="hidden mb-6 rounded-2xl overflow-hidden shadow-md bg-white relative">
-            <img id="banner-img" src="" alt="Banner Kedai" class="w-full h-auto object-cover">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-            <div class="absolute bottom-0 left-0 right-0 p-4">
-                <h1 id="banner-nama" class="text-white text-xl font-extrabold drop-shadow-lg"></h1>
-                <p id="banner-tagline" class="text-white/90 text-xs drop-shadow"></p>
+    <!-- ============ LOGIN ============ -->
+    <div id="screen-login" class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-sm bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+            <div class="text-center mb-6">
+                <div class="w-14 h-14 bg-brand rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-store text-white text-2xl"></i>
+                </div>
+                <h1 class="text-xl font-bold">Admin Kedai</h1>
+                <p class="text-gray-500 text-sm">Log masuk untuk urus kedai anda</p>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">ID Kedai (Slug)</label>
+                    <input type="text" id="login-slug" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: laksakriuk" autocapitalize="none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">PIN</label>
+                    <input type="password" id="login-pin" inputmode="numeric" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="PIN anda">
+                </div>
+                <button onclick="doLogin()" id="login-btn" class="w-full bg-brand text-white font-bold py-3 rounded-xl hover:bg-brand-dark transition-colors">
+                    Log Masuk
+                </button>
             </div>
         </div>
-        <div id="header-text" class="mb-6 text-center">
-            <h1 id="kedai-nama" class="text-2xl font-bold text-navy-dark"></h1>
-            <p id="kedai-tagline" class="text-gray-500 text-sm mt-1"></p>
+    </div>
+
+    <!-- ============ DASHBOARD ============ -->
+    <div id="screen-dash" class="hidden max-w-3xl mx-auto p-3 pb-24">
+
+        <!-- Top bar -->
+        <div class="flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-4">
+            <div>
+                <h1 id="dash-nama" class="font-bold text-lg leading-tight"></h1>
+                <a id="dash-link" href="#" target="_blank" class="text-brand text-xs font-medium"><i class="fa-solid fa-arrow-up-right-from-square"></i> Lihat Kedai Anda</a>
+            </div>
+            <button onclick="doLogout()" class="text-gray-400 hover:text-red-500 text-sm"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
         </div>
 
-        <!-- Butang Share -->
-        <div class="text-center mb-6 -mt-2">
-            <button onclick="shareKedai()" class="inline-flex items-center gap-2 bg-white border-2 border-brand-light text-brand-dark text-sm font-bold px-5 py-2.5 rounded-full hover:bg-red-50 transition-colors shadow-sm">
-                <i class="fa-solid fa-share-nodes"></i> Kongsi Kedai Ini
+        <!-- Tabs -->
+        <div class="grid grid-cols-3 gap-2 mb-4">
+            <button id="tab-btn-profil" onclick="showTab('profil')" class="py-2.5 rounded-xl font-bold text-sm bg-brand text-white">Profil</button>
+            <button id="tab-btn-menu" onclick="showTab('menu')" class="py-2.5 rounded-xl font-bold text-sm bg-white text-gray-600 border border-gray-200">Menu</button>
+            <button id="tab-btn-stats" onclick="showTab('stats')" class="py-2.5 rounded-xl font-bold text-sm bg-white text-gray-600 border border-gray-200">Statistik</button>
+        </div>
+
+        <!-- ============ TAB PROFIL ============ -->
+        <div id="tab-profil" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Kedai</label>
+                <input type="text" id="p-nama" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Bisnes</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="border rounded-lg p-3 flex items-center gap-2 cursor-pointer hover:bg-gray-50">
+                        <input type="radio" name="p-jenis" value="makanan">
+                        <span class="text-sm font-medium"><i class="fa-solid fa-utensils text-brand"></i> Makanan & Minuman</span>
+                    </label>
+                    <label class="border rounded-lg p-3 flex items-center gap-2 cursor-pointer hover:bg-gray-50">
+                        <input type="radio" name="p-jenis" value="general">
+                        <span class="text-sm font-medium"><i class="fa-solid fa-box-open text-brand"></i> Produk / Servis Lain</span>
+                    </label>
+                </div>
+                <p class="text-xs text-gray-400 mt-1">Pilihan ini ubah istilah di page kedai (Menu vs Senarai Produk)</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tagline (pilihan)</label>
+                <input type="text" id="p-tagline" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: Laksa paling kriuk di pekan">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Gerai (pilihan)</label>
+                <textarea id="p-alamat" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="Alamat penuh gerai anda"></textarea>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Link Peta (pilihan)</label>
+                <input type="url" id="p-peta" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="Link Waze atau Google Maps">
+                <p class="text-xs text-gray-400 mt-1">Buka Google Maps/Waze, cari gerai, Share, copy link</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Jam Operasi (pilihan)</label>
+                <input type="text" id="p-jam" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: Isnin - Sabtu: 8 pagi - 5 petang">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">No. WhatsApp (terima order)</label>
+                <input type="tel" id="p-whatsapp" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: 60123456789">
+                <p class="text-xs text-gray-400 mt-1">Mula dengan 60, tanpa + atau jarak</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Gambar Banner / Poster Kedai (pilihan)</label>
+                <div class="flex gap-2">
+                    <input type="url" id="p-banner" class="flex-1 min-w-0 px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="Upload atau paste link gambar">
+                    <button onclick="pickImage('banner')" id="up-banner-btn" class="bg-brand-light text-brand-dark font-bold px-3 rounded-lg text-sm whitespace-nowrap hover:bg-red-100"><i class="fa-solid fa-upload"></i> Upload</button>
+                </div>
+                <img id="prev-banner" class="hidden mt-2 rounded-lg max-h-32 border border-gray-200" alt="Preview banner">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Gambar QR Bayaran / DuitNow (pilihan)</label>
+                <div class="flex gap-2">
+                    <input type="url" id="p-qr" class="flex-1 min-w-0 px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="Upload atau paste link gambar">
+                    <button onclick="pickImage('qr')" id="up-qr-btn" class="bg-brand-light text-brand-dark font-bold px-3 rounded-lg text-sm whitespace-nowrap hover:bg-red-100"><i class="fa-solid fa-upload"></i> Upload</button>
+                </div>
+                <img id="prev-qr" class="hidden mt-2 rounded-lg max-h-32 border border-gray-200" alt="Preview QR">
+                <p class="text-xs text-gray-400 mt-1">Jika kosong, pilihan Online Transfer disembunyikan</p>
+            </div>
+            <input type="file" id="file-input" accept="image/*" class="hidden">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Caj Penghantaran (RM)</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <input type="number" id="p-caj-cod" step="0.50" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: 3.00">
+                        <p class="text-xs text-gray-400 mt-1">Bayar Tunai (COD)</p>
+                    </div>
+                    <div>
+                        <input type="number" id="p-caj-online" step="0.50" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: 0.00">
+                        <p class="text-xs text-gray-400 mt-1">Online Transfer</p>
+                    </div>
+                </div>
+                <p class="text-xs text-amber-600 mt-1"><i class="fa-solid fa-lightbulb"></i> Tip: set caj Online RM0 untuk galakkan pelanggan bayar dulu — kurangkan risiko order tak jadi</p>
+            </div>
+
+            <!-- Zon Penghantaran -->
+            <div class="border-t border-gray-100 pt-4">
+                <div class="flex items-center justify-between mb-1">
+                    <label class="block text-sm font-medium text-gray-700">Zon Penghantaran (pilihan)</label>
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" id="p-guna-zon" onchange="toggleZon()" class="accent-green-500 w-4 h-4">
+                        <span class="text-xs font-medium text-gray-600">Guna zon</span>
+                    </label>
+                </div>
+                <p class="text-xs text-gray-400 mb-2">Jika aktif, pelanggan pilih kawasan & caj ikut zon (ganti caj flat di atas)</p>
+                <div id="zon-list" class="space-y-2"></div>
+                <button onclick="addZon()" id="add-zon-btn" class="hidden w-full border-2 border-dashed border-brand text-brand font-bold py-2 rounded-xl hover:bg-red-50 transition-colors text-sm mt-2">
+                    <i class="fa-solid fa-plus"></i> Tambah Zon
+                </button>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Status Kedai</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="border rounded-lg p-3 flex items-center gap-2 cursor-pointer hover:bg-gray-50">
+                        <input type="radio" name="p-status" value="Aktif">
+                        <span class="text-sm font-medium text-green-700">Buka</span>
+                    </label>
+                    <label class="border rounded-lg p-3 flex items-center gap-2 cursor-pointer hover:bg-gray-50">
+                        <input type="radio" name="p-status" value="Tutup">
+                        <span class="text-sm font-medium text-red-600">Tutup Sementara</span>
+                    </label>
+                </div>
+            </div>
+            <button onclick="saveProfile()" id="save-profil-btn" class="w-full bg-brand text-white font-bold py-3 rounded-xl hover:bg-brand-dark transition-colors">
+                <i class="fa-solid fa-floppy-disk"></i> Simpan Profil
             </button>
         </div>
 
-        <!-- Menu -->
-        <h3 id="menu-title" class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-utensils text-brand"></i> Menu Kami</h3>
-        <div id="menu-list" class="grid grid-cols-1 gap-4 mb-6"></div>
+        <!-- ============ TAB MENU ============ -->
+        <div id="tab-menu" class="hidden">
+            <div id="menu-items" class="space-y-3 mb-4"></div>
 
-        <!-- Card Alamat Gerai -->
-        <div id="alamat-card" class="hidden bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6">
-            <h3 class="font-bold mb-3 flex items-center gap-2"><i class="fa-solid fa-store text-brand"></i> Lokasi Gerai</h3>
-            <div class="space-y-2.5 text-sm">
-                <p id="alamat-teks" class="hidden text-gray-600 flex items-start gap-2"><i class="fa-solid fa-location-dot text-brand mt-1"></i> <span></span></p>
-                <p id="alamat-jam" class="hidden text-gray-600 flex items-start gap-2"><i class="fa-solid fa-clock text-brand mt-1"></i> <span></span></p>
-                <a id="alamat-peta" href="#" target="_blank" class="hidden items-center gap-2 text-brand-dark font-bold mt-1"><i class="fa-solid fa-map-location-dot"></i> Buka di Peta</a>
-            </div>
+            <button onclick="addItem()" class="w-full border-2 border-dashed border-brand text-brand font-bold py-3 rounded-xl hover:bg-red-50 transition-colors mb-3">
+                <i class="fa-solid fa-plus"></i> Tambah Item
+            </button>
+            <button onclick="saveMenu()" id="save-menu-btn" class="w-full bg-brand text-white font-bold py-3 rounded-xl hover:bg-brand-dark transition-colors">
+                <i class="fa-solid fa-floppy-disk"></i> Simpan Menu
+            </button>
+            <p class="text-xs text-gray-400 text-center mt-2">Susunan item di kedai ikut susunan dalam senarai ini</p>
+            <p class="text-xs text-gray-400 text-center mt-1">Stok berkurang automatik bila anda <b>Sahkan</b> order. "Tanpa had" untuk item yang sentiasa ada.</p>
         </div>
 
-        <!-- Maklumat Penghantaran -->
-        <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-clipboard-list text-brand"></i> Maklumat Penghantaran</h3>
-        <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6">
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama</label>
-                    <input type="text" id="cust-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="Nama anda">
+        <!-- ============ TAB STATISTIK ============ -->
+        <div id="tab-stats" class="hidden space-y-4">
+            <div class="grid grid-cols-3 gap-2">
+                <div class="bg-white p-3 rounded-xl border border-gray-100 text-center">
+                    <p id="s-klik" class="text-2xl font-bold text-brand">0</p>
+                    <p class="text-xs text-gray-500">Klik (7 hari)</p>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">No. WhatsApp</label>
-                    <input type="tel" id="cust-phone" inputmode="numeric" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: 0123456789">
+                <div class="bg-white p-3 rounded-xl border border-gray-100 text-center">
+                    <p id="s-order" class="text-2xl font-bold text-[#16a34a]">0</p>
+                    <p class="text-xs text-gray-500">Order Sah (7 hari)</p>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Penuh / Lokasi COD</label>
-                    <textarea id="cust-address" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="Alamat lengkap anda"></textarea>
+                <div class="bg-white p-3 rounded-xl border border-gray-100 text-center">
+                    <p id="s-conv" class="text-2xl font-bold text-green-600">0%</p>
+                    <p class="text-xs text-gray-500">Klik jadi Order</p>
                 </div>
+            </div>
 
-                <div id="zon-wrap" class="hidden">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Kawasan Penghantaran</label>
-                    <select id="cust-zon" onchange="calculateTotal()" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand bg-white">
-                    </select>
-                    <p class="text-xs text-gray-400 mt-1">Caj penghantaran berbeza ikut kawasan</p>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-bold text-sm">Klik & Order Mingguan</h3>
+                    <button onclick="loadStats(true)" class="text-xs text-brand font-bold"><i class="fa-solid fa-rotate"></i> Refresh</button>
                 </div>
+                <div id="chart-wrap" class="w-full"></div>
+                <div class="flex gap-5 justify-center mt-2 text-xs text-gray-500">
+                    <span class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 bg-[#7c2d12] rounded-sm"></span> Klik link</span>
+                    <span class="flex items-center gap-1.5"><span class="inline-block w-5 h-0.5 bg-[#dc2626]"></span> Order disahkan</span>
+                </div>
+            </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Pilihan Pembayaran</label>
-                    <div id="payment-options" class="grid grid-cols-2 gap-3">
-                        <label class="border rounded-lg p-3 cursor-pointer hover:bg-gray-50">
-                            <div class="flex items-center gap-2">
-                                <input type="radio" name="payment_method" value="COD" checked onclick="pilihBayaran()">
-                                <span class="text-sm font-medium">Tunai (COD)</span>
-                            </div>
-                            <span id="cod-caj" class="block text-xs text-gray-400 mt-1"></span>
-                        </label>
-                        <label id="online-option" class="border rounded-lg p-3 cursor-pointer hover:bg-gray-50">
-                            <div class="flex items-center gap-2">
-                                <input type="radio" name="payment_method" value="Online Transfer" onclick="pilihBayaran()">
-                                <span class="text-sm font-medium">Online Transfer</span>
-                            </div>
-                            <span id="online-caj" class="block text-xs text-gray-400 mt-1"></span>
-                        </label>
-                    </div>
-                </div>
-
-                <div id="qr-section" class="hidden mt-4 p-4 border-2 border-brand-light rounded-xl bg-red-50 text-center">
-                    <p class="font-bold text-brand-dark mb-2">Sila Bayar Dulu melalui QR Kod di bawah:</p>
-                    <img id="qr-img" src="" alt="QR Bayaran" class="mx-auto max-w-xs rounded-lg shadow-md mb-2">
-                    <p class="text-xs text-red-600 font-semibold italic">PENTING: Sila buat pembayaran mengikut jumlah keseluruhan di bawah sebelum menekan butang hantar. Sila sertakan resit transaksi di WhatsApp nanti.</p>
-                </div>
+            <div>
+                <h3 class="font-bold mb-2 text-sm"><i class="fa-solid fa-users text-brand"></i> Rekod Pelanggan (50 terkini)</h3>
+                <div id="orders-list" class="space-y-2"></div>
             </div>
         </div>
+    </div>
 
-        <!-- Ringkasan -->
-        <div class="bg-white p-5 rounded-xl shadow-lg border border-gray-200">
-            <h3 class="font-bold border-b pb-2 mb-3">Ringkasan Pesanan</h3>
-            <div class="flex justify-between mb-2 text-sm text-gray-600"><span>Subtotal:</span> <span class="font-bold text-gray-800" id="summary-subtotal">RM 0.00</span></div>
-            <div class="flex justify-between mb-3 text-sm text-gray-600"><span>Penghantaran:</span> <span class="font-bold text-gray-800" id="summary-delivery">RM 0.00</span></div>
-            <div class="flex justify-between font-bold text-lg border-t pt-2"><span>Total Keseluruhan:</span> <span class="text-navy-dark" id="summary-total">RM 0.00</span></div>
-
-            <a id="whatsapp-btn" href="#" target="_blank" onclick="return submitOrder()" class="w-full mt-4 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 block text-center transition-colors" style="background-color:#25D366" onmouseover="this.style.backgroundColor='#1da851'" onmouseout="this.style.backgroundColor='#25D366'">
-                <i class="fa-brands fa-whatsapp text-xl"></i> Hantar Pesanan ke WhatsApp
-            </a>
-        </div>
-
-        <p class="text-center text-xs text-gray-400 mt-6 mb-2">
-            <a href="https://orderlah.store" target="_blank" class="hover:text-brand transition-colors">
-                Powered by <span class="font-semibold text-brand-dark">Orderlah</span> &mdash; buat link order untuk kedai anda
-            </a>
-        </p>
-    </main>
-
-    
-</div>
-
-<!-- ==================== SALESPAGE UTAMA (tiada ?id) ==================== -->
-<div id="page-sales" class="hidden">
-
-
-    <!-- ====================================================
-         GANTI 3 BENDA DALAM FAIL INI:
-         1. Cari "60167388358"  -> no WhatsApp anda (60xxxxxxxxx)
-         2. Cari "https://orderlah.store/?id=demo"         -> link kedai demo anda
-         3. Bahagian HARGA           -> ubah ikut harga jualan anda
-    ===================================================== -->
-
-    <!-- ============ HERO ============ -->
-    <header class="relative overflow-hidden bg-gradient-to-b from-navy-dark via-navy to-navy-dark text-white px-4 pt-10 pb-16">
-        <!-- hiasan blob merah & amber -->
-        <div class="absolute top-10 -left-20 w-64 h-64 bg-brand/20 rounded-full blur-3xl"></div>
-        <div class="absolute bottom-0 -right-16 w-72 h-72 bg-amber-500/15 rounded-full blur-3xl"></div>
-
-        <div class="relative max-w-5xl mx-auto grid md:grid-cols-2 gap-10 items-center">
-
-            <!-- Kolum kiri: teks -->
-            <div class="text-center md:text-left">
-                <span class="inline-block bg-white/10 text-brand-light text-xs font-bold px-3 py-1.5 rounded-full mb-4 backdrop-blur">UNTUK PENIAGA KECIL & SEDERHANA</span>
-                <h1 class="text-3xl md:text-5xl font-extrabold leading-tight mb-4">
-                    Kedai Anda Boleh Terima<br>
-                    <span class="text-brand">Order Online</span> Hari Ini Juga
-                </h1>
-                <p class="text-blue-100 mb-7 max-w-xl mx-auto md:mx-0">
-                    Satu link untuk kedai anda. Pelanggan pilih menu, isi alamat, tekan satu butang — order terus masuk WhatsApp anda. <b class="text-white">Tanpa app. Tanpa caj tambahan.</b>
-                </p>
-                <div class="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
-                    <a href="https://wa.me/60167388358?text=Saya%20berminat%20nak%20sistem%20order%20online%20Orderlah%20untuk%20kedai%20saya" class="bg-brand text-white font-bold py-3.5 px-8 rounded-xl hover:bg-brand-dark transition-colors shadow-lg shadow-brand/30">
-                        <i class="fa-brands fa-whatsapp"></i> Saya Nak Sistem Ini
-                    </a>
-                    <a href="https://orderlah.store/?id=demo" target="_blank" class="bg-white/10 border border-white/30 text-white font-bold py-3.5 px-8 rounded-xl hover:bg-white/20 transition-colors backdrop-blur">
-                        <i class="fa-solid fa-eye"></i> Tengok Demo Live
-                    </a>
-                </div>
-            </div>
-
-            <!-- Kolum kanan: mockup gambar page peniaga -->
-            <div class="flex justify-center md:justify-end">
-                <div class="float-a w-[280px] sm:w-[310px]">
-                    <div class="phone-shadow bg-gray-900 rounded-[2.5rem] p-2.5">
-                        <div class="bg-gray-50 rounded-[2rem] overflow-hidden">
-                            <!-- GANTI src di bawah dengan link gambar screenshot page peniaga anda -->
-                            <img src="GAMBAR_MOCKUP_HERO"
-                                 alt="Panel Peniaga Orderlah"
-                                 class="w-full h-auto block"
-                                 onerror="this.style.display='none';document.getElementById('hero-img-fallback').style.display='block';">
-                            <!-- Fallback jika gambar belum diisi -->
-                            <div id="hero-img-fallback" style="display:none" class="aspect-[9/19] flex flex-col items-center justify-center text-center p-6 bg-gradient-to-br from-navy to-navy-dark">
-                                <i class="fa-solid fa-image text-white/30 text-4xl mb-3"></i>
-                                <p class="text-white/60 text-xs">Letak screenshot<br>page peniaga di sini</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- ============ MASALAH ============ -->
-    <section class="px-4 py-12 bg-navy-dark text-white">
-        <div class="max-w-3xl mx-auto">
-            <h2 class="text-2xl font-extrabold text-center mb-2">Kenal Tak Situasi Ni?</h2>
-            <p class="text-blue-200 text-center text-sm mb-8">Setiap hari, masa anda habis layan benda yang sama...</p>
-            <div class="space-y-4">
-                <div class="bg-white/10 rounded-2xl p-4 flex gap-4 items-start">
-                    <i class="fa-solid fa-comments text-brand text-xl mt-1"></i>
-                    <p class="text-sm text-blue-50">Pelanggan tanya <b>"menu apa ada hari ni? harga berapa?"</b> — anda taip benda sama 20 kali sehari, sedangkan tangan tengah sibuk.</p>
-                </div>
-                <div class="bg-white/10 rounded-2xl p-4 flex gap-4 items-start">
-                    <i class="fa-solid fa-circle-question text-brand text-xl mt-1"></i>
-                    <p class="text-sm text-blue-50">Order masuk bersepah — <b>"nak 2 bungkus"</b> tapi tak bagitahu alamat, tak bagitahu nak bayar macam mana. Kena tanya balik satu-satu.</p>
-                </div>
-                <div class="bg-white/10 rounded-2xl p-4 flex gap-4 items-start">
-                    <i class="fa-solid fa-percent text-brand text-xl mt-1"></i>
-                    <p class="text-sm text-blue-50">Nak masuk platform delivery besar? <b>Caj sampai 25-30% setiap order.</b> Untung nipis terus jadi hampir tiada.</p>
-                </div>
-                <div class="bg-white/10 rounded-2xl p-4 flex gap-4 items-start">
-                    <i class="fa-solid fa-calculator text-brand text-xl mt-1"></i>
-                    <p class="text-sm text-blue-50">Silap kira total, terlupa satu item dalam order panjang — <b>pelanggan tak puas hati</b>, anda yang rugi.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============ BENEFITS (B dalam BAF) ============ -->
-    <section class="px-4 py-12 bg-gradient-to-b from-white to-red-50">
-        <div class="max-w-3xl mx-auto">
-            <p class="text-center text-brand font-bold text-sm mb-1">DENGAN ORDERLAH</p>
-            <h2 class="text-2xl md:text-3xl font-extrabold text-center mb-2">Lebih Banyak Jualan, Kurang Kepala Pening</h2>
-            <p class="text-gray-500 text-center text-sm mb-8">Inilah yang berubah untuk kedai anda</p>
-            <div class="grid md:grid-cols-3 gap-4">
-                <div class="bg-white rounded-2xl p-5 border border-gray-100 text-center shadow-sm">
-                    <div class="w-14 h-14 bg-brand-light rounded-2xl flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-sack-dollar text-brand text-2xl"></i></div>
-                    <h3 class="font-bold mb-1">Untung Penuh Masuk Poket</h3>
-                    <p class="text-sm text-gray-600">Tiada caj potongan. Tak macam platform delivery yang potong 25-30% setiap order. Setiap sen jualan, anda punya.</p>
-                </div>
-                <div class="bg-white rounded-2xl p-5 border border-gray-100 text-center shadow-sm">
-                    <div class="w-14 h-14 bg-brand-light rounded-2xl flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-clock text-brand text-2xl"></i></div>
-                    <h3 class="font-bold mb-1">Jimat Masa, Fokus Masak</h3>
-                    <p class="text-sm text-gray-600">Tak payah taip menu & harga berulang kali. Pelanggan tengok sendiri, order sendiri. Anda fokus sediakan makanan.</p>
-                </div>
-                <div class="bg-white rounded-2xl p-5 border border-gray-100 text-center shadow-sm">
-                    <div class="w-14 h-14 bg-brand-light rounded-2xl flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-arrow-trend-up text-brand text-2xl"></i></div>
-                    <h3 class="font-bold mb-1">Pelanggan Datang Lagi</h3>
-                    <p class="text-sm text-gray-600">Link sendiri yang senang share. Pelanggan setia order berulang, dan tolong sebar ke kawan-kawan mereka.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============ PENYELESAIAN / CARA KERJA ============ -->
-    <section class="px-4 py-12">
-        <div class="max-w-3xl mx-auto">
-            <h2 class="text-2xl font-extrabold text-center mb-2">Penyelesaiannya Sangat Mudah</h2>
-            <p class="text-gray-500 text-center text-sm mb-8">3 langkah sahaja, dan anda tak perlu pandai IT langsung</p>
-            <div class="grid md:grid-cols-3 gap-4">
-                <div class="bg-red-50 rounded-2xl p-5 text-center">
-                    <div class="w-12 h-12 bg-brand text-white rounded-2xl flex items-center justify-center mx-auto mb-3 font-extrabold text-lg">1</div>
-                    <h3 class="font-bold mb-1">Kami Setupkan</h3>
-                    <p class="text-sm text-gray-600">Bagi kami nama kedai, menu & harga, dan no WhatsApp anda. Kami siapkan semuanya.</p>
-                </div>
-                <div class="bg-red-50 rounded-2xl p-5 text-center">
-                    <div class="w-12 h-12 bg-brand text-white rounded-2xl flex items-center justify-center mx-auto mb-3 font-extrabold text-lg">2</div>
-                    <h3 class="font-bold mb-1">Anda Dapat Link</h3>
-                    <p class="text-sm text-gray-600">Link khas untuk kedai anda. Share di WhatsApp Status, Facebook, TikTok — mana-mana.</p>
-                </div>
-                <div class="bg-red-50 rounded-2xl p-5 text-center">
-                    <div class="w-12 h-12 bg-brand text-white rounded-2xl flex items-center justify-center mx-auto mb-3 font-extrabold text-lg">3</div>
-                    <h3 class="font-bold mb-1">Order Masuk WhatsApp</h3>
-                    <p class="text-sm text-gray-600">Pelanggan order, anda terima mesej lengkap: item, jumlah, alamat, cara bayaran. Terus sediakan.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============ FEATURES ============ -->
-    <section class="px-4 py-12 bg-gray-50">
-        <div class="max-w-3xl mx-auto">
-            <p class="text-center text-brand font-bold text-sm mb-1">SEMUA YANG ANDA PERLU</p>
-            <h2 class="text-2xl md:text-3xl font-extrabold text-center mb-2">Fungsi Lengkap Untuk Penjaja</h2>
-            <p class="text-gray-500 text-center text-sm mb-8">Satu sistem, semua dari telefon anda</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-white rounded-2xl p-5 border border-gray-100">
-                    <i class="fa-brands fa-whatsapp text-brand text-xl mb-2"></i>
-                    <h3 class="font-bold mb-1">Order Masuk WhatsApp Automatik</h3>
-                    <p class="text-sm text-gray-600">Pelanggan order, mesej lengkap terus masuk WhatsApp anda — nama, no telefon, alamat, item, total. Terus sediakan.</p>
-                </div>
-                <div class="bg-white rounded-2xl p-5 border border-gray-100">
-                    <i class="fa-solid fa-boxes-stacked text-brand text-xl mb-2"></i>
-                    <h3 class="font-bold mb-1">Menu & Stok Sendiri</h3>
-                    <p class="text-sm text-gray-600">Tambah item, tukar harga, tanda promo. Set stok — bila habis, item auto "Habis Stok", pelanggan tak boleh order.</p>
-                </div>
-                <div class="bg-white rounded-2xl p-5 border border-gray-100">
-                    <i class="fa-solid fa-clipboard-check text-brand text-xl mb-2"></i>
-                    <h3 class="font-bold mb-1">Rekod & Sahkan Order</h3>
-                    <p class="text-sm text-gray-600">Setiap order tersimpan. Sahkan order betul atau tandakan batal untuk yang tak jadi. Hubungi pelanggan satu tekan.</p>
-                </div>
-                <div class="bg-white rounded-2xl p-5 border border-gray-100">
-                    <i class="fa-solid fa-chart-line text-brand text-xl mb-2"></i>
-                    <h3 class="font-bold mb-1">Statistik Klik & Order</h3>
-                    <p class="text-sm text-gray-600">Nampak berapa orang tengok link & berapa order setiap hari. Tahu hari mana paling laris, rancang promosi ikut data.</p>
-                </div>
-                <div class="bg-white rounded-2xl p-5 border border-gray-100">
-                    <i class="fa-solid fa-map-location-dot text-brand text-xl mb-2"></i>
-                    <h3 class="font-bold mb-1">Zon Penghantaran COD & Online</h3>
-                    <p class="text-sm text-gray-600">Set caj ikut kawasan, berbeza untuk COD dan online transfer. Buat online lebih murah untuk galak bayar dulu.</p>
-                </div>
-                <div class="bg-white rounded-2xl p-5 border border-gray-100">
-                    <i class="fa-solid fa-fire text-brand text-xl mb-2"></i>
-                    <h3 class="font-bold mb-1">Social Proof Automatik</h3>
-                    <p class="text-sm text-gray-600">Popup "Ahmad baru order Laksa..." muncul di page anda guna order sebenar. Bina kepercayaan, dorong pelanggan order.</p>
-                </div>
-                <div class="bg-white rounded-2xl p-5 border border-gray-100">
-                    <i class="fa-solid fa-share-nodes text-brand text-xl mb-2"></i>
-                    <h3 class="font-bold mb-1">Butang Share Kedai</h3>
-                    <p class="text-sm text-gray-600">Pelanggan tolong share link kedai anda ke WhatsApp & Facebook mereka — pemasaran percuma dari mulut ke mulut.</p>
-                </div>
-                <div class="bg-white rounded-2xl p-5 border border-gray-100">
-                    <i class="fa-solid fa-door-closed text-brand text-xl mb-2"></i>
-                    <h3 class="font-bold mb-1">Tutup Kedai Sekelip Mata</h3>
-                    <p class="text-sm text-gray-600">Cuti? Habis stok? Satu tekan, page papar "kedai tutup sementara". Buka balik bila dah sedia berniaga.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============ SHOWCASE FEATURE (ZIG-ZAG) ============ -->
-    <section class="px-4 py-12 bg-gray-50">
-        <div class="max-w-4xl mx-auto">
-            <h2 class="text-2xl font-extrabold text-center mb-2">Lebih Dari Sekadar Borang Order</h2>
-            <p class="text-gray-500 text-center text-sm mb-10">Setiap kedai dapat panel pengurusan sendiri — semua dari telefon</p>
-
-            <!-- Feature 1: Statistik -->
-            <div class="grid md:grid-cols-2 gap-6 items-center mb-12">
-                <div class="order-2 md:order-1">
-                    <div class="inline-flex items-center gap-2 bg-brand-light text-brand-dark text-xs font-bold px-3 py-1.5 rounded-full mb-3"><i class="fa-solid fa-chart-line"></i> STATISTIK JUALAN</div>
-                    <h3 class="text-xl font-bold mb-2">Tahu Berapa Yang Tengok & Order</h3>
-                    <p class="text-gray-600 text-sm">Setiap hari nampak berapa orang klik link kedai anda, berapa yang order, dan peratus tukaran. Carta mingguan tunjuk hari mana paling laris — anda boleh rancang promosi ikut data sebenar, bukan agak-agak.</p>
-                </div>
-                <div class="order-1 md:order-2 flex justify-center">
-                    <div class="w-full max-w-xs bg-white rounded-2xl shadow-lg border border-gray-100 p-4">
-                        <img src="GAMBAR_FEATURE_STATISTIK" alt="Statistik" class="w-full h-auto rounded-lg" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
-                        <div style="display:none">
-                            <div class="grid grid-cols-3 gap-2 mb-3">
-                                <div class="bg-gray-50 rounded-lg p-2 text-center"><p class="text-lg font-extrabold text-navy">48</p><p class="text-[8px] text-gray-400">Klik</p></div>
-                                <div class="bg-gray-50 rounded-lg p-2 text-center"><p class="text-lg font-extrabold text-brand">12</p><p class="text-[8px] text-gray-400">Order</p></div>
-                                <div class="bg-gray-50 rounded-lg p-2 text-center"><p class="text-lg font-extrabold text-green-600">25%</p><p class="text-[8px] text-gray-400">Tukar</p></div>
-                            </div>
-                            <svg viewBox="0 0 160 70" class="w-full h-auto">
-                                <rect x="10" y="38" width="13" height="28" rx="2" fill="#7c2d12"/><rect x="34" y="24" width="13" height="42" rx="2" fill="#7c2d12"/><rect x="58" y="42" width="13" height="24" rx="2" fill="#7c2d12"/><rect x="82" y="16" width="13" height="50" rx="2" fill="#7c2d12"/><rect x="106" y="30" width="13" height="36" rx="2" fill="#7c2d12"/><rect x="130" y="22" width="13" height="44" rx="2" fill="#7c2d12"/>
-                                <polyline points="16,42 40,30 64,36 88,18 112,28 136,20" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Feature 2: Menu & Stok -->
-            <div class="grid md:grid-cols-2 gap-6 items-center mb-12">
-                <div class="flex justify-center">
-                    <div class="w-full max-w-xs bg-white rounded-2xl shadow-lg border border-gray-100 p-4">
-                        <img src="GAMBAR_FEATURE_MENU" alt="Menu & Stok" class="w-full h-auto rounded-lg" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
-                        <div style="display:none" class="space-y-2">
-                            <div class="bg-gray-50 rounded-lg p-2.5 flex justify-between items-center"><div><p class="text-xs font-bold">Laksa Biasa</p><p class="text-[9px] text-amber-600 font-bold">Tinggal 5 je! 🔥</p></div><span class="text-xs font-bold text-brand">RM7</span></div>
-                            <div class="bg-gray-50 rounded-lg p-2.5 flex justify-between items-center"><div><p class="text-xs font-bold">Air Jagung</p><p class="text-[9px] text-gray-400">Stok: Tanpa had</p></div><span class="text-xs font-bold text-brand">RM4</span></div>
-                            <div class="bg-gray-100 rounded-lg p-2.5 flex justify-between items-center opacity-60"><div><p class="text-xs font-bold">Kombo Jimat</p><p class="text-[9px] text-gray-500 font-bold">HABIS STOK</p></div><span class="text-xs font-bold text-gray-400">RM10</span></div>
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <div class="inline-flex items-center gap-2 bg-brand-light text-brand-dark text-xs font-bold px-3 py-1.5 rounded-full mb-3"><i class="fa-solid fa-boxes-stacked"></i> MENU & STOK</div>
-                    <h3 class="text-xl font-bold mb-2">Urus Menu, Harga & Stok Sendiri</h3>
-                    <p class="text-gray-600 text-sm">Tambah item, tukar harga, tanda promo — bila-bila masa. Set stok untuk item terhad; bila habis, item auto bertukar "Habis Stok" dan pelanggan tak boleh order. Tak payah risau terima order benda yang dah habis.</p>
-                </div>
-            </div>
-
-            <!-- Feature 3: Rekod Pelanggan -->
-            <div class="grid md:grid-cols-2 gap-6 items-center mb-12">
-                <div class="order-2 md:order-1">
-                    <div class="inline-flex items-center gap-2 bg-brand-light text-brand-dark text-xs font-bold px-3 py-1.5 rounded-full mb-3"><i class="fa-solid fa-users"></i> REKOD PELANGGAN</div>
-                    <h3 class="text-xl font-bold mb-2">Simpan Setiap Order & Pelanggan</h3>
-                    <p class="text-gray-600 text-sm">Setiap order tersimpan kemas: nama, no WhatsApp, alamat, item. Sahkan order betul atau tandakan batal untuk yang tak jadi. Nak hubungi pelanggan? Tekan terus nombor WhatsApp dia dari rekod.</p>
-                </div>
-                <div class="order-1 md:order-2 flex justify-center">
-                    <div class="w-full max-w-xs bg-white rounded-2xl shadow-lg border border-gray-100 p-4">
-                        <img src="GAMBAR_FEATURE_REKOD" alt="Rekod Pelanggan" class="w-full h-auto rounded-lg" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
-                        <div style="display:none" class="space-y-2">
-                            <div class="border border-gray-100 rounded-lg p-2.5">
-                                <div class="flex justify-between items-center"><div><p class="text-xs font-bold">Ahmad</p><p class="text-[9px] text-gray-400">12/06 2:30 PM</p></div><div class="text-right"><p class="text-xs font-bold text-brand-dark">RM21</p><span class="text-[8px] font-bold px-1.5 py-0.5 rounded bg-green-100 text-green-700">SAH</span></div></div>
-                            </div>
-                            <div class="border border-amber-200 rounded-lg p-2.5">
-                                <div class="flex justify-between items-center"><div><p class="text-xs font-bold">Siti</p><p class="text-[9px] text-gray-400">12/06 1:15 PM</p></div><div class="text-right"><p class="text-xs font-bold text-brand-dark">RM14</p><span class="text-[8px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">BARU</span></div></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Feature 4: Zon Penghantaran -->
-            <div class="grid md:grid-cols-2 gap-6 items-center">
-                <div class="flex justify-center">
-                    <div class="w-full max-w-xs bg-white rounded-2xl shadow-lg border border-gray-100 p-4">
-                        <img src="GAMBAR_FEATURE_ZON" alt="Zon Penghantaran" class="w-full h-auto rounded-lg" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
-                        <div style="display:none" class="space-y-2">
-                            <p class="text-[10px] font-bold text-gray-500 mb-1">Caj ikut kawasan & bayaran</p>
-                            <div class="bg-gray-50 rounded-lg p-2.5"><p class="text-xs font-bold mb-1">Dalam Pekan</p><div class="flex gap-2 text-[9px]"><span class="bg-white px-2 py-0.5 rounded border">COD: RM3</span><span class="bg-green-100 text-green-700 px-2 py-0.5 rounded font-bold">Online: PERCUMA</span></div></div>
-                            <div class="bg-gray-50 rounded-lg p-2.5"><p class="text-xs font-bold mb-1">Luar Pekan</p><div class="flex gap-2 text-[9px]"><span class="bg-white px-2 py-0.5 rounded border">COD: RM6</span><span class="bg-white px-2 py-0.5 rounded border">Online: RM4</span></div></div>
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <div class="inline-flex items-center gap-2 bg-brand-light text-brand-dark text-xs font-bold px-3 py-1.5 rounded-full mb-3"><i class="fa-solid fa-map-location-dot"></i> ZON PENGHANTARAN</div>
-                    <h3 class="text-xl font-bold mb-2">Caj Penghantaran Ikut Kawasan</h3>
-                    <p class="text-gray-600 text-sm">Set zon mengikut kawasan, setiap zon ada caj COD dan Online berasingan. Buat caj online lebih murah (atau percuma!) untuk galakkan pelanggan bayar dulu — kurangkan risiko order tak jadi.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============ PERBANDINGAN ============ -->
-    <section class="px-4 py-12">
-        <div class="max-w-3xl mx-auto">
-            <p class="text-center text-brand font-bold text-sm mb-1">KENAPA ORDERLAH</p>
-            <h2 class="text-2xl md:text-3xl font-extrabold text-center mb-2">Banding Sendiri</h2>
-            <p class="text-gray-500 text-center text-sm mb-8">Cara lain ada kelemahan masing-masing</p>
-
-            <div class="overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="bg-gray-50 text-gray-600">
-                            <th class="text-left p-3 font-semibold"></th>
-                            <th class="p-3 font-semibold text-center">Platform<br>Delivery</th>
-                            <th class="p-3 font-semibold text-center">WhatsApp<br>Biasa</th>
-                            <th class="p-3 font-bold text-center bg-brand text-white">Orderlah</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        <tr>
-                            <td class="p-3 text-gray-600">Caj setiap order</td>
-                            <td class="p-3 text-center text-red-500 font-bold">25-30%</td>
-                            <td class="p-3 text-center text-green-600 font-bold">0%</td>
-                            <td class="p-3 text-center text-green-600 font-bold bg-red-50">0%</td>
-                        </tr>
-                        <tr>
-                            <td class="p-3 text-gray-600">Menu & harga tersusun</td>
-                            <td class="p-3 text-center"><i class="fa-solid fa-check text-green-500"></i></td>
-                            <td class="p-3 text-center"><i class="fa-solid fa-xmark text-red-400"></i></td>
-                            <td class="p-3 text-center bg-red-50"><i class="fa-solid fa-check text-green-500"></i></td>
-                        </tr>
-                        <tr>
-                            <td class="p-3 text-gray-600">Order kemas (tak bersepah)</td>
-                            <td class="p-3 text-center"><i class="fa-solid fa-check text-green-500"></i></td>
-                            <td class="p-3 text-center"><i class="fa-solid fa-xmark text-red-400"></i></td>
-                            <td class="p-3 text-center bg-red-50"><i class="fa-solid fa-check text-green-500"></i></td>
-                        </tr>
-                        <tr>
-                            <td class="p-3 text-gray-600">Statistik & rekod jualan</td>
-                            <td class="p-3 text-center"><i class="fa-solid fa-xmark text-red-400"></i></td>
-                            <td class="p-3 text-center"><i class="fa-solid fa-xmark text-red-400"></i></td>
-                            <td class="p-3 text-center bg-red-50"><i class="fa-solid fa-check text-green-500"></i></td>
-                        </tr>
-                        <tr>
-                            <td class="p-3 text-gray-600">Duit terus masuk akaun</td>
-                            <td class="p-3 text-center"><i class="fa-solid fa-xmark text-red-400"></i></td>
-                            <td class="p-3 text-center"><i class="fa-solid fa-check text-green-500"></i></td>
-                            <td class="p-3 text-center bg-red-50"><i class="fa-solid fa-check text-green-500"></i></td>
-                        </tr>
-                        <tr>
-                            <td class="p-3 text-gray-600">Kos sebulan</td>
-                            <td class="p-3 text-center text-red-500 font-bold">Caj tinggi</td>
-                            <td class="p-3 text-center text-green-600 font-bold">Percuma</td>
-                            <td class="p-3 text-center font-bold bg-red-50 text-brand-dark">RM10 je</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <p class="text-xs text-gray-400 text-center mt-4">Platform delivery bagus untuk capai pelanggan baru. WhatsApp biasa percuma tapi serabut. Orderlah gabungkan yang terbaik — kemas, murah, tanpa caj.</p>
-        </div>
-    </section>
-
-    <!-- ============ HARGA (UBAH IKUT OFFER ANDA) ============ -->
-    <section id="harga" class="px-4 py-12 bg-navy-dark text-white">
-        <div class="max-w-md mx-auto text-center">
-            <h2 class="text-2xl font-extrabold mb-2">Pelaburan Anda</h2>
-            <p class="text-blue-200 text-sm mb-8">Lebih murah dari sekali bayar caj platform delivery</p>
-
-            <div class="bg-white text-gray-800 rounded-3xl p-6 shadow-2xl">
-                <span class="inline-block bg-brand-light text-brand-dark text-xs font-bold px-3 py-1 rounded-full mb-3">PAKEJ LENGKAP</span>
-                <div class="mb-4">
-                    <p class="text-gray-400 text-sm line-through">Setup RM30</p>
-                    <p class="text-4xl font-extrabold text-brand-dark">RM15 <span class="text-base font-semibold text-gray-500">setup sekali</span></p>
-                    <p class="text-xl font-bold mt-1">+ RM10<span class="text-sm font-semibold text-gray-500">/bulan</span></p>
-                </div>
-                <ul class="text-left text-sm space-y-2.5 mb-6">
-                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Link kedai khas untuk anda</li>
-                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Kami setupkan menu penuh (siap dalam 24 jam)</li>
-                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Panel admin urus sendiri</li>
-                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> COD + QR DuitNow</li>
-                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Tiada caj potongan, unlimited order</li>
-                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Support WhatsApp terus dengan kami</li>
-                </ul>
-                <a href="https://wa.me/60167388358?text=Saya%20berminat%20nak%20sistem%20order%20online%20Orderlah%20untuk%20kedai%20saya" class="block bg-brand text-white font-bold py-3.5 rounded-xl hover:bg-brand-dark transition-colors">
-                    <i class="fa-brands fa-whatsapp"></i> WhatsApp Kami Sekarang
-                </a>
-                <p class="text-xs text-gray-400 mt-3">Tiada kontrak. Berhenti bila-bila masa.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============ DEMO ============ -->
-    <section class="px-4 py-12">
-        <div class="max-w-xl mx-auto text-center">
-            <h2 class="text-2xl font-extrabold mb-2">Jangan Percaya Cakap Kami.<br>Cuba Sendiri.</h2>
-            <p class="text-gray-500 text-sm mb-6">Ini kedai demo yang berfungsi 100%. Tekan, pilih menu, tengok sendiri macam mana pelanggan anda akan order.</p>
-            <a href="https://orderlah.store/?id=demo" target="_blank" class="inline-block bg-white border-2 border-brand text-brand-dark font-bold py-3.5 px-10 rounded-xl hover:bg-red-50 transition-colors">
-                <i class="fa-solid fa-eye"></i> Buka Kedai Demo
-            </a>
-        </div>
-    </section>
-
-    <!-- ============ FAQ ============ -->
-    <section class="px-4 py-12 bg-gray-50">
-        <div class="max-w-2xl mx-auto">
-            <h2 class="text-2xl font-extrabold text-center mb-8">Soalan Lazim</h2>
-            <div class="space-y-3">
-                <details class="bg-white rounded-2xl border border-gray-100 p-4 group">
-                    <summary class="font-bold text-sm cursor-pointer list-none flex justify-between items-center">Saya tak pandai IT. Susah tak nak guna?<i class="fa-solid fa-chevron-down text-gray-400 text-xs group-open:rotate-180 transition-transform"></i></summary>
-                    <p class="text-sm text-gray-600 mt-3">Kami yang setupkan semuanya. Anda cuma perlu bagi menu dan harga. Lepas siap, nak tukar harga pun semudah isi borang — kalau boleh guna WhatsApp, boleh guna sistem ini.</p>
-                </details>
-                <details class="bg-white rounded-2xl border border-gray-100 p-4 group">
-                    <summary class="font-bold text-sm cursor-pointer list-none flex justify-between items-center">Pelanggan saya kena download app ke?<i class="fa-solid fa-chevron-down text-gray-400 text-xs group-open:rotate-180 transition-transform"></i></summary>
-                    <p class="text-sm text-gray-600 mt-3">Tidak. Pelanggan cuma klik link — page terus terbuka dalam browser telefon. Tiada app, tiada daftar akaun, tiada password.</p>
-                </details>
-                <details class="bg-white rounded-2xl border border-gray-100 p-4 group">
-                    <summary class="font-bold text-sm cursor-pointer list-none flex justify-between items-center">Duit bayaran masuk mana?<i class="fa-solid fa-chevron-down text-gray-400 text-xs group-open:rotate-180 transition-transform"></i></summary>
-                    <p class="text-sm text-gray-600 mt-3">Terus kepada anda. COD = pelanggan bayar tunai semasa terima. QR = pelanggan scan QR DuitNow anda sendiri, duit masuk terus akaun bank anda. Kami tak pegang duit anda langsung.</p>
-                </details>
-                <details class="bg-white rounded-2xl border border-gray-100 p-4 group">
-                    <summary class="font-bold text-sm cursor-pointer list-none flex justify-between items-center">Berapa lama nak siap?<i class="fa-solid fa-chevron-down text-gray-400 text-xs group-open:rotate-180 transition-transform"></i></summary>
-                    <p class="text-sm text-gray-600 mt-3">Selalunya dalam 24 jam selepas anda hantar menu lengkap. Ada yang siap hari yang sama.</p>
-                </details>
-                <details class="bg-white rounded-2xl border border-gray-100 p-4 group">
-                    <summary class="font-bold text-sm cursor-pointer list-none flex justify-between items-center">Boleh tukar menu dan harga sendiri tak?<i class="fa-solid fa-chevron-down text-gray-400 text-xs group-open:rotate-180 transition-transform"></i></summary>
-                    <p class="text-sm text-gray-600 mt-3">Boleh, bila-bila masa melalui panel admin anda. Tambah item baru, tukar harga, tanda promo, atau tutup kedai sementara — semua dari telefon anda sendiri.</p>
-                </details>
-                <details class="bg-white rounded-2xl border border-gray-100 p-4 group">
-                    <summary class="font-bold text-sm cursor-pointer list-none flex justify-between items-center">Saya nak rekod jualan & resit sekali, ada tak?<i class="fa-solid fa-chevron-down text-gray-400 text-xs group-open:rotate-180 transition-transform"></i></summary>
-                    <p class="text-sm text-gray-600 mt-3">Untuk rekod jualan penuh, resit, dan dashboard bisnes, kami ada sistem POS lengkap (POSKedai). Boleh mula dengan Orderlah dulu, upgrade bila bisnes makin besar — tanya kami di WhatsApp.</p>
-                </details>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============ CTA AKHIR ============ -->
-    <section class="px-4 py-14 bg-gradient-to-b from-white to-red-50">
-        <div class="max-w-xl mx-auto text-center">
-            <h2 class="text-2xl md:text-3xl font-extrabold mb-3">Malam Ini, Bila Pelanggan Tanya<br>"Menu Apa Ada?"...</h2>
-            <p class="text-gray-600 mb-6">...anda cuma perlu hantar satu link. Itu sahaja.</p>
-            <a href="https://wa.me/60167388358?text=Saya%20berminat%20nak%20sistem%20order%20online%20Orderlah%20untuk%20kedai%20saya" class="inline-block bg-brand text-white font-bold py-4 px-10 rounded-xl hover:bg-brand-dark transition-colors text-lg">
-                <i class="fa-brands fa-whatsapp"></i> Mula Sekarang — WhatsApp Kami
-            </a>
-            <p class="text-xs text-gray-400 mt-4">Balas dalam masa bekerja. Tiada bayaran sehingga anda sahkan setup.</p>
-        </div>
-    </section>
-
-    <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
-        <p class="text-sm font-bold text-brand-dark mb-1">Senang nak order? Orderlah.</p>
-        <p><b>Orderlah</b> &mdash; Sistem order online untuk peniaga F&amp;B Malaysia</p>
-    </footer>
-
-
-</div>
-
-<script>
-
+    <script>
         // ============================================
-        // GANTI URL INI DENGAN URL WEB APP GAS ANDA
+        // GANTI 2 URL DI BAWAH
         // ============================================
         const GAS_URL = 'https://script.google.com/macros/s/AKfycbww8lWVv-6bFjBvsKijgu2b0SVdfKmBCAlvoWkIFQI2b9L5YZPqZSlJJ7nNiIAHiZWc/exec';
+        const STORE_URL = 'https://orderlah.store'; // domain anda, tanpa / di hujung
 
+        let SESSION = null; // { slug, pin }
         let KEDAI = null;
-        let MENU = [];
-        let cart = {}; // { itemId: qty }
+        let ITEMS = [];
 
-        const slug = new URLSearchParams(location.search).get('id');
-
-        // ROUTER: ada ?id= -> page kedai. Tiada -> salespage. URL tak berubah.
-        if (slug) {
-            document.body.classList.add('bg-gray-50', 'p-2');
-            document.getElementById('page-kedai').classList.remove('hidden');
-            document.title = 'Order Online';
-            init();
-        } else {
-            document.body.classList.add('bg-white');
-            document.getElementById('page-sales').classList.remove('hidden');
-        }
-
-        async function init() {
-            if (!slug) return showError('Link tidak lengkap. Pastikan link ada ?id=namakedai');
-            try {
-                const res = await fetch(GAS_URL + '?action=config&kedai=' + encodeURIComponent(slug));
-                const data = await res.json();
-                if (!data.success) return showError(data.error || 'Kedai tidak dijumpai');
-
-                KEDAI = data.kedai;
-                MENU = data.menu || [];
-
-                if (KEDAI.status !== 'Aktif') return showClosed();
-                renderApp();
-
-                // Rekod klik untuk statistik peniaga (fire & forget)
-                fetch(GAS_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'trackVisit', slug: KEDAI.slug }),
-                    keepalive: true
-                }).catch(function () {});
-
-                // Muat social proof (order sebenar terkini)
-                loadSocialProof();
-            } catch (err) {
-                showError('Masalah sambungan. Sila cuba semula.');
+        // Auto-login jika ada session, atau prefill ID dari URL (?id=namakedai)
+        (function () {
+            const saved = sessionStorage.getItem('orderlah_session');
+            if (saved) {
+                const s = JSON.parse(saved);
+                document.getElementById('login-slug').value = s.slug;
+                document.getElementById('login-pin').value = s.pin;
+                doLogin();
+                return;
             }
-        }
-
-        function showError(msg) {
-            document.getElementById('state-loading').classList.add('hidden');
-            document.getElementById('error-msg').innerText = msg;
-            document.getElementById('state-error').classList.remove('hidden');
-        }
-
-        function showClosed() {
-            document.getElementById('state-loading').classList.add('hidden');
-            document.getElementById('closed-nama').innerText = KEDAI.nama;
-            document.getElementById('state-closed').classList.remove('hidden');
-        }
-
-        function renderApp() {
-            document.title = KEDAI.nama + ' | Order Online';
-
-            // Istilah ikut jenis bisnes
-            if (KEDAI.jenisBisnes === 'general') {
-                document.getElementById('menu-title').innerHTML = '<i class="fa-solid fa-box-open text-brand"></i> Senarai Produk';
+            const pre = new URLSearchParams(location.search).get('id');
+            if (pre) {
+                document.getElementById('login-slug').value = pre.trim().toLowerCase();
+                document.getElementById('login-pin').focus();
             }
+        })();
 
-            // Banner atau header teks
-            if (KEDAI.banner) {
-                document.getElementById('banner-img').src = KEDAI.banner;
-                document.getElementById('banner-nama').innerText = KEDAI.nama;
-                document.getElementById('banner-tagline').innerText = KEDAI.tagline || '';
-                document.getElementById('banner-wrap').classList.remove('hidden');
-                document.getElementById('header-text').classList.add('hidden');
-            } else {
-                document.getElementById('kedai-nama').innerText = KEDAI.nama;
-                document.getElementById('kedai-tagline').innerText = KEDAI.tagline || '';
-            }
-
-            // Sembunyikan Online Transfer jika tiada QR
-            if (!KEDAI.qr) {
-                document.getElementById('online-option').classList.add('hidden');
-                document.getElementById('payment-options').classList.remove('grid-cols-2');
-                document.getElementById('payment-options').classList.add('grid-cols-1');
-            } else {
-                document.getElementById('qr-img').src = KEDAI.qr;
-            }
-
-            // Papar caj penghantaran ikut kaedah bayaran
-            setCajLabel('cod-caj', KEDAI.cajPenghantaran);
-            setCajLabel('online-caj', KEDAI.cajOnline);
-
-            // Zon penghantaran (jika ada)
-            renderZon();
-
-            // Card alamat gerai (papar hanya jika ada maklumat)
-            renderAlamat();
-
-            // Render menu
-            const list = document.getElementById('menu-list');
-            list.innerHTML = '';
-            MENU.forEach(function (item) {
-                cart[item.id] = 0;
-                list.appendChild(buildItemCard(item));
+        async function api(payload) {
+            const res = await fetch(GAS_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
             });
-
-            calculateTotal();
-            document.getElementById('state-loading').classList.add('hidden');
-            document.getElementById('app').classList.remove('hidden');
+            return res.json();
         }
 
-        function buildItemCard(item) {
+        function toast(msg, isError) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.className = t.className.replace(' bg-red-600', '').replace(' bg-gray-900', '');
+            t.classList.add(isError ? 'bg-red-600' : 'bg-gray-900');
+            t.classList.add('toast-show');
+            setTimeout(function () { t.classList.remove('toast-show'); }, 2500);
+        }
+
+        function busy(btnId, isBusy, normalHTML) {
+            const b = document.getElementById(btnId);
+            b.disabled = isBusy;
+            b.innerHTML = isBusy ? '<i class="fa-solid fa-circle-notch fa-spin"></i> Sila tunggu...' : normalHTML;
+        }
+
+        /* ================ LOGIN ================ */
+
+        async function doLogin() {
+            const slug = document.getElementById('login-slug').value.trim().toLowerCase();
+            const pin = document.getElementById('login-pin').value.trim();
+            if (!slug || !pin) return toast('Sila isi ID kedai dan PIN', true);
+
+            busy('login-btn', true, 'Log Masuk');
+            try {
+                const data = await api({ action: 'login', slug: slug, pin: pin });
+                if (!data.success) {
+                    toast(data.error || 'Log masuk gagal', true);
+                    sessionStorage.removeItem('orderlah_session');
+                    return;
+                }
+                SESSION = { slug: slug, pin: pin };
+                sessionStorage.setItem('orderlah_session', JSON.stringify(SESSION));
+                KEDAI = data.kedai;
+                ITEMS = data.menu || [];
+                openDashboard();
+            } catch (err) {
+                toast('Masalah sambungan. Cuba semula.', true);
+            } finally {
+                busy('login-btn', false, 'Log Masuk');
+            }
+        }
+
+        function doLogout() {
+            sessionStorage.removeItem('orderlah_session');
+            location.reload();
+        }
+
+        /* ================ DASHBOARD ================ */
+
+        function openDashboard() {
+            document.getElementById('screen-login').classList.add('hidden');
+            document.getElementById('screen-dash').classList.remove('hidden');
+
+            document.getElementById('dash-nama').innerText = KEDAI.nama;
+            document.getElementById('dash-link').href = STORE_URL + '/?id=' + KEDAI.slug;
+
+            // Isi borang profil
+            document.getElementById('p-nama').value = KEDAI.nama || '';
+            document.getElementById('p-tagline').value = KEDAI.tagline || '';
+            const jenisVal = (KEDAI.jenisBisnes === 'general') ? 'general' : 'makanan';
+            document.querySelector('input[name="p-jenis"][value="' + jenisVal + '"]').checked = true;
+            document.getElementById('p-alamat').value = KEDAI.alamat || '';
+            document.getElementById('p-peta').value = KEDAI.linkPeta || '';
+            document.getElementById('p-jam').value = KEDAI.jamOperasi || '';
+            document.getElementById('p-whatsapp').value = KEDAI.noWhatsapp || '';
+            document.getElementById('p-banner').value = KEDAI.banner || '';
+            document.getElementById('p-qr').value = KEDAI.qr || '';
+            document.getElementById('p-caj-cod').value = KEDAI.cajPenghantaran || 0;
+            document.getElementById('p-caj-online').value = (KEDAI.cajOnline === undefined || KEDAI.cajOnline === null) ? (KEDAI.cajPenghantaran || 0) : KEDAI.cajOnline;
+            ZON = Array.isArray(KEDAI.zon) ? KEDAI.zon.slice() : [];
+            document.getElementById('p-guna-zon').checked = ZON.length > 0;
+            toggleZon();
+            showPreview('banner', KEDAI.banner);
+            showPreview('qr', KEDAI.qr);
+            const statusVal = (KEDAI.status === 'Tutup') ? 'Tutup' : 'Aktif';
+            document.querySelector('input[name="p-status"][value="' + statusVal + '"]').checked = true;
+
+            renderItems();
+        }
+
+        function showTab(tab) {
+            ['profil', 'menu', 'stats'].forEach(function (t) {
+                document.getElementById('tab-' + t).classList.toggle('hidden', t !== tab);
+                document.getElementById('tab-btn-' + t).className = 'py-2.5 rounded-xl font-bold text-sm ' +
+                    (t === tab ? 'bg-brand text-white' : 'bg-white text-gray-600 border border-gray-200');
+            });
+            if (tab === 'stats') loadStats(false);
+        }
+
+        /* ================ PROFIL ================ */
+
+        /* ================ ZON PENGHANTARAN ================ */
+
+        let ZON = [];
+
+        function toggleZon() {
+            const guna = document.getElementById('p-guna-zon').checked;
+            document.getElementById('add-zon-btn').classList.toggle('hidden', !guna);
+            if (guna && ZON.length === 0) {
+                ZON = [{ nama: '', cod: 0, online: 0 }];
+            }
+            renderZonList();
+        }
+
+        function renderZonList() {
+            const wrap = document.getElementById('zon-list');
+            wrap.innerHTML = '';
+            if (!document.getElementById('p-guna-zon').checked) return;
+
+            ZON.forEach(function (z, idx) {
+                const card = document.createElement('div');
+                card.className = 'bg-gray-50 rounded-xl p-3 space-y-2';
+
+                const nama = document.createElement('input');
+                nama.type = 'text';
+                nama.placeholder = 'Nama kawasan (cth: Dalam Pekan)';
+                nama.value = z.nama || '';
+                nama.className = 'w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand text-sm';
+                nama.oninput = function () { ZON[idx].nama = nama.value; };
+
+                const row = document.createElement('div');
+                row.className = 'flex items-center gap-2';
+
+                const codWrap = document.createElement('div');
+                codWrap.className = 'flex-1';
+                codWrap.innerHTML = '<span class="text-xs text-gray-500">Caj COD</span>';
+                const cod = document.createElement('input');
+                cod.type = 'number'; cod.step = '0.50'; cod.min = '0';
+                cod.placeholder = 'RM'; cod.value = (z.cod !== undefined ? z.cod : '');
+                cod.className = 'w-full px-3 py-1.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand text-sm';
+                cod.oninput = function () { ZON[idx].cod = parseFloat(cod.value) || 0; };
+                codWrap.appendChild(cod);
+
+                const onWrap = document.createElement('div');
+                onWrap.className = 'flex-1';
+                onWrap.innerHTML = '<span class="text-xs text-gray-500">Caj Online</span>';
+                const on = document.createElement('input');
+                on.type = 'number'; on.step = '0.50'; on.min = '0';
+                on.placeholder = 'RM'; on.value = (z.online !== undefined ? z.online : '');
+                on.className = 'w-full px-3 py-1.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand text-sm';
+                on.oninput = function () { ZON[idx].online = parseFloat(on.value) || 0; };
+                onWrap.appendChild(on);
+
+                const del = document.createElement('button');
+                del.className = 'w-9 h-9 self-end rounded-lg bg-red-50 text-red-500 hover:bg-red-100 shrink-0';
+                del.innerHTML = '<i class="fa-solid fa-trash text-xs"></i>';
+                del.onclick = function () { ZON.splice(idx, 1); renderZonList(); };
+
+                row.appendChild(codWrap);
+                row.appendChild(onWrap);
+                row.appendChild(del);
+
+                card.appendChild(nama);
+                card.appendChild(row);
+                wrap.appendChild(card);
+            });
+        }
+
+        function addZon() {
+            ZON.push({ nama: '', cod: 0, online: 0 });
+            renderZonList();
+        }
+
+        async function saveProfile() {
+            const profile = {
+                nama: document.getElementById('p-nama').value.trim(),
+                tagline: document.getElementById('p-tagline').value.trim(),
+                jenisBisnes: document.querySelector('input[name="p-jenis"]:checked').value,
+                alamat: document.getElementById('p-alamat').value.trim(),
+                linkPeta: document.getElementById('p-peta').value.trim(),
+                jamOperasi: document.getElementById('p-jam').value.trim(),
+                noWhatsapp: document.getElementById('p-whatsapp').value.replace(/[^0-9]/g, ''),
+                banner: document.getElementById('p-banner').value.trim(),
+                qr: document.getElementById('p-qr').value.trim(),
+                cajPenghantaran: parseFloat(document.getElementById('p-caj-cod').value) || 0,
+                cajOnline: parseFloat(document.getElementById('p-caj-online').value) || 0,
+                zon: document.getElementById('p-guna-zon').checked ? ZON : [],
+                status: document.querySelector('input[name="p-status"]:checked').value
+            };
+
+            if (!profile.nama) return toast('Nama kedai diperlukan', true);
+            if (!profile.noWhatsapp) return toast('No. WhatsApp diperlukan', true);
+
+            if (document.getElementById('p-guna-zon').checked) {
+                for (let i = 0; i < ZON.length; i++) {
+                    if (!ZON[i].nama || !ZON[i].nama.trim()) {
+                        return toast('Zon #' + (i + 1) + ' tiada nama kawasan', true);
+                    }
+                }
+                if (ZON.length === 0) {
+                    return toast('Sila tambah sekurang-kurangnya satu zon, atau matikan "Guna zon"', true);
+                }
+            }
+
+            const normalHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Profil';
+            busy('save-profil-btn', true, normalHTML);
+            try {
+                const data = await api({ action: 'saveProfile', slug: SESSION.slug, pin: SESSION.pin, profile: profile });
+                if (!data.success) return toast(data.error || 'Gagal simpan', true);
+                KEDAI = data.kedai;
+                document.getElementById('dash-nama').innerText = KEDAI.nama;
+                toast('Profil disimpan');
+            } catch (err) {
+                toast('Masalah sambungan. Cuba semula.', true);
+            } finally {
+                busy('save-profil-btn', false, normalHTML);
+            }
+        }
+
+        /* ================ MENU ================ */
+
+        function renderItems() {
+            const wrap = document.getElementById('menu-items');
+            wrap.innerHTML = '';
+
+            if (ITEMS.length === 0) {
+                const empty = document.createElement('p');
+                empty.className = 'text-center text-gray-400 text-sm py-6';
+                empty.innerText = 'Belum ada item. Tekan Tambah Item untuk mula.';
+                wrap.appendChild(empty);
+                return;
+            }
+
+            ITEMS.forEach(function (item, idx) {
+                wrap.appendChild(buildItemEditor(item, idx));
+            });
+        }
+
+        function buildItemEditor(item, idx) {
             const card = document.createElement('div');
+            card.className = 'bg-white p-4 rounded-2xl shadow-sm border border-gray-100 space-y-3';
 
-            if (item.promo) {
-                card.className = 'item-card bg-red-50 border-2 border-brand-light p-4 rounded-xl shadow-sm flex justify-between items-center relative overflow-hidden';
-                const badge = document.createElement('div');
-                badge.className = 'absolute top-0 right-0 bg-brand text-white text-xs font-bold px-2 py-1 rounded-bl-lg';
-                badge.innerText = 'PROMO';
-                card.appendChild(badge);
-            } else {
-                card.className = 'item-card bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center';
-            }
+            // Baris 1: nama + harga
+            const row1 = document.createElement('div');
+            row1.className = 'flex gap-2';
 
-            const info = document.createElement('div');
-            const h4 = document.createElement('h4');
-            h4.className = 'font-bold text-lg';
-            h4.innerText = item.nama;
-            const price = document.createElement('p');
-            price.className = item.promo ? 'text-brand-dark font-semibold' : 'text-brand font-semibold';
-            price.innerText = 'RM ' + item.harga.toFixed(2);
-            info.appendChild(h4);
-            info.appendChild(price);
+            const nama = document.createElement('input');
+            nama.type = 'text';
+            nama.placeholder = 'Nama item';
+            nama.value = item.nama || '';
+            nama.className = 'flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand text-sm';
+            nama.oninput = function () { ITEMS[idx].nama = nama.value; };
 
-            if (item.freeDelivery) {
-                const fd = document.createElement('span');
-                fd.className = 'inline-block mt-1 text-xs bg-green-100 text-green-700 px-2 py-1 rounded font-medium';
-                fd.innerHTML = '<i class="fa-solid fa-truck-fast"></i> FREE Delivery';
-                info.appendChild(fd);
-            }
+            const harga = document.createElement('input');
+            harga.type = 'number';
+            harga.step = '0.50';
+            harga.min = '0';
+            harga.placeholder = 'RM';
+            harga.value = item.harga || '';
+            harga.className = 'w-24 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand text-sm';
+            harga.oninput = function () { ITEMS[idx].harga = parseFloat(harga.value) || 0; };
 
-            const habis = (item.stok === 0);
-            const stokRendah = (item.stok > 0 && item.stok <= 5);
+            row1.appendChild(nama);
+            row1.appendChild(harga);
 
-            if (habis) {
-                const hb = document.createElement('span');
-                hb.className = 'block mt-1 text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded font-bold w-max';
-                hb.innerHTML = '<i class="fa-solid fa-ban"></i> HABIS STOK';
-                info.appendChild(hb);
-            } else if (stokRendah) {
-                const lr = document.createElement('span');
-                lr.className = 'block mt-1 text-xs text-amber-600 font-bold';
-                lr.innerHTML = '<i class="fa-solid fa-fire"></i> Tinggal ' + item.stok + ' je!';
-                info.appendChild(lr);
-            }
+            // Baris stok
+            const stokRow = document.createElement('div');
+            stokRow.className = 'flex items-center gap-2';
 
-            const controls = document.createElement('div');
-            controls.className = 'flex items-center gap-3 z-10';
+            const stokLabel = document.createElement('span');
+            stokLabel.className = 'text-xs font-medium text-gray-500 whitespace-nowrap';
+            stokLabel.innerHTML = '<i class="fa-solid fa-boxes-stacked text-gray-400"></i> Stok:';
 
-            if (habis) {
-                // Item habis: tiada butang qty
-                card.classList.add('opacity-60');
-                card.appendChild(info);
-                card.appendChild(controls);
-                return card;
-            }
+            const tanpaHad = (item.stok === undefined || item.stok === null || item.stok < 0);
 
-            const minus = document.createElement('button');
-            minus.type = 'button';
-            minus.className = item.promo
-                ? 'w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50'
-                : 'w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200';
-            minus.innerHTML = '<i class="fa-solid fa-minus"></i>';
-            minus.onclick = function () { updateQty(item.id, -1); };
+            const stokInput = document.createElement('input');
+            stokInput.type = 'number';
+            stokInput.min = '0';
+            stokInput.placeholder = '0';
+            stokInput.value = tanpaHad ? '' : item.stok;
+            stokInput.disabled = tanpaHad;
+            stokInput.className = 'w-20 px-3 py-1.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand text-sm disabled:bg-gray-100 disabled:text-gray-400';
+            stokInput.oninput = function () { ITEMS[idx].stok = parseInt(stokInput.value) || 0; };
 
-            const qty = document.createElement('span');
-            qty.id = 'qty-' + item.id;
-            qty.className = 'font-bold w-4 text-center';
-            qty.innerText = '0';
+            const hadWrap = document.createElement('label');
+            hadWrap.className = 'flex items-center gap-1.5 cursor-pointer ml-1';
+            const hadCb = document.createElement('input');
+            hadCb.type = 'checkbox';
+            hadCb.checked = tanpaHad;
+            hadCb.className = 'accent-green-500 w-4 h-4';
+            hadCb.onchange = function () {
+                if (hadCb.checked) {
+                    ITEMS[idx].stok = -1;
+                    stokInput.disabled = true;
+                    stokInput.value = '';
+                } else {
+                    ITEMS[idx].stok = 0;
+                    stokInput.disabled = false;
+                    stokInput.value = 0;
+                    stokInput.focus();
+                }
+            };
+            const hadSpan = document.createElement('span');
+            hadSpan.className = 'text-xs font-medium text-gray-600';
+            hadSpan.innerText = 'Tanpa had';
+            hadWrap.appendChild(hadCb);
+            hadWrap.appendChild(hadSpan);
 
-            const plus = document.createElement('button');
-            plus.type = 'button';
-            plus.className = 'w-8 h-8 rounded-full bg-brand text-white flex items-center justify-center hover:bg-brand-dark';
-            plus.innerHTML = '<i class="fa-solid fa-plus"></i>';
-            plus.onclick = function () { updateQty(item.id, 1); };
+            stokRow.appendChild(stokLabel);
+            stokRow.appendChild(stokInput);
+            stokRow.appendChild(hadWrap);
 
-            controls.appendChild(minus);
-            controls.appendChild(qty);
-            controls.appendChild(plus);
+            // Baris 2: toggles + buttons
+            const row2 = document.createElement('div');
+            row2.className = 'flex items-center justify-between flex-wrap gap-2';
 
-            card.appendChild(info);
-            card.appendChild(controls);
+            const toggles = document.createElement('div');
+            toggles.className = 'flex items-center gap-3 flex-wrap';
+            toggles.appendChild(buildToggle('Promo', item.promo, function (v) { ITEMS[idx].promo = v; }));
+            toggles.appendChild(buildToggle('Free Delivery', item.freeDelivery, function (v) { ITEMS[idx].freeDelivery = v; }));
+            toggles.appendChild(buildToggle('Aktif', item.aktif !== false, function (v) { ITEMS[idx].aktif = v; }));
+
+            const actions = document.createElement('div');
+            actions.className = 'flex items-center gap-1';
+
+            const up = document.createElement('button');
+            up.className = 'w-8 h-8 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200';
+            up.innerHTML = '<i class="fa-solid fa-arrow-up text-xs"></i>';
+            up.onclick = function () { moveItem(idx, -1); };
+
+            const down = document.createElement('button');
+            down.className = 'w-8 h-8 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200';
+            down.innerHTML = '<i class="fa-solid fa-arrow-down text-xs"></i>';
+            down.onclick = function () { moveItem(idx, 1); };
+
+            const del = document.createElement('button');
+            del.className = 'w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100';
+            del.innerHTML = '<i class="fa-solid fa-trash text-xs"></i>';
+            del.onclick = function () {
+                if (confirm('Padam item "' + (ITEMS[idx].nama || 'tanpa nama') + '"?')) {
+                    ITEMS.splice(idx, 1);
+                    renderItems();
+                }
+            };
+
+            actions.appendChild(up);
+            actions.appendChild(down);
+            actions.appendChild(del);
+
+            row2.appendChild(toggles);
+            row2.appendChild(actions);
+
+            card.appendChild(row1);
+            card.appendChild(stokRow);
+            card.appendChild(row2);
             return card;
         }
 
-        function toggleQR(show) {
-            document.getElementById('qr-section').classList.toggle('hidden', !show);
+        function buildToggle(label, checked, onChange) {
+            const wrap = document.createElement('label');
+            wrap.className = 'flex items-center gap-1.5 cursor-pointer';
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.checked = !!checked;
+            cb.className = 'accent-green-500 w-4 h-4';
+            cb.onchange = function () { onChange(cb.checked); };
+            const span = document.createElement('span');
+            span.className = 'text-xs font-medium text-gray-600';
+            span.innerText = label;
+            wrap.appendChild(cb);
+            wrap.appendChild(span);
+            return wrap;
         }
 
-        function pilihBayaran() {
-            const pay = document.querySelector('input[name="payment_method"]:checked').value;
-            toggleQR(pay === 'Online Transfer');
-            calculateTotal();
+        function moveItem(idx, dir) {
+            const newIdx = idx + dir;
+            if (newIdx < 0 || newIdx >= ITEMS.length) return;
+            const tmp = ITEMS[idx];
+            ITEMS[idx] = ITEMS[newIdx];
+            ITEMS[newIdx] = tmp;
+            renderItems();
         }
 
-        function setCajLabel(elId, caj) {
-            const el = document.getElementById(elId);
-            const v = Number(caj) || 0;
-            if (v === 0) {
-                el.innerText = 'Penghantaran: PERCUMA 🎉';
-                el.className = 'block text-xs text-green-600 font-bold mt-1';
-            } else {
-                el.innerText = 'Penghantaran: RM ' + v.toFixed(2);
-                el.className = 'block text-xs text-gray-400 mt-1';
-            }
+        function addItem() {
+            ITEMS.push({ id: '', nama: '', harga: 0, promo: false, freeDelivery: false, aktif: true, stok: -1 });
+            renderItems();
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         }
 
-        function renderAlamat() {
-            const adaAlamat = KEDAI.alamat || KEDAI.jamOperasi || KEDAI.linkPeta;
-            if (!adaAlamat) return;
-
-            document.getElementById('alamat-card').classList.remove('hidden');
-
-            if (KEDAI.alamat) {
-                const p = document.getElementById('alamat-teks');
-                p.classList.remove('hidden');
-                p.querySelector('span').innerText = KEDAI.alamat;
-            }
-            if (KEDAI.jamOperasi) {
-                const p = document.getElementById('alamat-jam');
-                p.classList.remove('hidden');
-                p.querySelector('span').innerText = KEDAI.jamOperasi;
-            }
-            if (KEDAI.linkPeta) {
-                const a = document.getElementById('alamat-peta');
-                a.classList.remove('hidden');
-                a.classList.add('flex');
-                a.href = KEDAI.linkPeta;
-            }
-        }
-
-        function cajIkutBayaran() {
-            const pay = document.querySelector('input[name="payment_method"]:checked').value;
-
-            // Jika ada zon, guna caj zon yang dipilih
-            if (KEDAI.zon && KEDAI.zon.length > 0) {
-                const sel = document.getElementById('cust-zon');
-                const idx = sel ? parseInt(sel.value) : 0;
-                const z = KEDAI.zon[idx] || KEDAI.zon[0];
-                return (pay === 'Online Transfer') ? (Number(z.online) || 0) : (Number(z.cod) || 0);
-            }
-
-            // Fallback: caj flat
-            return (pay === 'Online Transfer')
-                ? (Number(KEDAI.cajOnline) || 0)
-                : (Number(KEDAI.cajPenghantaran) || 0);
-        }
-
-        function renderZon() {
-            if (!KEDAI.zon || KEDAI.zon.length === 0) return;
-
-            const wrap = document.getElementById('zon-wrap');
-            const sel = document.getElementById('cust-zon');
-            sel.innerHTML = '';
-            KEDAI.zon.forEach(function (z, i) {
-                const opt = document.createElement('option');
-                opt.value = i;
-                opt.innerText = z.nama;
-                sel.appendChild(opt);
-            });
-            wrap.classList.remove('hidden');
-
-            // Bila ada zon, sembunyikan label caj flat (caj ikut zon)
-            document.getElementById('cod-caj').classList.add('hidden');
-            document.getElementById('online-caj').classList.add('hidden');
-        }
-
-        async function shareKedai() {
-            const url = location.origin + '/?id=' + KEDAI.slug;
-            const general = (KEDAI.jenisBisnes === 'general');
-            const text = (general ? ('Order online dari ' + KEDAI.nama + '! 🛒\n\n') : ('Nak makan? Orderlah! 😋\n\n' + KEDAI.nama)) + ' sekarang boleh order online — pilih ' + (general ? 'produk' : 'menu') + ', terus hantar:\n';
-
-            if (navigator.share) {
-                try {
-                    await navigator.share({ title: KEDAI.nama, text: text, url: url });
-                } catch (e) {
-                    // pengguna batalkan share - tak perlu buat apa-apa
+        async function saveMenu() {
+            // Validasi ringkas
+            for (let i = 0; i < ITEMS.length; i++) {
+                if (!ITEMS[i].nama || !ITEMS[i].nama.trim()) {
+                    return toast('Item #' + (i + 1) + ' tiada nama', true);
                 }
-            } else {
-                // Fallback: share melalui WhatsApp
-                window.open('https://wa.me/?text=' + encodeURIComponent(text + url), '_blank');
+                if (!(ITEMS[i].harga > 0)) {
+                    return toast('Item "' + ITEMS[i].nama + '" tiada harga', true);
+                }
             }
-        }
 
-        /* ================ SOCIAL PROOF ================ */
-        let SP_ITEMS = [];
-        let spIndex = 0;
-
-        async function loadSocialProof() {
+            const normalHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Menu';
+            busy('save-menu-btn', true, normalHTML);
             try {
-                const res = await fetch(GAS_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'socialProof', slug: KEDAI.slug })
-                });
-                const data = await res.json();
-                if (data.success && data.items && data.items.length > 0) {
-                    SP_ITEMS = data.items;
-                    setTimeout(rotateSocialProof, 4000); // mula selepas 4 saat
-                }
-            } catch (e) {}
+                const data = await api({ action: 'saveMenu', slug: SESSION.slug, pin: SESSION.pin, items: ITEMS });
+                if (!data.success) return toast(data.error || 'Gagal simpan', true);
+                ITEMS = data.menu || [];
+                renderItems();
+                toast('Menu disimpan');
+            } catch (err) {
+                toast('Masalah sambungan. Cuba semula.', true);
+            } finally {
+                busy('save-menu-btn', false, normalHTML);
+            }
         }
 
-        function rotateSocialProof() {
-            if (SP_ITEMS.length === 0) return;
-            const sp = document.getElementById('social-proof');
-            const it = SP_ITEMS[spIndex % SP_ITEMS.length];
-            spIndex++;
+        /* ================ STATISTIK ================ */
 
-            document.getElementById('sp-text').innerText = it.nama + ' baru order ' + it.item;
-            document.getElementById('sp-time').innerText = '🔥 ' + it.lalu;
+        let STATS = null;
 
-            // Masuk
-            sp.classList.remove('hidden');
-            requestAnimationFrame(function () {
-                sp.classList.remove('translate-y-24', 'opacity-0');
-            });
-
-            // Keluar selepas 5 saat, ulang selepas 8 saat
-            setTimeout(function () {
-                sp.classList.add('translate-y-24', 'opacity-0');
-            }, 5000);
-            setTimeout(rotateSocialProof, 8000);
-        }
-
-        function updateQty(itemId, change) {
-            const item = MENU.find(function (m) { return m.id === itemId; });
-            let next = Math.max(0, (cart[itemId] || 0) + change);
-
-            // Had ikut stok (jika ada had)
-            if (item && item.stok >= 0 && next > item.stok) {
-                next = item.stok;
-                if (change > 0) alert('Maaf, stok ' + item.nama + ' tinggal ' + item.stok + ' sahaja.');
-            }
-
-            cart[itemId] = next;
-            document.getElementById('qty-' + itemId).innerText = next;
-            calculateTotal();
-        }
-
-        function getTotals() {
-            let sub = 0;
-            let hasFreeDelivery = false;
-            MENU.forEach(function (item) {
-                const q = cart[item.id] || 0;
-                sub += q * item.harga;
-                if (q > 0 && item.freeDelivery) hasFreeDelivery = true;
-            });
-            let del = 0;
-            if (sub > 0) del = hasFreeDelivery ? 0 : cajIkutBayaran();
-            return { sub: sub, del: del, total: sub + del };
-        }
-
-        function calculateTotal() {
-            const t = getTotals();
-            document.getElementById('summary-subtotal').innerText = 'RM ' + t.sub.toFixed(2);
-            document.getElementById('summary-delivery').innerText = 'RM ' + t.del.toFixed(2);
-            document.getElementById('summary-total').innerText = 'RM ' + t.total.toFixed(2);
-        }
-
-        function submitOrder() {
-            const name = document.getElementById('cust-name').value.trim();
-            const phone = document.getElementById('cust-phone').value.replace(/[^0-9]/g, '');
-            const addr = document.getElementById('cust-address').value.trim();
-            const pay = document.querySelector('input[name="payment_method"]:checked').value;
-            const t = getTotals();
-
-            if (t.sub === 0 || !name || !phone || !addr) {
-                alert('Sila pilih menu dan lengkapkan nama, no. WhatsApp & alamat anda.');
-                return false;
-            }
-            if (phone.length < 9) {
-                alert('Sila masukkan no. WhatsApp yang sah.');
-                return false;
-            }
-
-            let text = '*PESANAN BARU: ' + KEDAI.nama.toUpperCase() + '*\n\n';
-            text += '*Nama:* ' + name + '\n';
-            text += '*No. WhatsApp:* ' + phone + '\n';
-            text += '*Alamat:* ' + addr + '\n';
-            if (KEDAI.zon && KEDAI.zon.length > 0) {
-                const sel = document.getElementById('cust-zon');
-                const z = KEDAI.zon[sel ? parseInt(sel.value) : 0];
-                if (z) text += '*Kawasan:* ' + z.nama + '\n';
-            }
-            text += '\n';
-            text += (KEDAI.jenisBisnes === 'general' ? '*Item Pesanan:*\n' : '*Item Sila Sediakan:*\n');
-
-            MENU.forEach(function (item) {
-                const q = cart[item.id] || 0;
-                if (q > 0) {
-                    text += '- ' + q + 'x ' + item.nama + ' (RM ' + (q * item.harga).toFixed(2) + ')\n';
-                }
-            });
-
-            text += '\n*Subtotal:* RM ' + t.sub.toFixed(2) + '\n';
-            text += '*Cas Penghantaran:* RM ' + t.del.toFixed(2) + '\n';
-            text += '*JUMLAH KESELURUHAN: RM ' + t.total.toFixed(2) + '*\n\n';
-            text += '*Kaedah Pembayaran:* ' + pay + '\n';
-
-            if (pay === 'Online Transfer') {
-                text += '_(Pelanggan telah dimaklumkan untuk sertakan resit bayaran)_\n';
-            }
-
-            const waUrl = 'https://wa.me/' + KEDAI.noWhatsapp + '?text=' + encodeURIComponent(text);
-            document.getElementById('whatsapp-btn').href = waUrl;
-
-            // Rekod order untuk peniaga (fire & forget, tak halang WhatsApp)
+        async function loadStats(force) {
+            if (STATS && !force) { renderStats(); return; }
+            document.getElementById('chart-wrap').innerHTML = '<p class="text-center text-gray-400 text-sm py-10"><i class="fa-solid fa-circle-notch fa-spin"></i> Memuatkan...</p>';
+            document.getElementById('orders-list').innerHTML = '';
             try {
-                const logItems = [];
-                MENU.forEach(function (item) {
-                    const q = cart[item.id] || 0;
-                    if (q > 0) logItems.push({ nama: item.nama, qty: q });
-                });
-                fetch(GAS_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: 'logOrder',
-                        slug: KEDAI.slug,
-                        order: {
-                            nama: name,
-                            telefon: phone,
-                            alamat: addr,
-                            bayaran: pay,
-                            items: logItems,
-                            subtotal: t.sub,
-                            caj: t.del,
-                            total: t.total
-                        }
-                    }),
-                    keepalive: true
-                }).catch(function () {});
-            } catch (e) {}
-
-            return true;
+                const data = await api({ action: 'getStats', slug: SESSION.slug, pin: SESSION.pin });
+                if (!data.success) return toast(data.error || 'Gagal muat statistik', true);
+                STATS = data;
+                renderStats();
+            } catch (err) {
+                toast('Masalah sambungan. Cuba semula.', true);
+            }
         }
-    
-</script>
+
+        function renderStats() {
+            const days = STATS.days || [];
+            const orders = STATS.orders || [];
+
+            const totalKlik = days.reduce(function (s, d) { return s + d.klik; }, 0);
+            const totalOrder = days.reduce(function (s, d) { return s + d.order; }, 0);
+            const conv = totalKlik > 0 ? Math.round(totalOrder / totalKlik * 100) : 0;
+
+            document.getElementById('s-klik').innerText = totalKlik;
+            document.getElementById('s-order').innerText = totalOrder;
+            document.getElementById('s-conv').innerText = conv + '%';
+
+            document.getElementById('chart-wrap').innerHTML = buildChart(days);
+            renderOrders(orders);
+        }
+
+        function buildChart(days) {
+            const W = 340, H = 180;
+            const pad = { l: 30, r: 10, t: 12, b: 24 };
+            const innerW = W - pad.l - pad.r;
+            const innerH = H - pad.t - pad.b;
+
+            let maxV = 1;
+            days.forEach(function (d) { maxV = Math.max(maxV, d.klik, d.order); });
+            maxV = Math.ceil(maxV / 5) * 5 || 5; // bundarkan ke gandaan 5
+
+            const slotW = innerW / 7;
+            const barW = slotW * 0.5;
+            const y = function (v) { return pad.t + innerH - (v / maxV * innerH); };
+
+            let svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">';
+
+            // Grid + label paksi-y (0, separuh, max)
+            [0, maxV / 2, maxV].forEach(function (v) {
+                const gy = y(v);
+                svg += '<line x1="' + pad.l + '" y1="' + gy + '" x2="' + (W - pad.r) + '" y2="' + gy + '" stroke="#f3f4f6" stroke-width="1"/>';
+                svg += '<text x="' + (pad.l - 5) + '" y="' + (gy + 3.5) + '" text-anchor="end" font-size="9" fill="#9ca3af">' + Math.round(v) + '</text>';
+            });
+
+            // Bars (klik) + label hari
+            days.forEach(function (d, i) {
+                const cx = pad.l + slotW * i + slotW / 2;
+                const bh = (d.klik / maxV) * innerH;
+                svg += '<rect x="' + (cx - barW / 2) + '" y="' + y(d.klik) + '" width="' + barW + '" height="' + Math.max(bh, 0) + '" rx="3" fill="#7c2d12"/>';
+                svg += '<text x="' + cx + '" y="' + (H - 8) + '" text-anchor="middle" font-size="9" fill="#6b7280">' + d.label + '</text>';
+            });
+
+            // Line + dots (order)
+            let pts = '';
+            days.forEach(function (d, i) {
+                const cx = pad.l + slotW * i + slotW / 2;
+                pts += cx + ',' + y(d.order) + ' ';
+            });
+            svg += '<polyline points="' + pts.trim() + '" fill="none" stroke="#dc2626" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+            days.forEach(function (d, i) {
+                const cx = pad.l + slotW * i + slotW / 2;
+                svg += '<circle cx="' + cx + '" cy="' + y(d.order) + '" r="3.2" fill="#fff" stroke="#dc2626" stroke-width="2"/>';
+            });
+
+            svg += '</svg>';
+            return svg;
+        }
+
+        function renderOrders(orders) {
+            const wrap = document.getElementById('orders-list');
+            wrap.innerHTML = '';
+
+            if (orders.length === 0) {
+                const empty = document.createElement('p');
+                empty.className = 'text-center text-gray-400 text-sm py-6 bg-white rounded-2xl border border-gray-100';
+                empty.innerText = 'Belum ada rekod order. Share link kedai anda untuk mula terima order!';
+                wrap.appendChild(empty);
+                return;
+            }
+
+            // Banner order baru menunggu pengesahan
+            const pending = orders.filter(function (o) { return o.status === 'Baru'; }).length;
+            if (pending > 0) {
+                const banner = document.createElement('div');
+                banner.className = 'bg-amber-50 border border-amber-200 text-amber-800 text-sm font-medium rounded-xl px-4 py-3';
+                banner.innerHTML = '<i class="fa-solid fa-bell"></i> ' + pending + ' order baru menunggu pengesahan anda';
+                wrap.appendChild(banner);
+            }
+
+            orders.forEach(function (o) {
+                const d = document.createElement('details');
+                d.className = 'bg-white rounded-2xl border border-gray-100 p-3.5 group';
+                if (o.status === 'Baru') d.className += ' border-amber-200';
+
+                let badge;
+                if (o.status === 'Sah') {
+                    badge = '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-green-100 text-green-700">SAH</span>';
+                } else if (o.status === 'Batal') {
+                    badge = '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-gray-100 text-gray-500">BATAL</span>';
+                } else {
+                    badge = '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">BARU</span>';
+                }
+
+                const sahActive = (o.status === 'Sah');
+                const batalActive = (o.status === 'Batal');
+                const btnSah = '<button onclick="setStatus(\'' + escText(o.id) + '\', \'Sah\')" class="flex-1 py-2 rounded-lg text-xs font-bold transition-colors ' +
+                    (sahActive ? 'bg-green-600 text-white' : 'bg-red-50 text-green-700 hover:bg-green-100') + '">' +
+                    '<i class="fa-solid fa-check"></i> ' + (sahActive ? 'Order Disahkan' : 'Sahkan Order') + '</button>';
+                const btnBatal = '<button onclick="setStatus(\'' + escText(o.id) + '\', \'Batal\')" class="flex-1 py-2 rounded-lg text-xs font-bold transition-colors ' +
+                    (batalActive ? 'bg-gray-500 text-white' : 'bg-gray-50 text-gray-500 hover:bg-gray-100') + '">' +
+                    '<i class="fa-solid fa-xmark"></i> ' + (batalActive ? 'Dibatalkan' : 'Batal / Tak Jadi') + '</button>';
+
+                d.innerHTML =
+                    '<summary class="cursor-pointer list-none flex justify-between items-center gap-2">' +
+                    '  <div class="min-w-0">' +
+                    '    <p class="font-bold text-sm truncate">' + escText(o.nama) + '</p>' +
+                    '    <p class="text-xs text-gray-400">' + escText(o.masa) + '</p>' +
+                    '  </div>' +
+                    '  <div class="text-right shrink-0">' +
+                    '    <p class="font-bold text-brand-dark text-sm">RM ' + (Number(o.total) || 0).toFixed(2) + '</p>' +
+                    '    ' + badge +
+                    '  </div>' +
+                    '</summary>' +
+                    '<div class="mt-3 pt-3 border-t border-gray-100 text-sm space-y-1.5">' +
+                    '  <p class="text-gray-700"><i class="fa-solid fa-utensils text-brand text-xs"></i> ' + escText(o.items) + '</p>' +
+                    '  <p class="text-gray-700 text-xs"><i class="fa-brands fa-whatsapp text-green-600"></i> <a href="https://wa.me/' + waNo(o.telefon) + '" target="_blank" class="text-green-700 font-bold underline">' + escText(o.telefon || '-') + '</a></p>' +
+                    '  <p class="text-gray-500 text-xs"><i class="fa-solid fa-location-dot text-brand"></i> ' + escText(o.alamat) + '</p>' +
+                    '  <p class="text-gray-500 text-xs"><i class="fa-solid fa-money-bill text-brand"></i> ' + escText(o.bayaran) + '</p>' +
+                    '  <div class="flex gap-2 pt-2">' + btnSah + btnBatal + '</div>' +
+                    '</div>';
+
+                wrap.appendChild(d);
+            });
+        }
+
+        async function setStatus(orderId, status) {
+            try {
+                const data = await api({ action: 'setOrderStatus', slug: SESSION.slug, pin: SESSION.pin, orderId: orderId, status: status });
+                if (!data.success) return toast(data.error || 'Gagal kemaskini', true);
+                STATS = data;
+                renderStats();
+                toast(status === 'Sah' ? 'Order disahkan ✓' : 'Order ditanda batal');
+            } catch (err) {
+                toast('Masalah sambungan. Cuba semula.', true);
+            }
+        }
+
+        /* ================ UPLOAD GAMBAR ================ */
+
+        let uploadJenis = null;
+
+        function pickImage(jenis) {
+            uploadJenis = jenis;
+            const fi = document.getElementById('file-input');
+            fi.value = '';
+            fi.click();
+        }
+
+        document.getElementById('file-input').addEventListener('change', async function (e) {
+            const f = e.target.files[0];
+            if (!f) return;
+
+            const btnId = (uploadJenis === 'qr') ? 'up-qr-btn' : 'up-banner-btn';
+            const normalHTML = '<i class="fa-solid fa-upload"></i> Upload';
+            busy(btnId, true, normalHTML);
+
+            try {
+                // Kecilkan gambar di telefon dulu supaya upload laju
+                const maxW = (uploadJenis === 'qr') ? 800 : 1280;
+                const b64 = await resizeToBase64(f, maxW, 0.82);
+
+                const data = await api({
+                    action: 'uploadImage',
+                    slug: SESSION.slug,
+                    pin: SESSION.pin,
+                    jenis: uploadJenis,
+                    mime: 'image/jpeg',
+                    data: b64
+                });
+
+                if (!data.success) return toast(data.error || 'Upload gagal', true);
+
+                const input = document.getElementById(uploadJenis === 'qr' ? 'p-qr' : 'p-banner');
+                input.value = data.url;
+                showPreview(uploadJenis, data.url);
+                toast('Gambar diupload! Jangan lupa tekan Simpan Profil');
+            } catch (err) {
+                toast('Masalah sambungan. Cuba semula.', true);
+            } finally {
+                busy(btnId, false, normalHTML);
+            }
+        });
+
+        function resizeToBase64(file, maxW, quality) {
+            return new Promise(function (resolve, reject) {
+                const img = new Image();
+                img.onload = function () {
+                    const scale = Math.min(1, maxW / img.width);
+                    const c = document.createElement('canvas');
+                    c.width = Math.round(img.width * scale);
+                    c.height = Math.round(img.height * scale);
+                    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                    const dataUrl = c.toDataURL('image/jpeg', quality);
+                    resolve(dataUrl.split(',')[1]);
+                };
+                img.onerror = function () { reject(new Error('Gagal baca gambar')); };
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        function showPreview(jenis, url) {
+            const prev = document.getElementById(jenis === 'qr' ? 'prev-qr' : 'prev-banner');
+            if (url) {
+                prev.src = url;
+                prev.classList.remove('hidden');
+            } else {
+                prev.classList.add('hidden');
+            }
+        }
+
+        function escText(s) {
+            const d = document.createElement('div');
+            d.innerText = String(s == null ? '' : s);
+            return d.innerHTML;
+        }
+
+        // Tukar no telefon ke format wa.me (60xxxxxxxxx)
+        function waNo(phone) {
+            let p = String(phone || '').replace(/[^0-9]/g, '');
+            if (p.indexOf('0') === 0) p = '60' + p.slice(1);
+            else if (p.indexOf('60') !== 0 && p.length > 0) p = '60' + p;
+            return p;
+        }
+    </script>
 </body>
 </html>
