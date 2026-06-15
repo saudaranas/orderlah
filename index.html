@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orderlah — Sistem Order Online Untuk Kedai Makan Anda</title>
-    <meta name="description" content="Kedai anda boleh terima order online hari ini juga. Link sendiri, order terus masuk WhatsApp, tanpa komisen.">
+    <title>Orderlah — Sistem Order Online Untuk Bisnes Anda</title>
+    <meta name="description" content="Kedai anda boleh terima order online hari ini juga. Link sendiri, order terus masuk WhatsApp, tanpa caj.">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -18,8 +18,8 @@
                             dark: '#991b1b',
                         },
                         navy: {
-                            DEFAULT: '#292524',
-                            dark: '#1c1917',
+                            DEFAULT: '#7c2d12',
+                            dark: '#431407',
                         }
                     }
                 }
@@ -83,8 +83,13 @@
     <main id="app" class="hidden max-w-3xl mx-auto py-2">
 
         <!-- Banner / Header -->
-        <div id="banner-wrap" class="hidden mb-6 rounded-2xl overflow-hidden shadow-md bg-white">
+        <div id="banner-wrap" class="hidden mb-6 rounded-2xl overflow-hidden shadow-md bg-white relative">
             <img id="banner-img" src="" alt="Banner Kedai" class="w-full h-auto object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-4">
+                <h1 id="banner-nama" class="text-white text-xl font-extrabold drop-shadow-lg"></h1>
+                <p id="banner-tagline" class="text-white/90 text-xs drop-shadow"></p>
+            </div>
         </div>
         <div id="header-text" class="mb-6 text-center">
             <h1 id="kedai-nama" class="text-2xl font-bold text-navy-dark"></h1>
@@ -99,7 +104,7 @@
         </div>
 
         <!-- Menu -->
-        <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-utensils text-brand"></i> Menu Kami</h3>
+        <h3 id="menu-title" class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-utensils text-brand"></i> Menu Kami</h3>
         <div id="menu-list" class="grid grid-cols-1 gap-4 mb-6"></div>
 
         <!-- Card Alamat Gerai -->
@@ -171,7 +176,7 @@
             <div class="flex justify-between mb-3 text-sm text-gray-600"><span>Penghantaran:</span> <span class="font-bold text-gray-800" id="summary-delivery">RM 0.00</span></div>
             <div class="flex justify-between font-bold text-lg border-t pt-2"><span>Total Keseluruhan:</span> <span class="text-navy-dark" id="summary-total">RM 0.00</span></div>
 
-            <a id="whatsapp-btn" href="#" target="_blank" onclick="return submitOrder()" class="w-full mt-4 bg-brand text-white font-bold py-3 rounded-xl hover:bg-brand-dark flex items-center justify-center gap-2 block text-center transition-colors">
+            <a id="whatsapp-btn" href="#" target="_blank" onclick="return submitOrder()" class="w-full mt-4 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 block text-center transition-colors" style="background-color:#25D366" onmouseover="this.style.backgroundColor='#1da851'" onmouseout="this.style.backgroundColor='#25D366'">
                 <i class="fa-brands fa-whatsapp text-xl"></i> Hantar Pesanan ke WhatsApp
             </a>
         </div>
@@ -207,13 +212,13 @@
 
             <!-- Kolum kiri: teks -->
             <div class="text-center md:text-left">
-                <span class="inline-block bg-white/10 text-brand-light text-xs font-bold px-3 py-1.5 rounded-full mb-4 backdrop-blur">UNTUK PENIAGA MAKANAN & MINUMAN</span>
+                <span class="inline-block bg-white/10 text-brand-light text-xs font-bold px-3 py-1.5 rounded-full mb-4 backdrop-blur">UNTUK PENIAGA KECIL & SEDERHANA</span>
                 <h1 class="text-3xl md:text-5xl font-extrabold leading-tight mb-4">
                     Kedai Anda Boleh Terima<br>
                     <span class="text-brand">Order Online</span> Hari Ini Juga
                 </h1>
                 <p class="text-blue-100 mb-7 max-w-xl mx-auto md:mx-0">
-                    Satu link untuk kedai anda. Pelanggan pilih menu, isi alamat, tekan satu butang — order terus masuk WhatsApp anda. <b class="text-white">Tanpa app. Tanpa komisen.</b>
+                    Satu link untuk kedai anda. Pelanggan pilih menu, isi alamat, tekan satu butang — order terus masuk WhatsApp anda. <b class="text-white">Tanpa app. Tanpa caj tambahan.</b>
                 </p>
                 <div class="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
                     <a href="https://wa.me/60167388358?text=Saya%20berminat%20nak%20sistem%20order%20online%20Orderlah%20untuk%20kedai%20saya" class="bg-brand text-white font-bold py-3.5 px-8 rounded-xl hover:bg-brand-dark transition-colors shadow-lg shadow-brand/30">
@@ -255,7 +260,7 @@
             <div class="space-y-4">
                 <div class="bg-white/10 rounded-2xl p-4 flex gap-4 items-start">
                     <i class="fa-solid fa-comments text-brand text-xl mt-1"></i>
-                    <p class="text-sm text-blue-50">Pelanggan tanya <b>"menu apa ada hari ni? harga berapa?"</b> — anda taip benda sama 20 kali sehari, tangan tengah sibuk masak.</p>
+                    <p class="text-sm text-blue-50">Pelanggan tanya <b>"menu apa ada hari ni? harga berapa?"</b> — anda taip benda sama 20 kali sehari, sedangkan tangan tengah sibuk.</p>
                 </div>
                 <div class="bg-white/10 rounded-2xl p-4 flex gap-4 items-start">
                     <i class="fa-solid fa-circle-question text-brand text-xl mt-1"></i>
@@ -263,7 +268,7 @@
                 </div>
                 <div class="bg-white/10 rounded-2xl p-4 flex gap-4 items-start">
                     <i class="fa-solid fa-percent text-brand text-xl mt-1"></i>
-                    <p class="text-sm text-blue-50">Nak masuk platform delivery besar? <b>Komisen sampai 25-30% setiap order.</b> Untung nipis terus jadi hampir tiada.</p>
+                    <p class="text-sm text-blue-50">Nak masuk platform delivery besar? <b>Caj sampai 25-30% setiap order.</b> Untung nipis terus jadi hampir tiada.</p>
                 </div>
                 <div class="bg-white/10 rounded-2xl p-4 flex gap-4 items-start">
                     <i class="fa-solid fa-calculator text-brand text-xl mt-1"></i>
@@ -283,7 +288,7 @@
                 <div class="bg-white rounded-2xl p-5 border border-gray-100 text-center shadow-sm">
                     <div class="w-14 h-14 bg-brand-light rounded-2xl flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-sack-dollar text-brand text-2xl"></i></div>
                     <h3 class="font-bold mb-1">Untung Penuh Masuk Poket</h3>
-                    <p class="text-sm text-gray-600">0% komisen. Tak macam platform delivery yang potong 25-30% setiap order. Setiap sen jualan, anda punya.</p>
+                    <p class="text-sm text-gray-600">Tiada caj potongan. Tak macam platform delivery yang potong 25-30% setiap order. Setiap sen jualan, anda punya.</p>
                 </div>
                 <div class="bg-white rounded-2xl p-5 border border-gray-100 text-center shadow-sm">
                     <div class="w-14 h-14 bg-brand-light rounded-2xl flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-clock text-brand text-2xl"></i></div>
@@ -398,7 +403,7 @@
                                 <div class="bg-gray-50 rounded-lg p-2 text-center"><p class="text-lg font-extrabold text-green-600">25%</p><p class="text-[8px] text-gray-400">Tukar</p></div>
                             </div>
                             <svg viewBox="0 0 160 70" class="w-full h-auto">
-                                <rect x="10" y="38" width="13" height="28" rx="2" fill="#292524"/><rect x="34" y="24" width="13" height="42" rx="2" fill="#292524"/><rect x="58" y="42" width="13" height="24" rx="2" fill="#292524"/><rect x="82" y="16" width="13" height="50" rx="2" fill="#292524"/><rect x="106" y="30" width="13" height="36" rx="2" fill="#292524"/><rect x="130" y="22" width="13" height="44" rx="2" fill="#292524"/>
+                                <rect x="10" y="38" width="13" height="28" rx="2" fill="#7c2d12"/><rect x="34" y="24" width="13" height="42" rx="2" fill="#7c2d12"/><rect x="58" y="42" width="13" height="24" rx="2" fill="#7c2d12"/><rect x="82" y="16" width="13" height="50" rx="2" fill="#7c2d12"/><rect x="106" y="30" width="13" height="36" rx="2" fill="#7c2d12"/><rect x="130" y="22" width="13" height="44" rx="2" fill="#7c2d12"/>
                                 <polyline points="16,42 40,30 64,36 88,18 112,28 136,20" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </div>
@@ -487,7 +492,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         <tr>
-                            <td class="p-3 text-gray-600">Komisen setiap order</td>
+                            <td class="p-3 text-gray-600">Caj setiap order</td>
                             <td class="p-3 text-center text-red-500 font-bold">25-30%</td>
                             <td class="p-3 text-center text-green-600 font-bold">0%</td>
                             <td class="p-3 text-center text-green-600 font-bold bg-red-50">0%</td>
@@ -518,14 +523,14 @@
                         </tr>
                         <tr>
                             <td class="p-3 text-gray-600">Kos sebulan</td>
-                            <td class="p-3 text-center text-red-500 font-bold">Komisen tinggi</td>
+                            <td class="p-3 text-center text-red-500 font-bold">Caj tinggi</td>
                             <td class="p-3 text-center text-green-600 font-bold">Percuma</td>
                             <td class="p-3 text-center font-bold bg-red-50 text-brand-dark">RM10 je</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <p class="text-xs text-gray-400 text-center mt-4">Platform delivery bagus untuk capai pelanggan baru. WhatsApp biasa percuma tapi serabut. Orderlah gabungkan yang terbaik — kemas, murah, tanpa komisen.</p>
+            <p class="text-xs text-gray-400 text-center mt-4">Platform delivery bagus untuk capai pelanggan baru. WhatsApp biasa percuma tapi serabut. Orderlah gabungkan yang terbaik — kemas, murah, tanpa caj.</p>
         </div>
     </section>
 
@@ -533,7 +538,7 @@
     <section id="harga" class="px-4 py-12 bg-navy-dark text-white">
         <div class="max-w-md mx-auto text-center">
             <h2 class="text-2xl font-extrabold mb-2">Pelaburan Anda</h2>
-            <p class="text-blue-200 text-sm mb-8">Lebih murah dari sekali bayar komisen platform delivery</p>
+            <p class="text-blue-200 text-sm mb-8">Lebih murah dari sekali bayar caj platform delivery</p>
 
             <div class="bg-white text-gray-800 rounded-3xl p-6 shadow-2xl">
                 <span class="inline-block bg-brand-light text-brand-dark text-xs font-bold px-3 py-1 rounded-full mb-3">PAKEJ LENGKAP</span>
@@ -547,7 +552,7 @@
                     <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Kami setupkan menu penuh (siap dalam 24 jam)</li>
                     <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Panel admin urus sendiri</li>
                     <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> COD + QR DuitNow</li>
-                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> 0% komisen, unlimited order</li>
+                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Tiada caj potongan, unlimited order</li>
                     <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Support WhatsApp terus dengan kami</li>
                 </ul>
                 <a href="https://wa.me/60167388358?text=Saya%20berminat%20nak%20sistem%20order%20online%20Orderlah%20untuk%20kedai%20saya" class="block bg-brand text-white font-bold py-3.5 rounded-xl hover:bg-brand-dark transition-colors">
@@ -615,7 +620,7 @@
     </section>
 
     <footer class="text-center text-xs text-gray-400 py-6 border-t border-gray-100">
-        <p class="text-sm font-bold text-brand-dark mb-1">Nak makan? Orderlah.</p>
+        <p class="text-sm font-bold text-brand-dark mb-1">Senang nak order? Orderlah.</p>
         <p><b>Orderlah</b> &mdash; Sistem order online untuk peniaga F&amp;B Malaysia</p>
     </footer>
 
@@ -688,9 +693,16 @@
         function renderApp() {
             document.title = KEDAI.nama + ' | Order Online';
 
+            // Istilah ikut jenis bisnes
+            if (KEDAI.jenisBisnes === 'general') {
+                document.getElementById('menu-title').innerHTML = '<i class="fa-solid fa-box-open text-brand"></i> Senarai Produk';
+            }
+
             // Banner atau header teks
             if (KEDAI.banner) {
                 document.getElementById('banner-img').src = KEDAI.banner;
+                document.getElementById('banner-nama').innerText = KEDAI.nama;
+                document.getElementById('banner-tagline').innerText = KEDAI.tagline || '';
                 document.getElementById('banner-wrap').classList.remove('hidden');
                 document.getElementById('header-text').classList.add('hidden');
             } else {
@@ -898,7 +910,8 @@
 
         async function shareKedai() {
             const url = location.origin + '/?id=' + KEDAI.slug;
-            const text = 'Nak makan? Orderlah! 😋\n\n' + KEDAI.nama + ' sekarang boleh order online — pilih menu, terus hantar:\n';
+            const general = (KEDAI.jenisBisnes === 'general');
+            const text = (general ? ('Order online dari ' + KEDAI.nama + '! 🛒\n\n') : ('Nak makan? Orderlah! 😋\n\n' + KEDAI.nama)) + ' sekarang boleh order online — pilih ' + (general ? 'produk' : 'menu') + ', terus hantar:\n';
 
             if (navigator.share) {
                 try {
@@ -1013,7 +1026,7 @@
                 if (z) text += '*Kawasan:* ' + z.nama + '\n';
             }
             text += '\n';
-            text += '*Item Sila Sediakan:*\n';
+            text += (KEDAI.jenisBisnes === 'general' ? '*Item Pesanan:*\n' : '*Item Sila Sediakan:*\n');
 
             MENU.forEach(function (item) {
                 const q = cart[item.id] || 0;
