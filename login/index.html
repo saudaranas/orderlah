@@ -6,6 +6,9 @@
     <title>Admin Kedai | Orderlah</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -45,7 +48,7 @@
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">ID Kedai (Slug)</label>
-                    <input type="text" id="login-slug" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: laksakriuk" autocapitalize="none">
+                    <input type="text" id="login-slug" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: duriankampung" autocapitalize="none">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">PIN</label>
@@ -99,7 +102,7 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Tagline (pilihan)</label>
-                <input type="text" id="p-tagline" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: Laksa paling kriuk di pekan">
+                <input type="text" id="p-tagline" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: Durian segar setiap hari">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Gerai (pilihan)</label>
@@ -201,14 +204,29 @@
 
         <!-- ============ TAB STATISTIK ============ -->
         <div id="tab-stats" class="hidden space-y-4">
+            <!-- Filter -->
+            <div class="bg-white p-3 rounded-2xl border border-gray-100 space-y-2">
+                <div class="grid grid-cols-4 gap-1.5" id="filter-tabs">
+                    <button data-mode="minggu" class="filter-btn py-2 rounded-lg text-xs font-bold bg-brand text-white">7 Hari</button>
+                    <button data-mode="hari" class="filter-btn py-2 rounded-lg text-xs font-bold bg-gray-100 text-gray-600">Hari</button>
+                    <button data-mode="bulan" class="filter-btn py-2 rounded-lg text-xs font-bold bg-gray-100 text-gray-600">Bulan</button>
+                    <button data-mode="tahun" class="filter-btn py-2 rounded-lg text-xs font-bold bg-gray-100 text-gray-600">Tahun</button>
+                </div>
+                <div id="filter-input-wrap" class="hidden">
+                    <input type="date" id="filter-hari" class="hidden w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    <input type="month" id="filter-bulan" class="hidden w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    <select id="filter-tahun" class="hidden w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"></select>
+                </div>
+            </div>
+
             <div class="grid grid-cols-3 gap-2">
                 <div class="bg-white p-3 rounded-xl border border-gray-100 text-center">
                     <p id="s-klik" class="text-2xl font-bold text-brand">0</p>
-                    <p class="text-xs text-gray-500">Klik (7 hari)</p>
+                    <p id="s-klik-label" class="text-xs text-gray-500">Klik</p>
                 </div>
                 <div class="bg-white p-3 rounded-xl border border-gray-100 text-center">
                     <p id="s-order" class="text-2xl font-bold text-[#16a34a]">0</p>
-                    <p class="text-xs text-gray-500">Order Sah (7 hari)</p>
+                    <p class="text-xs text-gray-500">Order Sah</p>
                 </div>
                 <div class="bg-white p-3 rounded-xl border border-gray-100 text-center">
                     <p id="s-conv" class="text-2xl font-bold text-green-600">0%</p>
@@ -218,7 +236,7 @@
 
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                 <div class="flex justify-between items-center mb-2">
-                    <h3 class="font-bold text-sm">Klik & Order Mingguan</h3>
+                    <h3 id="chart-title" class="font-bold text-sm">Klik & Order</h3>
                     <button onclick="loadStats(true)" class="text-xs text-brand font-bold"><i class="fa-solid fa-rotate"></i> Refresh</button>
                 </div>
                 <div id="chart-wrap" class="w-full"></div>
@@ -228,8 +246,14 @@
                 </div>
             </div>
 
+            <!-- Download -->
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="downloadPDF()" class="py-2.5 rounded-xl font-bold text-sm bg-red-50 text-red-600 border border-red-100 flex items-center justify-center gap-2"><i class="fa-solid fa-file-pdf"></i> Download PDF</button>
+                <button onclick="downloadExcel()" class="py-2.5 rounded-xl font-bold text-sm bg-green-50 text-green-700 border border-green-100 flex items-center justify-center gap-2"><i class="fa-solid fa-file-excel"></i> Download Excel</button>
+            </div>
+
             <div>
-                <h3 class="font-bold mb-2 text-sm"><i class="fa-solid fa-users text-brand"></i> Rekod Pelanggan (50 terkini)</h3>
+                <h3 id="rekod-title" class="font-bold mb-2 text-sm"><i class="fa-solid fa-users text-brand"></i> Rekod Pelanggan</h3>
                 <div id="orders-list" class="space-y-2"></div>
             </div>
         </div>
@@ -323,6 +347,8 @@
         function openDashboard() {
             document.getElementById('screen-login').classList.add('hidden');
             document.getElementById('screen-dash').classList.remove('hidden');
+
+            setupFilters();
 
             document.getElementById('dash-nama').innerText = KEDAI.nama;
             document.getElementById('dash-link').href = STORE_URL + '/?id=' + KEDAI.slug;
@@ -581,10 +607,23 @@
             toggles.className = 'flex items-center gap-3 flex-wrap';
             toggles.appendChild(buildToggle('Promo', item.promo, function (v) { ITEMS[idx].promo = v; }));
             toggles.appendChild(buildToggle('Free Delivery', item.freeDelivery, function (v) { ITEMS[idx].freeDelivery = v; }));
-            toggles.appendChild(buildToggle('Aktif', item.aktif !== false, function (v) { ITEMS[idx].aktif = v; }));
 
             const actions = document.createElement('div');
             actions.className = 'flex items-center gap-1';
+
+            // Butang Hide/Show (mata)
+            const eye = document.createElement('button');
+            const setEyeStyle = function () {
+                const hidden = (ITEMS[idx].aktif === false);
+                eye.className = 'w-8 h-8 rounded-lg ' + (hidden ? 'bg-gray-200 text-gray-500' : 'bg-green-50 text-green-600');
+                eye.innerHTML = hidden ? '<i class="fa-solid fa-eye-slash text-xs"></i>' : '<i class="fa-solid fa-eye text-xs"></i>';
+                eye.title = hidden ? 'Item disembunyikan — tekan untuk tunjuk' : 'Item dipaparkan — tekan untuk sembunyi';
+            };
+            setEyeStyle();
+            eye.onclick = function () {
+                ITEMS[idx].aktif = (ITEMS[idx].aktif === false);
+                setEyeStyle();
+            };
 
             const up = document.createElement('button');
             up.className = 'w-8 h-8 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200';
@@ -606,6 +645,7 @@
                 }
             };
 
+            actions.appendChild(eye);
             actions.appendChild(up);
             actions.appendChild(down);
             actions.appendChild(del);
@@ -679,19 +719,83 @@
         /* ================ STATISTIK ================ */
 
         let STATS = null;
+        let FILTER = { mode: 'minggu', val: '' };
+
+        function setupFilters() {
+            // Isi dropdown tahun (tahun semasa & 4 tahun lalu)
+            const sel = document.getElementById('filter-tahun');
+            if (sel && !sel.dataset.filled) {
+                const yr = new Date().getFullYear();
+                for (let i = 0; i < 5; i++) {
+                    const o = document.createElement('option');
+                    o.value = String(yr - i); o.innerText = String(yr - i);
+                    sel.appendChild(o);
+                }
+                sel.dataset.filled = '1';
+            }
+            // Default tarikh hari ini & bulan ini
+            const fh = document.getElementById('filter-hari');
+            const fb = document.getElementById('filter-bulan');
+            const today = new Date();
+            const iso = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+            if (fh && !fh.value) fh.value = iso;
+            if (fb && !fb.value) fb.value = iso.slice(0, 7);
+
+            // Klik butang mode
+            document.querySelectorAll('.filter-btn').forEach(function (btn) {
+                btn.onclick = function () {
+                    FILTER.mode = btn.dataset.mode;
+                    document.querySelectorAll('.filter-btn').forEach(function (b) {
+                        b.className = 'filter-btn py-2 rounded-lg text-xs font-bold ' + (b === btn ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600');
+                    });
+                    // Papar input yang sesuai
+                    const wrap = document.getElementById('filter-input-wrap');
+                    document.getElementById('filter-hari').classList.add('hidden');
+                    document.getElementById('filter-bulan').classList.add('hidden');
+                    document.getElementById('filter-tahun').classList.add('hidden');
+                    if (btn.dataset.mode === 'minggu') {
+                        wrap.classList.add('hidden');
+                    } else {
+                        wrap.classList.remove('hidden');
+                        document.getElementById('filter-' + btn.dataset.mode).classList.remove('hidden');
+                    }
+                    applyFilter();
+                };
+            });
+            // Tukar nilai input
+            ['filter-hari', 'filter-bulan', 'filter-tahun'].forEach(function (id) {
+                const el = document.getElementById(id);
+                if (el) el.onchange = applyFilter;
+            });
+        }
+
+        function applyFilter() {
+            if (FILTER.mode === 'hari') FILTER.val = document.getElementById('filter-hari').value;
+            else if (FILTER.mode === 'bulan') FILTER.val = document.getElementById('filter-bulan').value;
+            else if (FILTER.mode === 'tahun') FILTER.val = document.getElementById('filter-tahun').value;
+            else FILTER.val = '';
+            loadStats(true);
+        }
 
         async function loadStats(force) {
             if (STATS && !force) { renderStats(); return; }
             document.getElementById('chart-wrap').innerHTML = '<p class="text-center text-gray-400 text-sm py-10"><i class="fa-solid fa-circle-notch fa-spin"></i> Memuatkan...</p>';
             document.getElementById('orders-list').innerHTML = '';
             try {
-                const data = await api({ action: 'getStats', slug: SESSION.slug, pin: SESSION.pin });
+                const data = await api({ action: 'getStats', slug: SESSION.slug, pin: SESSION.pin, mode: FILTER.mode, val: FILTER.val });
                 if (!data.success) return toast(data.error || 'Gagal muat statistik', true);
                 STATS = data;
                 renderStats();
             } catch (err) {
                 toast('Masalah sambungan. Cuba semula.', true);
             }
+        }
+
+        function filterLabel() {
+            if (FILTER.mode === 'hari') return 'Hari ' + (FILTER.val || 'ini');
+            if (FILTER.mode === 'bulan') return 'Bulan ' + (FILTER.val || 'ini');
+            if (FILTER.mode === 'tahun') return 'Tahun ' + (FILTER.val || '');
+            return '7 Hari Terakhir';
         }
 
         function renderStats() {
@@ -706,11 +810,15 @@
             document.getElementById('s-order').innerText = totalOrder;
             document.getElementById('s-conv').innerText = conv + '%';
 
+            document.getElementById('chart-title').innerText = 'Klik & Order — ' + filterLabel();
+            document.getElementById('rekod-title').innerHTML = '<i class="fa-solid fa-users text-brand"></i> Rekod Pelanggan (' + orders.length + ')';
+
             document.getElementById('chart-wrap').innerHTML = buildChart(days);
             renderOrders(orders);
         }
 
         function buildChart(days) {
+            const n = days.length || 1;
             const W = 340, H = 180;
             const pad = { l: 30, r: 10, t: 12, b: 24 };
             const innerW = W - pad.l - pad.r;
@@ -718,30 +826,32 @@
 
             let maxV = 1;
             days.forEach(function (d) { maxV = Math.max(maxV, d.klik, d.order); });
-            maxV = Math.ceil(maxV / 5) * 5 || 5; // bundarkan ke gandaan 5
+            maxV = Math.ceil(maxV / 5) * 5 || 5;
 
-            const slotW = innerW / 7;
-            const barW = slotW * 0.5;
+            const slotW = innerW / n;
+            const barW = Math.min(slotW * 0.5, 18);
             const y = function (v) { return pad.t + innerH - (v / maxV * innerH); };
+
+            // Kalau banyak hari (cth bulan 30+), papar label setiap 5 je
+            const labelEvery = n > 15 ? Math.ceil(n / 8) : 1;
 
             let svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">';
 
-            // Grid + label paksi-y (0, separuh, max)
             [0, maxV / 2, maxV].forEach(function (v) {
                 const gy = y(v);
                 svg += '<line x1="' + pad.l + '" y1="' + gy + '" x2="' + (W - pad.r) + '" y2="' + gy + '" stroke="#f3f4f6" stroke-width="1"/>';
                 svg += '<text x="' + (pad.l - 5) + '" y="' + (gy + 3.5) + '" text-anchor="end" font-size="9" fill="#9ca3af">' + Math.round(v) + '</text>';
             });
 
-            // Bars (klik) + label hari
             days.forEach(function (d, i) {
                 const cx = pad.l + slotW * i + slotW / 2;
                 const bh = (d.klik / maxV) * innerH;
                 svg += '<rect x="' + (cx - barW / 2) + '" y="' + y(d.klik) + '" width="' + barW + '" height="' + Math.max(bh, 0) + '" rx="3" fill="#7c2d12"/>';
-                svg += '<text x="' + cx + '" y="' + (H - 8) + '" text-anchor="middle" font-size="9" fill="#6b7280">' + d.label + '</text>';
+                if (i % labelEvery === 0) {
+                    svg += '<text x="' + cx + '" y="' + (H - 8) + '" text-anchor="middle" font-size="9" fill="#6b7280">' + d.label + '</text>';
+                }
             });
 
-            // Line + dots (order)
             let pts = '';
             days.forEach(function (d, i) {
                 const cx = pad.l + slotW * i + slotW / 2;
@@ -750,11 +860,104 @@
             svg += '<polyline points="' + pts.trim() + '" fill="none" stroke="#dc2626" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
             days.forEach(function (d, i) {
                 const cx = pad.l + slotW * i + slotW / 2;
-                svg += '<circle cx="' + cx + '" cy="' + y(d.order) + '" r="3.2" fill="#fff" stroke="#dc2626" stroke-width="2"/>';
+                svg += '<circle cx="' + cx + '" cy="' + y(d.order) + '" r="' + (n > 15 ? 2 : 3.2) + '" fill="#fff" stroke="#dc2626" stroke-width="2"/>';
             });
 
             svg += '</svg>';
             return svg;
+        }
+
+        /* ============ DOWNLOAD ============ */
+
+        function downloadPDF() {
+            if (!STATS || !STATS.orders) return toast('Tiada data untuk download', true);
+            if (typeof window.jspdf === 'undefined') return toast('Library PDF belum sedia. Cuba lagi.', true);
+
+            const orders = STATS.orders || [];
+            const days = STATS.days || [];
+            const totalKlik = days.reduce(function (s, d) { return s + d.klik; }, 0);
+            const totalOrder = days.reduce(function (s, d) { return s + d.order; }, 0);
+            const totalJualan = orders.filter(function (o) { return o.status === 'Sah'; }).reduce(function (s, o) { return s + o.total; }, 0);
+
+            const doc = new window.jspdf.jsPDF();
+            const kedai = (KEDAI.nama || SESSION.slug);
+
+            // Tajuk
+            doc.setFontSize(16); doc.setTextColor(220, 38, 38);
+            doc.text('Laporan Jualan — ' + kedai, 14, 18);
+            doc.setFontSize(10); doc.setTextColor(100);
+            doc.text('Tempoh: ' + filterLabel(), 14, 25);
+            doc.text('Dijana: ' + new Date().toLocaleString('ms-MY'), 14, 30);
+
+            // Ringkasan
+            doc.setTextColor(40);
+            doc.setFontSize(11);
+            doc.text('Jumlah Klik: ' + totalKlik, 14, 40);
+            doc.text('Order Disahkan: ' + totalOrder, 70, 40);
+            doc.text('Jumlah Jualan: RM ' + totalJualan.toFixed(2), 130, 40);
+
+            // Graf (tukar SVG -> canvas -> imej)
+            const svg = document.querySelector('#chart-wrap svg');
+            const afterChart = function (imgData) {
+                if (imgData) {
+                    try { doc.addImage(imgData, 'PNG', 14, 46, 120, 64); } catch (e) {}
+                }
+                const startY = imgData ? 118 : 48;
+                // Jadual detail
+                const rows = orders.map(function (o) {
+                    return [o.masa, o.nama, o.telefon, o.bayaran, o.items.replace(/;/g, ', '), 'RM' + o.total.toFixed(2), o.status];
+                });
+                doc.autoTable({
+                    head: [['Masa', 'Nama', 'WhatsApp', 'Bayar', 'Item', 'Total', 'Status']],
+                    body: rows,
+                    startY: startY,
+                    styles: { fontSize: 7, cellPadding: 1.5 },
+                    headStyles: { fillColor: [220, 38, 38] },
+                    columnStyles: { 4: { cellWidth: 45 } }
+                });
+                doc.save('Laporan-' + SESSION.slug + '-' + FILTER.mode + '.pdf');
+            };
+
+            if (svg) {
+                svgToPng(svg, afterChart);
+            } else {
+                afterChart(null);
+            }
+        }
+
+        function svgToPng(svg, cb) {
+            try {
+                const xml = new XMLSerializer().serializeToString(svg);
+                const svg64 = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(xml)));
+                const img = new Image();
+                img.onload = function () {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 680; canvas.height = 360;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    cb(canvas.toDataURL('image/png'));
+                };
+                img.onerror = function () { cb(null); };
+                img.src = svg64;
+            } catch (e) { cb(null); }
+        }
+
+        function downloadExcel() {
+            if (!STATS || !STATS.orders) return toast('Tiada data untuk download', true);
+            if (typeof XLSX === 'undefined') return toast('Library Excel belum sedia. Cuba lagi.', true);
+
+            const orders = STATS.orders || [];
+            const rows = orders.map(function (o) {
+                return {
+                    Masa: o.masa, Nama: o.nama, 'No WhatsApp': o.telefon, Alamat: o.alamat,
+                    Bayaran: o.bayaran, Item: o.items.replace(/;/g, ', '), Total: o.total, Status: o.status
+                };
+            });
+            const ws = XLSX.utils.json_to_sheet(rows.length ? rows : [{ Nota: 'Tiada rekod dalam tempoh ini' }]);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Jualan');
+            XLSX.writeFile(wb, 'Jualan-' + SESSION.slug + '-' + FILTER.mode + '.xlsx');
         }
 
         function renderOrders(orders) {
