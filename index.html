@@ -311,8 +311,8 @@
                 </div>
                 <div class="bg-white rounded-2xl p-5 border border-gray-100 text-center shadow-sm">
                     <div class="w-14 h-14 bg-brand-light rounded-2xl flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-clock text-brand text-2xl"></i></div>
-                    <h3 class="font-bold mb-1">Jimat Masa, Fokus Masak</h3>
-                    <p class="text-sm text-gray-600">Tak payah taip menu & harga berulang kali. Pelanggan tengok sendiri, order sendiri. Anda fokus sediakan makanan.</p>
+                    <h3 class="font-bold mb-1">Jimat Masa, Fokus Penyediaan</h3>
+                    <p class="text-sm text-gray-600">Tak payah taip menu & harga berulang kali. Pelanggan tengok sendiri, order sendiri. Anda fokus sediakan pesanan.</p>
                 </div>
                 <div class="bg-white rounded-2xl p-5 border border-gray-100 text-center shadow-sm">
                     <div class="w-14 h-14 bg-brand-light rounded-2xl flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-arrow-trend-up text-brand text-2xl"></i></div>
@@ -570,30 +570,51 @@
 
     <!-- ============ HARGA (UBAH IKUT OFFER ANDA) ============ -->
     <section id="harga" class="px-4 py-12 bg-gradient-to-b from-red-50 to-white">
-        <div class="max-w-md mx-auto text-center">
-            <h2 class="text-2xl font-extrabold mb-2 text-gray-900">Pelaburan Anda</h2>
+        <div class="max-w-3xl mx-auto text-center">
+            <h2 class="text-2xl font-extrabold mb-2 text-gray-900">Pilih Pakej Anda</h2>
             <p class="text-gray-500 text-sm mb-8">Lebih murah dari sekali bayar caj platform delivery</p>
 
-            <div class="bg-white text-gray-800 rounded-3xl p-6 shadow-xl border-2 border-brand/20">
-                <span class="inline-block bg-brand-light text-brand-dark text-xs font-bold px-3 py-1 rounded-full mb-3">PAKEJ LENGKAP</span>
-                <div class="mb-4">
-                    <p class="text-gray-400 text-sm line-through">Setup RM30</p>
-                    <p class="text-4xl font-extrabold text-brand-dark">RM15 <span class="text-base font-semibold text-gray-500">setup sekali</span></p>
-                    <p class="text-xl font-bold mt-1">+ RM10<span class="text-sm font-semibold text-gray-500">/bulan</span></p>
+            <div class="grid md:grid-cols-2 gap-5 max-w-2xl mx-auto">
+
+                <!-- Pakej Bulanan -->
+                <div class="bg-white text-gray-800 rounded-3xl p-6 shadow-lg border border-gray-200 flex flex-col">
+                    <span class="inline-block bg-gray-100 text-gray-600 text-xs font-bold px-3 py-1 rounded-full mb-3 self-center">BULANAN</span>
+                    <div class="mb-4">
+                        <p class="text-4xl font-extrabold text-brand-dark">RM25</p>
+                        <p class="text-sm text-gray-500 mt-1">Setup RM15 + RM10 bulan pertama</p>
+                    </div>
+                    <ul class="text-left text-sm space-y-2 mb-6 flex-1">
+                        <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Semua fungsi penuh Orderlah</li>
+                        <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Kami setupkan menu (siap 24 jam)</li>
+                        <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Tiada caj potongan, unlimited order</li>
+                        <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Bayar bulan demi bulan</li>
+                    </ul>
+                    <button onclick="bukaLanggan('bulanan')" class="block w-full bg-white border-2 border-brand text-brand-dark font-bold py-3.5 rounded-xl hover:bg-red-50 transition-colors">
+                        Pilih Bulanan
+                    </button>
                 </div>
-                <ul class="text-left text-sm space-y-2.5 mb-6">
-                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Link kedai khas untuk anda</li>
-                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Kami setupkan menu penuh (siap dalam 24 jam)</li>
-                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Panel admin urus sendiri</li>
-                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> COD + QR DuitNow</li>
-                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Tiada caj potongan, unlimited order</li>
-                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Support WhatsApp terus dengan kami</li>
-                </ul>
-                <a href="https://wa.me/60167388358?text=Saya%20berminat%20nak%20sistem%20order%20online%20Orderlah%20untuk%20kedai%20saya" class="block bg-brand text-white font-bold py-3.5 rounded-xl hover:bg-brand-dark transition-colors">
-                    <i class="fa-brands fa-whatsapp"></i> WhatsApp Kami Sekarang
-                </a>
-                <p class="text-xs text-gray-400 mt-3">Tiada kontrak. Berhenti bila-bila masa.</p>
+
+                <!-- Pakej 3 Bulan -->
+                <div class="bg-white text-gray-800 rounded-3xl p-6 shadow-xl border-2 border-brand flex flex-col relative">
+                    <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap">PALING POPULAR &bull; JIMAT RM10</span>
+                    <span class="inline-block bg-brand-light text-brand-dark text-xs font-bold px-3 py-1 rounded-full mb-3 self-center mt-2">3 BULAN</span>
+                    <div class="mb-4">
+                        <p class="text-gray-400 text-sm line-through">RM45</p>
+                        <p class="text-4xl font-extrabold text-brand-dark">RM35</p>
+                        <p class="text-sm text-gray-500 mt-1">Setup RM5 + RM30 (3 bulan)</p>
+                    </div>
+                    <ul class="text-left text-sm space-y-2 mb-6 flex-1">
+                        <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Semua fungsi penuh Orderlah</li>
+                        <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Kami setupkan menu (siap 24 jam)</li>
+                        <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i> Tiada caj potongan, unlimited order</li>
+                        <li class="flex gap-2"><i class="fa-solid fa-star text-amber-500 mt-0.5"></i> <b>Jimat RM10 + setup separuh harga</b></li>
+                    </ul>
+                    <button onclick="bukaLanggan('3bulan')" class="block w-full bg-brand text-white font-bold py-3.5 rounded-xl hover:bg-brand-dark transition-colors">
+                        Pilih 3 Bulan
+                    </button>
+                </div>
             </div>
+            <p class="text-xs text-gray-400 mt-6">Tiada kontrak. Berhenti bila-bila masa.</p>
         </div>
     </section>
 
@@ -646,9 +667,9 @@
         <div class="max-w-xl mx-auto text-center">
             <h2 class="text-2xl md:text-3xl font-extrabold mb-3">Malam Ini, Bila Pelanggan Tanya<br>"Menu Apa Ada?"...</h2>
             <p class="text-gray-600 mb-6">...anda cuma perlu hantar satu link. Itu sahaja.</p>
-            <button onclick="bukaLanggan()" class="inline-block bg-brand text-white font-bold py-4 px-10 rounded-xl hover:bg-brand-dark transition-colors text-lg">
+            <a href="#harga" class="inline-block bg-brand text-white font-bold py-4 px-10 rounded-xl hover:bg-brand-dark transition-colors text-lg">
                 <i class="fa-solid fa-bolt"></i> Langgan Sekarang
-            </button>
+            </a>
             <p class="text-xs text-gray-400 mt-4">Bulanan RM25 atau 3 Bulan RM35 (jimat RM10). Tiada kontrak.</p>
         </div>
     </section>
@@ -668,43 +689,8 @@
                 <p class="text-sm text-rose-100">Setup RM15 + RM10 bulan pertama</p>
             </div>
 
-            <!-- Langkah 0: Pilih Pakej -->
-            <div id="langgan-step0" class="p-5 space-y-3">
-                <p class="text-sm text-gray-600 text-center mb-1">Pilih pakej yang sesuai untuk anda:</p>
-
-                <button onclick="pilihPakej('bulanan')" class="w-full text-left border-2 border-gray-200 rounded-2xl p-4 hover:border-brand transition-colors">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="font-bold text-gray-800">Bulanan</p>
-                            <p class="text-xs text-gray-500">Setup RM15 + RM10/bulan</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-2xl font-extrabold text-brand-dark">RM25</p>
-                            <p class="text-[10px] text-gray-400">bayaran pertama</p>
-                        </div>
-                    </div>
-                </button>
-
-                <button onclick="pilihPakej('3bulan')" class="w-full text-left border-2 border-brand rounded-2xl p-4 bg-red-50 relative hover:bg-red-100 transition-colors">
-                    <span class="absolute -top-2.5 left-4 bg-brand text-white text-[10px] font-bold px-2 py-0.5 rounded-full">PALING POPULAR &bull; JIMAT RM10</span>
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="font-bold text-gray-800">3 Bulan</p>
-                            <p class="text-xs text-gray-500">Setup RM5 + RM30 (3 bulan)</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-2xl font-extrabold text-brand-dark">RM35</p>
-                            <p class="text-[10px] text-gray-400">sekali bayar</p>
-                        </div>
-                    </div>
-                </button>
-
-                <p class="text-xs text-gray-400 text-center pt-1">Tiada kontrak. Berhenti bila-bila masa.</p>
-            </div>
-
-            <!-- Langkah 1: Bayar -->
+            <!-- Langkah 1: QR + Borang -->
             <div id="langgan-step1" class="hidden p-5 space-y-4">
-                <button onclick="langganStep(0)" class="text-xs text-gray-400"><i class="fa-solid fa-arrow-left"></i> Tukar pakej</button>
 
                 <!-- QR Bayaran -->
                 <div class="bg-gray-50 rounded-2xl p-4 text-center">
@@ -792,24 +778,22 @@
         /* ============ MODAL LANGGANAN (salespage) ============ */
         let PAKEJ = { id: '3bulan', nama: '3 Bulan', jumlah: 35 };
 
-        function bukaLanggan() {
+        function bukaLanggan(id) {
+            // Set pakej ikut card yang diklik
+            if (id === 'bulanan') PAKEJ = { id: 'bulanan', nama: 'Bulanan', jumlah: 25 };
+            else PAKEJ = { id: '3bulan', nama: '3 Bulan', jumlah: 35 };
+            document.getElementById('pay-pakej-nama').innerText = PAKEJ.nama;
+            document.getElementById('pay-jumlah').innerText = 'RM' + PAKEJ.jumlah;
+
             document.getElementById('modal-langgan').classList.remove('hidden');
-            langganStep(0);
+            langganStep(1);
             document.body.style.overflow = 'hidden';
         }
         function tutupLanggan() {
             document.getElementById('modal-langgan').classList.add('hidden');
             document.body.style.overflow = '';
         }
-        function pilihPakej(id) {
-            if (id === 'bulanan') PAKEJ = { id: 'bulanan', nama: 'Bulanan', jumlah: 25 };
-            else PAKEJ = { id: '3bulan', nama: '3 Bulan', jumlah: 35 };
-            document.getElementById('pay-pakej-nama').innerText = PAKEJ.nama;
-            document.getElementById('pay-jumlah').innerText = 'RM' + PAKEJ.jumlah;
-            langganStep(1);
-        }
         function langganStep(n) {
-            document.getElementById('langgan-step0').classList.toggle('hidden', n !== 0);
             document.getElementById('langgan-step1').classList.toggle('hidden', n !== 1);
             document.getElementById('langgan-step2').classList.toggle('hidden', n !== 2);
         }
