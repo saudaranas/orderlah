@@ -36,10 +36,12 @@
         .phone-shadow { box-shadow: 0 25px 50px -12px rgba(23, 37, 84, 0.35); }
         html { scroll-behavior: smooth; }
         @keyframes floatA { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
-        @keyframes floatB { 0%,100% { transform: translateY(0) rotate(4deg); } 50% { transform: translateY(-22px) rotate(4deg); } }
+        @keyframes floatB { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes floatC { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
         .float-a { animation: floatA 4.5s ease-in-out infinite; }
-        .float-b { animation: floatB 6s ease-in-out infinite; }
-        @media (prefers-reduced-motion: reduce) { .float-a, .float-b { animation: none; } }
+        .float-b { animation: floatB 3.8s ease-in-out infinite; }
+        .float-c { animation: floatC 5.2s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) { .float-a, .float-b, .float-c { animation: none; } }
     </style>
 </head>
 <body class="text-gray-800 antialiased">
@@ -225,21 +227,43 @@
                 </a>
             </div>
 
-            <!-- Gambar mockup (bawah, center) -->
+            <!-- Gambar mockup (bawah, center) dengan floating badges -->
             <div class="flex justify-center">
-                <div class="float-a w-[280px] sm:w-[310px]">
-                    <div class="phone-shadow bg-gray-900 rounded-[2.5rem] p-2.5">
-                        <div class="bg-gray-50 rounded-[2rem] overflow-hidden">
-                            <!-- GANTI src di bawah dengan link gambar screenshot page peniaga anda -->
-                            <img src="GAMBAR_MOCKUP_HERO"
-                                 alt="Panel Peniaga Orderlah"
-                                 class="w-full h-auto block"
-                                 onerror="this.style.display='none';document.getElementById('hero-img-fallback').style.display='block';">
-                            <!-- Fallback jika gambar belum diisi -->
-                            <div id="hero-img-fallback" style="display:none" class="aspect-[9/19] flex flex-col items-center justify-center text-center p-6 bg-gradient-to-br from-brand to-brand-dark">
-                                <i class="fa-solid fa-image text-white/40 text-4xl mb-3"></i>
-                                <p class="text-white/70 text-xs">Letak screenshot<br>page peniaga di sini</p>
-                            </div>
+                <div class="relative w-[300px] sm:w-[360px]">
+
+                    <!-- Badge kiri atas -->
+                    <div class="float-b absolute -left-6 sm:-left-16 top-8 z-10 bg-white rounded-xl shadow-lg px-3 py-2 flex items-center gap-2 border border-gray-100">
+                        <div class="w-7 h-7 rounded-lg bg-brand-light flex items-center justify-center"><i class="fa-brands fa-whatsapp text-brand text-sm"></i></div>
+                        <span class="text-xs font-bold text-gray-700">Order masuk<br>WhatsApp</span>
+                    </div>
+
+                    <!-- Badge kanan atas -->
+                    <div class="float-c absolute -right-4 sm:-right-12 top-24 z-10 bg-white rounded-xl shadow-lg px-3 py-2 flex items-center gap-2 border border-gray-100">
+                        <div class="w-7 h-7 rounded-lg bg-green-100 flex items-center justify-center"><i class="fa-solid fa-chart-line text-green-600 text-sm"></i></div>
+                        <span class="text-xs font-bold text-gray-700">Statistik<br>jualan</span>
+                    </div>
+
+                    <!-- Badge kiri bawah -->
+                    <div class="float-c absolute -left-4 sm:-left-14 bottom-28 z-10 bg-white rounded-xl shadow-lg px-3 py-2 flex items-center gap-2 border border-gray-100">
+                        <div class="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center"><i class="fa-solid fa-percent text-amber-600 text-sm"></i></div>
+                        <span class="text-xs font-bold text-gray-700">0% caj<br>komisen</span>
+                    </div>
+
+                    <!-- Badge kanan bawah -->
+                    <div class="float-b absolute -right-5 sm:-right-14 bottom-16 z-10 bg-white rounded-xl shadow-lg px-3 py-2 flex items-center gap-2 border border-gray-100">
+                        <div class="w-7 h-7 rounded-lg bg-brand-light flex items-center justify-center"><i class="fa-solid fa-boxes-stacked text-brand text-sm"></i></div>
+                        <span class="text-xs font-bold text-gray-700">Urus menu<br>&amp; stok</span>
+                    </div>
+
+                    <!-- Mockup -->
+                    <div class="float-a relative z-0">
+                        <img src="https://i.postimg.cc/256ck8b6/background-removed-background-removed-(1).png"
+                             alt="Panel Peniaga Orderlah"
+                             class="w-full h-auto block drop-shadow-2xl"
+                             onerror="this.style.display='none';document.getElementById('hero-img-fallback').style.display='flex';">
+                        <div id="hero-img-fallback" style="display:none" class="aspect-[9/19] flex-col items-center justify-center text-center p-6 bg-gradient-to-br from-brand to-brand-dark rounded-[2rem]">
+                            <i class="fa-solid fa-image text-white/40 text-4xl mb-3"></i>
+                            <p class="text-white/70 text-xs">Gambar page peniaga</p>
                         </div>
                     </div>
                 </div>
