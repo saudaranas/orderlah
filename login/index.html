@@ -9,6 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -93,6 +94,18 @@
             </div>
         </div>
 
+        <!-- ============ QR KEDAI (semua tab kecuali statistik) ============ -->
+        <div id="qr-card" class="hidden mb-4 bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <div class="flex items-center gap-4">
+                <div id="qr-box" class="w-24 h-24 shrink-0 flex items-center justify-center bg-gray-50 rounded-xl border border-gray-100"></div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-bold text-sm text-gray-800 mb-0.5"><i class="fa-solid fa-qrcode text-brand"></i> QR Kedai Anda</p>
+                    <p class="text-xs text-gray-500 mb-2">Cetak &amp; letak di gerai. Pelanggan scan terus order online.</p>
+                    <button onclick="downloadQR()" class="text-xs bg-brand text-white font-bold px-3 py-1.5 rounded-lg hover:bg-brand-dark"><i class="fa-solid fa-download"></i> Download QR</button>
+                </div>
+            </div>
+        </div>
+
         <!-- ============ TAB PROFIL ============ -->
         <div id="tab-profil" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4">
             <div>
@@ -134,6 +147,17 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">No. WhatsApp (terima order)</label>
                 <input type="tel" id="p-whatsapp" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: 60123456789">
                 <p class="text-xs text-gray-400 mt-1">Mula dengan 60, tanpa + atau jarak</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Telegram Chat ID (pilihan — notifikasi order)</label>
+                <input type="text" id="p-telegram" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: 1523007964">
+                <p class="text-xs text-gray-400 mt-1">Dapat notifikasi Telegram setiap order baru. <button type="button" onclick="document.getElementById('tg-help').classList.toggle('hidden')" class="text-brand underline">Cara dapat Chat ID?</button></p>
+                <div id="tg-help" class="hidden mt-2 bg-red-50 rounded-xl p-3 text-xs text-gray-600 space-y-1">
+                    <p>1. Buka Telegram, cari bot <b>@userinfobot</b></p>
+                    <p>2. Tekan Start — ia akan balas dengan ID anda</p>
+                    <p>3. Salin nombor ID tu, tampal di sini</p>
+                    <p>4. Cari bot <b>@orderlah_bot</b>, tekan Start (penting!) supaya bot boleh hantar mesej kepada anda</p>
+                </div>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Gambar Banner / Poster Kedai (pilihan)</label>
@@ -369,7 +393,9 @@
 
             setupFilters();
             loadKompas();
+            buildQR();
             document.getElementById('kompas').classList.remove('hidden');
+            document.getElementById('qr-card').classList.remove('hidden');
 
             document.getElementById('dash-nama').innerText = KEDAI.nama;
             document.getElementById('dash-link').href = STORE_URL + '/?id=' + KEDAI.slug;
@@ -383,6 +409,7 @@
             document.getElementById('p-peta').value = KEDAI.linkPeta || '';
             document.getElementById('p-jam').value = KEDAI.jamOperasi || '';
             document.getElementById('p-whatsapp').value = KEDAI.noWhatsapp || '';
+            document.getElementById('p-telegram').value = KEDAI.telegramChatId || '';
             document.getElementById('p-banner').value = KEDAI.banner || '';
             document.getElementById('p-qr').value = KEDAI.qr || '';
             document.getElementById('p-caj-cod').value = KEDAI.cajPenghantaran || 0;
@@ -404,8 +431,9 @@
                 document.getElementById('tab-btn-' + t).className = 'py-2.5 rounded-xl font-bold text-sm ' +
                     (t === tab ? 'bg-brand text-white' : 'bg-white text-gray-600 border border-gray-200');
             });
-            // Kompas Bisnes nampak di semua tab kecuali statistik
+            // Kompas Bisnes & QR nampak di semua tab kecuali statistik
             document.getElementById('kompas').classList.toggle('hidden', tab === 'stats');
+            document.getElementById('qr-card').classList.toggle('hidden', tab === 'stats');
             if (tab === 'stats') loadStats(false);
         }
 
@@ -423,6 +451,66 @@
                 document.getElementById('k-order').innerText = totalOrder;
                 document.getElementById('k-jualan').innerText = totalJualan.toFixed(0);
             } catch (e) {}
+        }
+
+        /* ================ QR KEDAI ================ */
+        let QR_OBJ = null;
+        function shopURL() {
+            return 'https://orderlah.store/?id=' + encodeURIComponent(SESSION.slug);
+        }
+        function buildQR() {
+            const box = document.getElementById('qr-box');
+            if (!box || typeof QRCode === 'undefined') return;
+            box.innerHTML = '';
+            try {
+                QR_OBJ = new QRCode(box, {
+                    text: shopURL(),
+                    width: 88, height: 88,
+                    colorDark: '#292524', colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+            } catch (e) {}
+        }
+        function downloadQR() {
+            // Bina QR saiz besar untuk cetak, dengan nama kedai di bawah
+            const tmp = document.createElement('div');
+            tmp.style.display = 'none';
+            document.body.appendChild(tmp);
+            try {
+                new QRCode(tmp, { text: shopURL(), width: 600, height: 600, colorDark: '#292524', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.H });
+            } catch (e) { document.body.removeChild(tmp); return toast('Gagal jana QR', true); }
+
+            setTimeout(function () {
+                const img = tmp.querySelector('img') || tmp.querySelector('canvas');
+                const srcCanvas = document.createElement('canvas');
+                const pad = 60, qrSize = 600, footerH = 90;
+                srcCanvas.width = qrSize + pad * 2;
+                srcCanvas.height = qrSize + pad * 2 + footerH;
+                const ctx = srcCanvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, srcCanvas.width, srcCanvas.height);
+
+                const draw = function () {
+                    ctx.drawImage(img, pad, pad, qrSize, qrSize);
+                    // Nama kedai
+                    ctx.fillStyle = '#292524';
+                    ctx.font = 'bold 34px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText((KEDAI.nama || '').slice(0, 28), srcCanvas.width / 2, qrSize + pad + 50);
+                    ctx.fillStyle = '#dc2626';
+                    ctx.font = '24px Arial';
+                    ctx.fillText('Scan untuk order online', srcCanvas.width / 2, qrSize + pad + 84);
+
+                    const a = document.createElement('a');
+                    a.href = srcCanvas.toDataURL('image/png');
+                    a.download = 'QR-' + SESSION.slug + '.png';
+                    a.click();
+                    document.body.removeChild(tmp);
+                };
+
+                if (img.tagName === 'IMG' && !img.complete) { img.onload = draw; }
+                else { draw(); }
+            }, 300);
         }
 
         /* ================ PROFIL ================ */
@@ -508,6 +596,7 @@
                 linkPeta: document.getElementById('p-peta').value.trim(),
                 jamOperasi: document.getElementById('p-jam').value.trim(),
                 noWhatsapp: document.getElementById('p-whatsapp').value.replace(/[^0-9]/g, ''),
+                telegramChatId: document.getElementById('p-telegram').value.replace(/[^0-9]/g, ''),
                 banner: document.getElementById('p-banner').value.trim(),
                 qr: document.getElementById('p-qr').value.trim(),
                 cajPenghantaran: parseFloat(document.getElementById('p-caj-cod').value) || 0,
