@@ -188,6 +188,16 @@
             </div>
             <input type="file" id="file-input" accept="image/*" class="hidden">
             <div>
+                <label class="flex items-center justify-between cursor-pointer">
+                    <span>
+                        <span class="block text-sm font-medium text-gray-700">Terima Bayaran Tunai (COD)</span>
+                        <span class="block text-xs text-gray-400">Tutup jika nak terima bayaran online (QR) sahaja</span>
+                    </span>
+                    <input type="checkbox" id="p-cod-aktif" class="sr-only peer" checked>
+                    <span class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-brand after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></span>
+                </label>
+            </div>
+            <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Caj Penghantaran (RM)</label>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
@@ -440,6 +450,7 @@
             document.getElementById('p-banner').value = KEDAI.banner || '';
             document.getElementById('p-qr').value = KEDAI.qr || '';
             document.getElementById('p-caj-cod').value = KEDAI.cajPenghantaran || 0;
+            document.getElementById('p-cod-aktif').checked = (KEDAI.codAktif !== false);
             document.getElementById('p-caj-online').value = (KEDAI.cajOnline === undefined || KEDAI.cajOnline === null) ? (KEDAI.cajPenghantaran || 0) : KEDAI.cajOnline;
             ZON = Array.isArray(KEDAI.zon) ? KEDAI.zon.slice() : [];
             document.getElementById('p-guna-zon').checked = ZON.length > 0;
@@ -627,6 +638,7 @@
                 banner: document.getElementById('p-banner').value.trim(),
                 qr: document.getElementById('p-qr').value.trim(),
                 cajPenghantaran: parseFloat(document.getElementById('p-caj-cod').value) || 0,
+                codAktif: document.getElementById('p-cod-aktif').checked,
                 cajOnline: parseFloat(document.getElementById('p-caj-online').value) || 0,
                 zon: document.getElementById('p-guna-zon').checked ? ZON : [],
                 status: document.querySelector('input[name="p-status"]:checked').value
