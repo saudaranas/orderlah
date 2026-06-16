@@ -74,6 +74,16 @@
             <button onclick="doLogout()" class="text-gray-400 hover:text-red-500 text-sm"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
         </div>
 
+        <!-- Banner amaran expiry (≤5 hari) -->
+        <div id="exp-warning" class="hidden mb-4 bg-amber-50 border border-amber-200 rounded-2xl p-3 flex items-center gap-3">
+            <i class="fa-solid fa-triangle-exclamation text-amber-500 text-lg"></i>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-amber-800" id="exp-warning-text">Langganan tamat tidak lama lagi</p>
+                <p class="text-xs text-amber-600">Perbaharui sekarang supaya kedai anda tak terganggu.</p>
+            </div>
+            <button onclick="bukaRenew()" class="text-xs bg-amber-500 text-white font-bold px-3 py-1.5 rounded-lg shrink-0">Perbaharui</button>
+        </div>
+
         <!-- Tabs -->
         <div class="grid grid-cols-3 gap-2 mb-4">
             <button id="tab-btn-profil" onclick="showTab('profil')" class="py-2.5 rounded-xl font-bold text-sm bg-brand text-white">Profil</button>
@@ -1345,11 +1355,36 @@
         let RENEW = { pakej: '3 Bulan', nama: '3 Bulan', jumlah: 30 };
 
         function checkExpiry() {
-            if (KEDAI && KEDAI.isExpired) {
-                document.getElementById('exp-date').innerText = KEDAI.expiry || '-';
+            if (!KEDAI || !KEDAI.expiry) return;
+
+            if (KEDAI.isExpired) {
+                // Dah tamat — popup penuh
+                document.getElementById('exp-modal-title').innerText = 'Langganan Tamat Tempoh';
+                document.getElementById('exp-modal-msg').innerHTML = 'Langganan Orderlah anda telah tamat pada <b>' + (KEDAI.expiry || '-') + '</b>. Page kedai anda tidak dapat dilihat pelanggan sehingga diperbaharui.';
                 expStep(1);
                 document.getElementById('modal-expired').classList.remove('hidden');
+                return;
             }
+
+            // Belum tamat — kira hari berbaki
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const exp = new Date(KEDAI.expiry);
+            const hariBaki = Math.ceil((exp - today) / 86400000);
+
+            if (hariBaki >= 0 && hariBaki <= 5) {
+                const txt = hariBaki === 0 ? 'Langganan tamat HARI INI' : ('Langganan tamat dalam ' + hariBaki + ' hari');
+                document.getElementById('exp-warning-text').innerText = txt;
+                document.getElementById('exp-warning').classList.remove('hidden');
+            }
+        }
+
+        // Buka popup renew secara manual (dari banner amaran)
+        function bukaRenew() {
+            document.getElementById('exp-modal-title').innerText = 'Perbaharui Langganan';
+            document.getElementById('exp-modal-msg').innerHTML = 'Langganan Orderlah anda tamat pada <b>' + (KEDAI.expiry || '-') + '</b>. Perbaharui awal supaya kedai anda terus aktif tanpa gangguan.';
+            expStep(1);
+            document.getElementById('modal-expired').classList.remove('hidden');
         }
         function expStep(n) {
             document.getElementById('exp-step1').classList.toggle('hidden', n !== 1);
@@ -1380,10 +1415,10 @@
         <div class="bg-white rounded-3xl max-w-sm w-full overflow-hidden">
             <div class="bg-brand text-white p-5 text-center">
                 <i class="fa-solid fa-circle-exclamation text-3xl mb-2"></i>
-                <h3 class="text-xl font-extrabold">Langganan Tamat Tempoh</h3>
+                <h3 class="text-xl font-extrabold" id="exp-modal-title">Perbaharui Langganan</h3>
             </div>
             <div id="exp-step1" class="p-5 text-center">
-                <p class="text-sm text-gray-600 mb-4">Langganan Orderlah anda telah tamat pada <b id="exp-date">-</b>. Page kedai anda tidak dapat dilihat pelanggan sehingga diperbaharui.</p>
+                <p class="text-sm text-gray-600 mb-4" id="exp-modal-msg">Langganan Orderlah anda tamat pada <b id="exp-date">-</b>. Perbaharui supaya page kedai anda terus aktif.</p>
                 <p class="text-sm font-bold text-gray-700 mb-3">Pilih pakej untuk teruskan:</p>
                 <div class="space-y-2 mb-2">
                     <button onclick="pilihRenew('bulanan')" class="w-full border-2 border-gray-200 rounded-2xl p-3 flex justify-between items-center hover:border-brand">
