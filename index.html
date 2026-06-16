@@ -39,6 +39,7 @@
         @keyframes waPulse { 0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37,211,102,0.5); } 50% { transform: scale(1.08); box-shadow: 0 0 0 12px rgba(37,211,102,0); } }
         .wa-float { animation: waPulse 2.2s ease-in-out infinite; }
         .wa-float:hover { animation-play-state: paused; transform: scale(1.12); }
+        body.mode-kedai .wa-float { display: none !important; }
         @media (prefers-reduced-motion: reduce) { .wa-float { animation: none; } }
         @keyframes floatB { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         @keyframes floatC { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
@@ -797,12 +798,9 @@
 
         // ROUTER: ada ?id= -> page kedai. Tiada -> salespage. URL tak berubah.
         if (slug) {
-            document.body.classList.add('bg-gray-50', 'p-2');
+            document.body.classList.add('bg-gray-50', 'p-2', 'mode-kedai');
             document.getElementById('page-kedai').classList.remove('hidden');
             document.title = 'Order Online';
-            // Floating WhatsApp hanya untuk salespage, bukan page kedai peniaga
-            const waBtn = document.getElementById('wa-float-btn');
-            if (waBtn) waBtn.style.display = 'none';
             init();
         } else {
             document.body.classList.add('bg-white');
