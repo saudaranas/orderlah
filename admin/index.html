@@ -335,16 +335,17 @@
         /* ================ SENARAI ================ */
 
         function renderList() {
-            // Stats
-            document.getElementById('stat-total').innerText = LIST.length;
-            document.getElementById('stat-aktif').innerText = LIST.filter(function (k) { return k.status === 'Aktif'; }).length;
-            document.getElementById('stat-tutup').innerText = LIST.filter(function (k) { return k.status !== 'Aktif'; }).length;
+            // Stats (kecuali demo — showcase, bukan pelanggan sebenar)
+            const real = LIST.filter(function (k) { return k.slug.toLowerCase() !== 'demo'; });
+            document.getElementById('stat-total').innerText = real.length;
+            document.getElementById('stat-aktif').innerText = real.filter(function (k) { return k.status === 'Aktif'; }).length;
+            document.getElementById('stat-tutup').innerText = real.filter(function (k) { return k.status !== 'Aktif'; }).length;
 
-            // Conversion ringkas (semua kedai)
+            // Conversion ringkas (kecuali demo)
             if (ADMIN_STATS) {
                 let totalKlik = 0, totalOrder = 0;
-                if (ADMIN_STATS.klik) { for (const s in ADMIN_STATS.klik) totalKlik += ADMIN_STATS.klik[s]; }
-                if (ADMIN_STATS.order) { for (const s in ADMIN_STATS.order) totalOrder += (ADMIN_STATS.order[s].total || 0); }
+                if (ADMIN_STATS.klik) { for (const s in ADMIN_STATS.klik) { if (s !== 'demo') totalKlik += ADMIN_STATS.klik[s]; } }
+                if (ADMIN_STATS.order) { for (const s in ADMIN_STATS.order) { if (s !== 'demo') totalOrder += (ADMIN_STATS.order[s].total || 0); } }
                 const rate = totalKlik > 0 ? Math.round((totalOrder / totalKlik) * 100) : 0;
                 document.getElementById('cv-klik').innerText = totalKlik;
                 document.getElementById('cv-order').innerText = totalOrder;
