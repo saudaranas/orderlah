@@ -848,6 +848,29 @@
             row2.appendChild(actions);
 
             card.appendChild(row1);
+
+            // Baris gambar item
+            const imgRow = document.createElement('div');
+            imgRow.className = 'flex gap-2 items-center';
+
+            const imgPreview = document.createElement('div');
+            imgPreview.className = 'w-12 h-12 shrink-0 rounded-lg bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center';
+            const setPreview = function (url) {
+                if (url) imgPreview.innerHTML = '<img src="' + url + '" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML=\'<i class=&quot;fa-solid fa-image text-gray-300&quot;></i>\'">';
+                else imgPreview.innerHTML = '<i class="fa-solid fa-image text-gray-300"></i>';
+            };
+            setPreview(item.gambar);
+
+            const imgInput = document.createElement('input');
+            imgInput.type = 'url';
+            imgInput.placeholder = 'Link gambar item (pilihan)';
+            imgInput.value = item.gambar || '';
+            imgInput.className = 'flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand text-sm';
+            imgInput.oninput = function () { ITEMS[idx].gambar = imgInput.value.trim(); setPreview(imgInput.value.trim()); };
+
+            imgRow.appendChild(imgPreview);
+            imgRow.appendChild(imgInput);
+            card.appendChild(imgRow);
             card.appendChild(stokRow);
             card.appendChild(row2);
             return card;
