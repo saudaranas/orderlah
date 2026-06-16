@@ -982,36 +982,36 @@
             const card = document.createElement('div');
 
             if (item.promo) {
-                card.className = 'item-card bg-red-50 border-2 border-brand-light p-4 rounded-xl shadow-sm flex justify-between items-center relative overflow-hidden';
+                card.className = 'item-card bg-red-50 border-2 border-brand-light p-3 rounded-xl shadow-sm flex justify-between items-center gap-2 relative overflow-hidden';
                 const badge = document.createElement('div');
-                badge.className = 'absolute top-0 right-0 bg-brand text-white text-xs font-bold px-2 py-1 rounded-bl-lg';
+                badge.className = 'absolute top-0 right-0 bg-brand text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg';
                 badge.innerText = 'PROMO';
                 card.appendChild(badge);
             } else {
-                card.className = 'item-card bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center';
+                card.className = 'item-card bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center gap-2';
             }
 
             const info = document.createElement('div');
+            info.className = 'flex items-center gap-3 min-w-0 flex-1';
 
             // Gambar item (jika ada) - klik untuk zoom
             if (item.gambar) {
                 const thumb = document.createElement('img');
                 thumb.src = item.gambar;
                 thumb.alt = item.nama;
-                thumb.className = 'w-16 h-16 rounded-lg object-cover mr-3 shrink-0 cursor-pointer border border-gray-100';
+                thumb.className = 'w-14 h-14 rounded-lg object-cover shrink-0 cursor-pointer border border-gray-100';
                 thumb.onclick = function (e) { e.stopPropagation(); zoomImage(item.gambar, item.nama); };
                 thumb.onerror = function () { thumb.style.display = 'none'; };
-                // Bungkus info+gambar dalam satu baris kiri
-                info.classList.add('flex', 'items-center');
                 info.appendChild(thumb);
             }
 
             const infoText = document.createElement('div');
+            infoText.className = 'min-w-0';
             const h4 = document.createElement('h4');
-            h4.className = 'font-bold text-lg';
+            h4.className = 'font-bold text-sm leading-tight';
             h4.innerText = item.nama;
             const price = document.createElement('p');
-            price.className = item.promo ? 'text-brand-dark font-semibold' : 'text-brand font-semibold';
+            price.className = (item.promo ? 'text-brand-dark' : 'text-brand') + ' font-bold text-base mt-0.5';
             price.innerText = 'RM ' + item.harga.toFixed(2);
             infoText.appendChild(h4);
             infoText.appendChild(price);
@@ -1041,7 +1041,7 @@
             info.appendChild(infoText);
 
             const controls = document.createElement('div');
-            controls.className = 'flex items-center gap-3 z-10';
+            controls.className = 'flex items-center gap-2 z-10 shrink-0';
 
             if (habis) {
                 // Item habis: tiada butang qty
