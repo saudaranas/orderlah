@@ -373,6 +373,7 @@
                 KEDAI = data.kedai;
                 ITEMS = data.menu || [];
                 openDashboard();
+                checkExpiry();
             } catch (err) {
                 toast('Masalah sambungan. Cuba semula.', true);
             } finally {
@@ -1296,6 +1297,74 @@
             else if (p.indexOf('60') !== 0 && p.length > 0) p = '60' + p;
             return p;
         }
+
+        /* ================ EXPIRY / RENEWAL ================ */
+        let RENEW = { pakej: '3 Bulan', nama: '3 Bulan', jumlah: 30 };
+
+        function checkExpiry() {
+            if (KEDAI && KEDAI.isExpired) {
+                document.getElementById('exp-date').innerText = KEDAI.expiry || '-';
+                expStep(1);
+                document.getElementById('modal-expired').classList.remove('hidden');
+            }
+        }
+        function expStep(n) {
+            document.getElementById('exp-step1').classList.toggle('hidden', n !== 1);
+            document.getElementById('exp-step2').classList.toggle('hidden', n !== 2);
+            document.getElementById('exp-step3').classList.toggle('hidden', n !== 3);
+        }
+        function pilihRenew(id) {
+            if (id === 'bulanan') RENEW = { pakej: 'Bulanan', nama: 'Bulanan', jumlah: 10 };
+            else RENEW = { pakej: '3 Bulan', nama: '3 Bulan', jumlah: 30 };
+            document.getElementById('exp-jumlah').innerText = 'RM' + RENEW.jumlah;
+            expStep(2);
+        }
+        async function hantarRenew() {
+            const btn = document.getElementById('exp-submit');
+            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Menghantar...';
+            try {
+                await api({ action: 'notifyRenew', slug: SESSION.slug, pakej: RENEW.pakej, jumlah: RENEW.jumlah });
+            } catch (e) {}
+            const waText = 'Salam, saya nak perbaharui langganan Orderlah untuk kedai ' + (KEDAI.nama || SESSION.slug) + ' (Pakej ' + RENEW.nama + ', RM' + RENEW.jumlah + '). Saya dah bayar.';
+            document.getElementById('exp-wa').href = 'https://wa.me/60167388358?text=' + encodeURIComponent(waText);
+            btn.disabled = false; btn.innerHTML = 'Saya Dah Bayar';
+            expStep(3);
+        }
     </script>
+
+    <!-- ============ MODAL EXPIRED / RENEWAL ============ -->
+    <div id="modal-expired" class="hidden fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full overflow-hidden">
+            <div class="bg-brand text-white p-5 text-center">
+                <i class="fa-solid fa-circle-exclamation text-3xl mb-2"></i>
+                <h3 class="text-xl font-extrabold">Langganan Tamat Tempoh</h3>
+            </div>
+            <div id="exp-step1" class="p-5 text-center">
+                <p class="text-sm text-gray-600 mb-4">Langganan Orderlah anda telah tamat pada <b id="exp-date">-</b>. Page kedai anda tidak dapat dilihat pelanggan sehingga diperbaharui.</p>
+                <p class="text-sm font-bold text-gray-700 mb-3">Pilih pakej untuk teruskan:</p>
+                <div class="space-y-2 mb-2">
+                    <button onclick="pilihRenew('bulanan')" class="w-full border-2 border-gray-200 rounded-2xl p-3 flex justify-between items-center hover:border-brand">
+                        <span class="font-bold text-gray-800">Bulanan</span>
+                        <span class="text-lg font-extrabold text-brand-dark">RM10</span>
+                    </button>
+                    <button onclick="pilihRenew('3bulan')" class="w-full border-2 border-brand bg-red-50 rounded-2xl p-3 flex justify-between items-center hover:bg-red-100">
+                        <span class="font-bold text-gray-800">3 Bulan <span class="text-[10px] bg-brand text-white px-1.5 py-0.5 rounded-full">JIMAT</span></span>
+                        <span class="text-lg font-extrabold text-brand-dark">RM30</span>
+                    </button>
+                </div>
+            </div>
+            <div id="exp-step2" class="hidden p-5 text-center">
+                <p class="text-sm text-gray-600 mb-3">Scan QR untuk bayar <b id="exp-jumlah">RM30</b>:</p>
+                <img src="https://i.postimg.cc/nrYXrmMP/IMG-20260615-203217-091.jpg" alt="QR" class="w-44 h-44 object-contain mx-auto rounded-xl border border-gray-200 mb-3" onerror="this.style.display='none'">
+                <button onclick="hantarRenew()" id="exp-submit" class="w-full bg-brand text-white font-bold py-3 rounded-xl hover:bg-brand-dark">Saya Dah Bayar</button>
+                <button onclick="expStep(1)" class="text-xs text-gray-400 mt-2">‹ Tukar pakej</button>
+            </div>
+            <div id="exp-step3" class="hidden p-5 text-center">
+                <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-check text-green-600 text-2xl"></i></div>
+                <p class="text-sm text-gray-600 mb-4">Terima kasih! Kami akan sahkan bayaran & aktifkan semula akaun anda secepat mungkin. Anda akan dimaklumkan.</p>
+                <a id="exp-wa" href="#" target="_blank" class="block w-full text-white font-bold py-3 rounded-xl mb-2" style="background-color:#25D366"><i class="fa-brands fa-whatsapp"></i> Hubungi Admin</a>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
