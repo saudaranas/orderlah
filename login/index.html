@@ -223,6 +223,22 @@
             <button onclick="saveProfile()" id="save-profil-btn" class="w-full bg-brand text-white font-bold py-3 rounded-xl hover:bg-brand-dark transition-colors">
                 <i class="fa-solid fa-floppy-disk"></i> Simpan Profil
             </button>
+
+            <div class="pt-3 border-t border-gray-100">
+                <button type="button" onclick="document.getElementById('pin-section').classList.toggle('hidden')" class="text-sm font-medium text-gray-600"><i class="fa-solid fa-key text-brand"></i> Tukar PIN <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i></button>
+                <div id="pin-section" class="hidden mt-3 space-y-2">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">PIN Baru (4-6 digit)</label>
+                        <input type="tel" id="new-pin" inputmode="numeric" maxlength="6" class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="cth: 5678">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Sahkan PIN Baru</label>
+                        <input type="tel" id="new-pin2" inputmode="numeric" maxlength="6" class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand" placeholder="Taip semula PIN baru">
+                    </div>
+                    <button onclick="tukarPin()" id="tukar-pin-btn" class="w-full bg-gray-100 text-gray-700 font-bold py-2.5 rounded-xl hover:bg-gray-200">Tukar PIN</button>
+                    <p class="text-xs text-gray-400">Selepas tukar, guna PIN baru untuk login kali seterusnya.</p>
+                </div>
+            </div>
         </div>
 
         <!-- ============ TAB MENU ============ -->
@@ -632,6 +648,33 @@
                 toast('Masalah sambungan. Cuba semula.', true);
             } finally {
                 busy('save-profil-btn', false, normalHTML);
+            }
+        }
+
+        async function tukarPin() {
+            const newPin = document.getElementById('new-pin').value.trim();
+            const newPin2 = document.getElementById('new-pin2').value.trim();
+
+            if (!/^\d{4,6}$/.test(newPin)) return toast('PIN baru mesti 4-6 digit nombor', true);
+            if (newPin !== newPin2) return toast('PIN tidak sama. Cuba semula.', true);
+
+            const btn = document.getElementById('tukar-pin-btn');
+            const orig = btn.innerHTML;
+            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Menukar...';
+            try {
+                const data = await api({ action: 'tukarPin', slug: SESSION.slug, pin: SESSION.pin, newPin: newPin });
+                if (!data.success) { btn.disabled = false; btn.innerHTML = orig; return toast(data.error || 'Gagal tukar PIN', true); }
+                // Kemas kini session dengan PIN baru
+                SESSION.pin = newPin;
+                sessionStorage.setItem('orderlah_session', JSON.stringify(SESSION));
+                document.getElementById('new-pin').value = '';
+                document.getElementById('new-pin2').value = '';
+                document.getElementById('pin-section').classList.add('hidden');
+                toast('PIN berjaya ditukar!');
+            } catch (err) {
+                toast('Masalah sambungan. Cuba semula.', true);
+            } finally {
+                btn.disabled = false; btn.innerHTML = orig;
             }
         }
 
