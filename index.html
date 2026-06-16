@@ -36,6 +36,10 @@
         .phone-shadow { box-shadow: 0 25px 50px -12px rgba(23, 37, 84, 0.35); }
         html { scroll-behavior: smooth; }
         @keyframes floatA { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+        @keyframes waPulse { 0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37,211,102,0.5); } 50% { transform: scale(1.08); box-shadow: 0 0 0 12px rgba(37,211,102,0); } }
+        .wa-float { animation: waPulse 2.2s ease-in-out infinite; }
+        .wa-float:hover { animation-play-state: paused; transform: scale(1.12); }
+        @media (prefers-reduced-motion: reduce) { .wa-float { animation: none; } }
         @keyframes floatB { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         @keyframes floatC { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
         .float-a { animation: floatA 4.5s ease-in-out infinite; }
@@ -219,8 +223,8 @@
                 Satu link untuk kedai anda. Pelanggan pilih menu, isi alamat, tekan satu butang — order terus masuk WhatsApp anda. <b class="text-gray-900">Tanpa app. Tanpa caj tambahan.</b>
             </p>
             <div class="flex flex-col sm:flex-row gap-3 justify-center mb-12">
-                <a href="https://wa.me/60167388358?text=Saya%20berminat%20nak%20sistem%20order%20online%20Orderlah%20untuk%20kedai%20saya" class="bg-brand text-white font-bold py-3.5 px-8 rounded-xl hover:bg-brand-dark transition-colors shadow-lg shadow-brand/30">
-                    <i class="fa-brands fa-whatsapp"></i> Saya Nak Sistem Ini
+                <a href="#harga" class="bg-brand text-white font-bold py-3.5 px-8 rounded-xl hover:bg-brand-dark transition-colors shadow-lg shadow-brand/30">
+                    <i class="fa-solid fa-bolt"></i> Saya Nak Sistem Ini
                 </a>
                 <a href="https://orderlah.store/?id=demo" target="_blank" class="bg-white border-2 border-brand text-brand-dark font-bold py-3.5 px-8 rounded-xl hover:bg-red-50 transition-colors">
                     <i class="fa-solid fa-eye"></i> Tengok Demo Live
@@ -1290,5 +1294,13 @@
         }
     
 </script>
+
+    <!-- Floating WhatsApp button -->
+    <a href="https://wa.me/60167388358?text=Salam%2C%20saya%20nak%20tanya%20pasal%20Orderlah%20untuk%20kedai%20saya"
+       target="_blank" rel="noopener"
+       class="wa-float fixed bottom-5 right-5 z-40 w-14 h-14 rounded-full flex items-center justify-center text-white text-2xl shadow-lg"
+       style="background-color:#25D366" aria-label="WhatsApp kami">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
 </body>
 </html>
