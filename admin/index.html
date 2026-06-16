@@ -235,14 +235,16 @@
         }
 
         async function testTelegram() {
+            toast('Menghantar mesej ujian...');
             try {
                 const data = await api({ action: 'adminTestTelegram', adminPin: ADMIN_PIN_SESSION });
-                if (data.success) toast('Mesej ujian dihantar! Semak Telegram anda.');
+                if (data.success) toast('✓ Mesej ujian dihantar! Semak Telegram anda.');
                 else toast(data.error || 'Gagal hantar. Semak token & Chat ID.', true);
             } catch (e) { toast('Masalah sambungan', true); }
         }
 
         async function setExpiry(k, mode, tarikh) {
+            toast('Mengemas kini langganan...');
             try {
                 const data = await api({ action: 'adminSetExpiry', adminPin: ADMIN_PIN_SESSION, slug: k.slug, mode: mode, tarikh: tarikh || '' });
                 if (!data.success) return toast(data.error || 'Gagal set expiry', true);
@@ -266,11 +268,20 @@
         })();
 
         async function api(payload) {
-            const res = await fetch(GAS_URL, {
-                method: 'POST',
-                body: JSON.stringify(payload)
-            });
-            return res.json();
+            try {
+                const res = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                const text = await res.text();
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    return { success: false, error: 'Respons GAS tidak sah. Pastikan GAS versi terbaru di-deploy.' };
+                }
+            } catch (e) {
+                return { success: false, error: 'Sambungan gagal: ' + e.message };
+            }
         }
 
         function toast(msg, isError) {
