@@ -510,16 +510,19 @@
             } catch (e) {}
         }
         function downloadQR() {
-            // Bina QR saiz besar untuk cetak, dengan nama kedai di bawah
+            // Bina QR saiz besar untuk cetak (off-screen, bukan display:none supaya render betul)
             const tmp = document.createElement('div');
-            tmp.style.display = 'none';
+            tmp.style.position = 'fixed';
+            tmp.style.left = '-9999px';
+            tmp.style.top = '0';
             document.body.appendChild(tmp);
             try {
                 new QRCode(tmp, { text: shopURL(), width: 600, height: 600, colorDark: '#292524', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.H });
             } catch (e) { document.body.removeChild(tmp); return toast('Gagal jana QR', true); }
 
-            setTimeout(function () {
-                const img = tmp.querySelector('img') || tmp.querySelector('canvas');
+            const finish = function () {
+                const canvas = tmp.querySelector('canvas');
+                const imgEl = tmp.querySelector('img');
                 const srcCanvas = document.createElement('canvas');
                 const pad = 60, qrSize = 600, footerH = 90;
                 srcCanvas.width = qrSize + pad * 2;
@@ -528,27 +531,41 @@
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(0, 0, srcCanvas.width, srcCanvas.height);
 
-                const draw = function () {
-                    ctx.drawImage(img, pad, pad, qrSize, qrSize);
-                    // Nama kedai
-                    ctx.fillStyle = '#292524';
-                    ctx.font = 'bold 34px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.fillText((KEDAI.nama || '').slice(0, 28), srcCanvas.width / 2, qrSize + pad + 50);
-                    ctx.fillStyle = '#dc2626';
-                    ctx.font = '24px Arial';
-                    ctx.fillText('Scan untuk order online', srcCanvas.width / 2, qrSize + pad + 84);
-
-                    const a = document.createElement('a');
-                    a.href = srcCanvas.toDataURL('image/png');
-                    a.download = 'QR-' + SESSION.slug + '.png';
-                    a.click();
+                // Utamakan canvas (lebih reliable); fallback ke img
+                const source = canvas || imgEl;
+                try {
+                    ctx.drawImage(source, pad, pad, qrSize, qrSize);
+                } catch (e) {
                     document.body.removeChild(tmp);
-                };
+                    return toast('Gagal jana QR. Cuba lagi.', true);
+                }
 
-                if (img.tagName === 'IMG' && !img.complete) { img.onload = draw; }
-                else { draw(); }
-            }, 300);
+                ctx.fillStyle = '#292524';
+                ctx.font = 'bold 34px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText((KEDAI.nama || '').slice(0, 28), srcCanvas.width / 2, qrSize + pad + 50);
+                ctx.fillStyle = '#dc2626';
+                ctx.font = '24px Arial';
+                ctx.fillText('Scan untuk order online', srcCanvas.width / 2, qrSize + pad + 84);
+
+                const a = document.createElement('a');
+                a.href = srcCanvas.toDataURL('image/png');
+                a.download = 'QR-' + SESSION.slug + '.png';
+                a.click();
+                document.body.removeChild(tmp);
+                toast('QR dimuat turun!');
+            };
+
+            // Tunggu QR siap dilukis. Canvas biasanya serta-merta; img perlu tunggu load.
+            setTimeout(function () {
+                const imgEl = tmp.querySelector('img');
+                if (imgEl && !imgEl.complete) {
+                    imgEl.onload = finish;
+                    imgEl.onerror = function () { document.body.removeChild(tmp); toast('Gagal jana QR', true); };
+                } else {
+                    finish();
+                }
+            }, 350);
         }
 
         /* ================ PROFIL ================ */
