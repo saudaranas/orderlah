@@ -87,6 +87,36 @@
             </div>
         </div>
 
+        <!-- Conversion ringkas (jumlah klik & order semua kedai) -->
+        <div class="grid grid-cols-3 gap-2 mb-4">
+            <div class="bg-blue-50 p-3 rounded-xl text-center">
+                <p id="cv-klik" class="text-xl font-bold text-blue-600">0</p>
+                <p class="text-xs text-blue-500">Jumlah Klik</p>
+            </div>
+            <div class="bg-green-50 p-3 rounded-xl text-center">
+                <p id="cv-order" class="text-xl font-bold text-green-600">0</p>
+                <p class="text-xs text-green-600">Jumlah Order</p>
+            </div>
+            <div class="bg-amber-50 p-3 rounded-xl text-center">
+                <p id="cv-rate" class="text-xl font-bold text-amber-600">0%</p>
+                <p class="text-xs text-amber-600">Conversion</p>
+            </div>
+        </div>
+
+        <!-- Tetapan Telegram Admin -->
+        <div class="mb-4">
+            <button onclick="document.getElementById('admin-settings').classList.toggle('hidden')" class="text-sm font-medium text-gray-600"><i class="fa-brands fa-telegram text-blue-500"></i> Tetapan Notifikasi Telegram <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i></button>
+            <div id="admin-settings" class="hidden mt-2 bg-white rounded-2xl p-4 border border-gray-100">
+                <label class="block text-xs font-medium text-gray-600 mb-1">Chat ID Telegram Admin (anda)</label>
+                <div class="flex gap-2">
+                    <input type="text" id="admin-chatid" inputmode="numeric" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-navy text-sm" placeholder="cth: 1523007964">
+                    <button onclick="simpanChatId()" id="chatid-btn" class="bg-navy text-white font-bold px-4 rounded-lg text-sm">Simpan</button>
+                </div>
+                <p class="text-xs text-gray-400 mt-2">Dapat notifikasi langganan baru & pembaharuan di sini. Dapat Chat ID dari <b>@userinfobot</b>, dan tekan Start pada <b>@orderlah_notify_bot</b> dulu.</p>
+                <button onclick="testTelegram()" class="text-xs text-blue-600 underline mt-2">Hantar mesej ujian</button>
+            </div>
+        </div>
+
         <!-- Senarai kedai -->
         <div id="view-list">
             <div class="flex gap-2 mb-4">
@@ -181,8 +211,35 @@
         async function loadAdminStats() {
             try {
                 const data = await api({ action: 'adminStats', adminPin: ADMIN_PIN_SESSION });
-                if (data.success) { ADMIN_STATS = data; renderList(); }
+                if (data.success) {
+                    ADMIN_STATS = data;
+                    if (data.adminChatId !== undefined) {
+                        document.getElementById('admin-chatid').value = data.adminChatId || '';
+                    }
+                    renderList();
+                }
             } catch (e) {}
+        }
+
+        async function simpanChatId() {
+            const chatId = document.getElementById('admin-chatid').value.replace(/[^0-9]/g, '');
+            const btn = document.getElementById('chatid-btn');
+            const orig = btn.innerHTML;
+            btn.disabled = true; btn.innerHTML = '...';
+            try {
+                const data = await api({ action: 'adminSetChatId', adminPin: ADMIN_PIN_SESSION, chatId: chatId });
+                if (!data.success) { toast(data.error || 'Gagal simpan', true); }
+                else toast('Chat ID disimpan');
+            } catch (e) { toast('Masalah sambungan', true); }
+            finally { btn.disabled = false; btn.innerHTML = orig; }
+        }
+
+        async function testTelegram() {
+            try {
+                const data = await api({ action: 'adminTestTelegram', adminPin: ADMIN_PIN_SESSION });
+                if (data.success) toast('Mesej ujian dihantar! Semak Telegram anda.');
+                else toast(data.error || 'Gagal hantar. Semak token & Chat ID.', true);
+            } catch (e) { toast('Masalah sambungan', true); }
         }
 
         async function setExpiry(k, mode, tarikh) {
@@ -271,6 +328,17 @@
             document.getElementById('stat-total').innerText = LIST.length;
             document.getElementById('stat-aktif').innerText = LIST.filter(function (k) { return k.status === 'Aktif'; }).length;
             document.getElementById('stat-tutup').innerText = LIST.filter(function (k) { return k.status !== 'Aktif'; }).length;
+
+            // Conversion ringkas (semua kedai)
+            if (ADMIN_STATS) {
+                let totalKlik = 0, totalOrder = 0;
+                if (ADMIN_STATS.klik) { for (const s in ADMIN_STATS.klik) totalKlik += ADMIN_STATS.klik[s]; }
+                if (ADMIN_STATS.order) { for (const s in ADMIN_STATS.order) totalOrder += (ADMIN_STATS.order[s].total || 0); }
+                const rate = totalKlik > 0 ? Math.round((totalOrder / totalKlik) * 100) : 0;
+                document.getElementById('cv-klik').innerText = totalKlik;
+                document.getElementById('cv-order').innerText = totalOrder;
+                document.getElementById('cv-rate').innerText = rate + '%';
+            }
 
             const q = document.getElementById('search-box').value.trim().toLowerCase();
             const wrap = document.getElementById('kedai-list');
