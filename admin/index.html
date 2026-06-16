@@ -190,7 +190,9 @@
                 const data = await api({ action: 'adminSetExpiry', adminPin: ADMIN_PIN_SESSION, slug: k.slug, mode: mode, tarikh: tarikh || '' });
                 if (!data.success) return toast(data.error || 'Gagal set expiry', true);
                 LIST = data.kedaiList || LIST;
-                toast('Langganan dikemas kini');
+                const updated = LIST.filter(function (x) { return x.slug.toLowerCase() === k.slug.toLowerCase(); })[0];
+                const expTxt = updated && updated.expiry ? updated.expiry : '-';
+                toast('✓ ' + k.nama + ': langganan s/d ' + expTxt);
                 renderList();
             } catch (e) {
                 toast('Masalah sambungan', true);
@@ -320,7 +322,7 @@
                 '</div>';
 
             const btns = document.createElement('div');
-            btns.className = 'grid grid-cols-2 gap-2';
+            btns.className = 'grid grid-cols-3 gap-2';
 
             btns.appendChild(actionBtn('fa-link', 'Salin Link', function () {
                 const url = STORE_URL + '/?id=' + k.slug;
@@ -335,36 +337,38 @@
             btns.appendChild(actionBtn('fa-pen', 'Edit', function () {
                 openForm(k);
             }));
-            btns.appendChild(actionBtn('fa-trash', 'Padam', function () {
-                deleteKedai(k);
-            }, true));
 
             card.appendChild(top);
-            card.appendChild(btns);
 
-            // Kawalan expiry
+            // Kawalan expiry (dalam kotak tersendiri, jauh dari Padam)
+            const expBox = document.createElement('div');
+            expBox.className = 'bg-blue-50 rounded-xl p-3 mb-3';
+            const expLabel = document.createElement('p');
+            expLabel.className = 'text-xs font-bold text-blue-700 mb-2';
+            expLabel.innerHTML = '<i class="fa-solid fa-calendar-check"></i> Kawalan Langganan';
+            expBox.appendChild(expLabel);
+
             const expRow = document.createElement('div');
-            expRow.className = 'mt-2 pt-2 border-t border-gray-100 flex flex-wrap items-center gap-1.5';
-            expRow.innerHTML = '<span class="text-xs text-gray-400 mr-1">Langganan:</span>';
+            expRow.className = 'flex flex-wrap items-center gap-1.5';
 
             const add1 = document.createElement('button');
-            add1.className = 'text-xs bg-brand-light text-brand-dark font-bold px-2.5 py-1 rounded-lg';
+            add1.className = 'text-xs bg-white border border-blue-200 text-blue-700 font-bold px-2.5 py-1.5 rounded-lg';
             add1.innerHTML = '+1 Bulan';
             add1.onclick = function () { setExpiry(k, 'add1'); };
 
             const add3 = document.createElement('button');
-            add3.className = 'text-xs bg-brand text-white font-bold px-2.5 py-1 rounded-lg';
+            add3.className = 'text-xs bg-blue-600 text-white font-bold px-2.5 py-1.5 rounded-lg';
             add3.innerHTML = '+3 Bulan';
             add3.onclick = function () { setExpiry(k, 'add3'); };
 
             const dateInput = document.createElement('input');
             dateInput.type = 'date';
-            dateInput.className = 'text-xs border border-gray-200 rounded-lg px-2 py-1';
+            dateInput.className = 'text-xs border border-blue-200 rounded-lg px-2 py-1.5';
             if (k.expiry) dateInput.value = k.expiry;
 
             const setBtn = document.createElement('button');
-            setBtn.className = 'text-xs bg-gray-100 text-gray-600 font-bold px-2.5 py-1 rounded-lg';
-            setBtn.innerHTML = 'Set';
+            setBtn.className = 'text-xs bg-blue-100 text-blue-700 font-bold px-2.5 py-1.5 rounded-lg';
+            setBtn.innerHTML = 'Set Tarikh';
             setBtn.onclick = function () {
                 if (!dateInput.value) return toast('Pilih tarikh dulu', true);
                 setExpiry(k, 'set', dateInput.value);
@@ -374,7 +378,28 @@
             expRow.appendChild(add3);
             expRow.appendChild(dateInput);
             expRow.appendChild(setBtn);
-            card.appendChild(expRow);
+            expBox.appendChild(expRow);
+            card.appendChild(expBox);
+
+            // Butang tindakan (Link, Onboard, Edit)
+            card.appendChild(btns);
+
+            // Butang Padam — ASINGKAN, dan SEMBUNYI untuk demo
+            if (k.slug.toLowerCase() !== 'demo') {
+                const delWrap = document.createElement('div');
+                delWrap.className = 'mt-2 pt-2 border-t border-gray-100';
+                const delBtn = document.createElement('button');
+                delBtn.className = 'w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 text-xs font-medium';
+                delBtn.innerHTML = '<i class="fa-solid fa-trash"></i> Padam Kedai Ini';
+                delBtn.onclick = function () { deleteKedai(k); };
+                delWrap.appendChild(delBtn);
+                card.appendChild(delWrap);
+            } else {
+                const demoNote = document.createElement('p');
+                demoNote.className = 'text-xs text-gray-400 text-center mt-2 pt-2 border-t border-gray-100';
+                demoNote.innerHTML = '<i class="fa-solid fa-lock"></i> Kedai demo dilindungi (tak boleh padam)';
+                card.appendChild(demoNote);
+            }
 
             return card;
         }
