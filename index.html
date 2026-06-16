@@ -35,6 +35,7 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         .phone-shadow { box-shadow: 0 25px 50px -12px rgba(23, 37, 84, 0.35); }
         html { scroll-behavior: smooth; }
+        .balance-text { text-wrap: balance; }
         @keyframes floatA { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
         @keyframes waPulse { 0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37,211,102,0.5); } 50% { transform: scale(1.08); box-shadow: 0 0 0 12px rgba(37,211,102,0); } }
         .wa-float { animation: waPulse 2.2s ease-in-out infinite; }
@@ -216,9 +217,8 @@
 
             <!-- Tajuk dulu (atas) -->
             <span class="inline-block bg-brand-light text-brand-dark text-xs font-bold px-3 py-1.5 rounded-full mb-4">UNTUK PENIAGA KECIL & SEDERHANA</span>
-            <h1 class="text-3xl md:text-5xl font-extrabold leading-tight mb-4 text-gray-900">
-                Kedai Anda Boleh Terima<br>
-                <span class="text-brand">Order Online</span> Hari Ini Juga
+            <h1 class="balance-text text-3xl md:text-5xl font-extrabold leading-tight mb-4 text-gray-900">
+                Kedai Anda Boleh Terima <span class="text-brand whitespace-nowrap">Order Online</span> Hari Ini Juga
             </h1>
             <p class="text-gray-600 mb-7 max-w-xl mx-auto">
                 Satu link untuk kedai anda. Pelanggan pilih menu, isi alamat, tekan satu butang — order terus masuk WhatsApp anda. <b class="text-gray-900">Tanpa app. Tanpa caj tambahan.</b>
@@ -313,10 +313,8 @@
     <section class="px-4 py-14 bg-gradient-to-br from-brand to-brand-dark text-white">
         <div class="max-w-2xl mx-auto text-center">
             <i class="fa-solid fa-quote-left text-white/30 text-3xl mb-3"></i>
-            <p class="text-2xl md:text-3xl font-extrabold leading-snug">
-                "Online"kan gerai anda.<br>
-                <span class="text-amber-300">Pelanggan boleh beli bila-bila masa</span><br>
-                walaupun malas keluar rumah!
+            <p class="balance-text text-xl sm:text-2xl md:text-3xl font-extrabold leading-snug px-2">
+                "Online"kan gerai anda. <span class="text-amber-300">Pelanggan boleh beli bila-bila masa</span> walaupun malas keluar rumah!
             </p>
         </div>
     </section>
@@ -325,7 +323,7 @@
     <section class="px-4 py-12 bg-gradient-to-b from-white to-red-50">
         <div class="max-w-3xl mx-auto">
             <p class="text-center text-brand font-bold text-sm mb-1">DENGAN ORDERLAH</p>
-            <h2 class="text-2xl md:text-3xl font-extrabold text-center mb-2">Lebih Banyak Jualan, Kurang Kepala Pening</h2>
+            <h2 class="balance-text text-2xl md:text-3xl font-extrabold text-center mb-2">Lebih Banyak Jualan, Kurang Kepala Pening</h2>
             <p class="text-gray-500 text-center text-sm mb-8">Inilah yang berubah untuk kedai anda</p>
             <div class="grid md:grid-cols-3 gap-4">
                 <div class="bg-white rounded-2xl p-5 border border-gray-100 text-center shadow-sm">
@@ -649,7 +647,7 @@
     <!-- ============ DEMO ============ -->
     <section class="px-4 py-12">
         <div class="max-w-xl mx-auto text-center">
-            <h2 class="text-2xl font-extrabold mb-2">Jangan Percaya Cakap Kami.<br>Cuba Sendiri.</h2>
+            <h2 class="balance-text text-2xl font-extrabold mb-2">Jangan Percaya Cakap Kami. Cuba Sendiri.</h2>
             <p class="text-gray-500 text-sm mb-6">Ini kedai demo yang berfungsi 100%. Tekan, pilih menu, tengok sendiri macam mana pelanggan anda akan order.</p>
             <a href="https://orderlah.store/?id=demo" target="_blank" class="inline-block bg-white border-2 border-brand text-brand-dark font-bold py-3.5 px-10 rounded-xl hover:bg-red-50 transition-colors">
                 <i class="fa-solid fa-eye"></i> Buka Kedai Demo
@@ -697,7 +695,7 @@
     <!-- ============ CTA AKHIR ============ -->
     <section class="px-4 py-14 bg-gradient-to-b from-white to-red-50">
         <div class="max-w-xl mx-auto text-center">
-            <h2 class="text-2xl md:text-3xl font-extrabold mb-3">Malam Ini, Bila Pelanggan Tanya<br>"Menu Apa Ada?"...</h2>
+            <h2 class="balance-text text-2xl md:text-3xl font-extrabold mb-3">Malam Ini, Bila Pelanggan Tanya "Menu Apa Ada?"...</h2>
             <p class="text-gray-600 mb-6">...anda cuma perlu hantar satu link. Itu sahaja.</p>
             <a href="#harga" class="inline-block bg-brand text-white font-bold py-4 px-10 rounded-xl hover:bg-brand-dark transition-colors text-lg">
                 <i class="fa-solid fa-bolt"></i> Langgan Sekarang
