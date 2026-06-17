@@ -6,6 +6,7 @@
     <title>Super Admin | Orderlah</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -101,6 +102,46 @@
                 <p id="cv-rate" class="text-xl font-bold text-amber-600">0%</p>
                 <p class="text-xs text-amber-600">Conversion</p>
             </div>
+        </div>
+
+        <!-- ===== STATISTIK LANGGANAN (BISNES ORDERLAH) ===== -->
+        <div class="bg-white rounded-2xl border border-gray-100 p-4 mb-4">
+            <h2 class="text-sm font-bold text-navy mb-3"><i class="fa-solid fa-chart-line text-brand"></i> Statistik Langganan Orderlah</h2>
+
+            <!-- Ringkasan pendapatan & customer -->
+            <div class="grid grid-cols-2 gap-2 mb-3">
+                <div class="bg-red-50 p-3 rounded-xl text-center">
+                    <p id="lg-revenue" class="text-xl font-bold text-brand">RM0</p>
+                    <p class="text-xs text-brand-dark">Jumlah Pendapatan</p>
+                </div>
+                <div class="bg-navy/5 p-3 rounded-xl text-center">
+                    <p id="lg-customer" class="text-xl font-bold text-navy">0</p>
+                    <p class="text-xs text-gray-500">Jumlah Customer</p>
+                </div>
+            </div>
+
+            <!-- Filter tempoh -->
+            <div class="flex gap-1 mb-3" id="lg-period">
+                <button data-p="7hari" class="lg-pbtn flex-1 text-xs py-1.5 rounded-lg font-medium bg-brand text-white">7 Hari</button>
+                <button data-p="hari" class="lg-pbtn flex-1 text-xs py-1.5 rounded-lg font-medium bg-gray-100 text-gray-600">Hari</button>
+                <button data-p="bulan" class="lg-pbtn flex-1 text-xs py-1.5 rounded-lg font-medium bg-gray-100 text-gray-600">Bulan</button>
+                <button data-p="tahun" class="lg-pbtn flex-1 text-xs py-1.5 rounded-lg font-medium bg-gray-100 text-gray-600">Tahun</button>
+            </div>
+
+            <!-- Graf langganan ikut masa -->
+            <div class="mb-4" style="height:200px;">
+                <canvas id="lg-chart"></canvas>
+            </div>
+
+            <!-- Jualan ikut pakej -->
+            <h3 class="text-xs font-bold text-gray-500 mb-2 uppercase">Jualan Ikut Pakej</h3>
+            <div id="lg-pakej" class="space-y-2 mb-2"></div>
+        </div>
+
+        <!-- Senarai customer -->
+        <div class="bg-white rounded-2xl border border-gray-100 p-4 mb-4">
+            <h2 class="text-sm font-bold text-navy mb-3"><i class="fa-solid fa-users text-brand"></i> Senarai Customer</h2>
+            <div id="lg-customers" class="space-y-2"></div>
         </div>
 
         <!-- Tetapan Telegram Admin -->
@@ -217,9 +258,184 @@
                         document.getElementById('admin-chatid').value = data.adminChatId || '';
                     }
                     renderList();
+                    renderLanggananStats();
                 }
             } catch (e) {}
         }
+
+        let LG_PERIOD = '7hari';
+        let lgChart = null;
+
+        function renderLanggananStats() {
+            if (!ADMIN_STATS || !ADMIN_STATS.langgan) return;
+            const lg = ADMIN_STATS.langgan;
+
+            // Ringkasan
+            document.getElementById('lg-revenue').innerText = 'RM' + (lg.totalRevenue || 0);
+            document.getElementById('lg-customer').innerText = lg.jumlahCustomer || 0;
+
+            // Jualan ikut pakej
+            const pakejWrap = document.getElementById('lg-pakej');
+            pakejWrap.innerHTML = '';
+            const pakejColors = ['#dc2626', '#f59e0b', '#16a34a', '#2563eb'];
+            const pakejKeys = Object.keys(lg.byPakej || {});
+            if (pakejKeys.length === 0) {
+                pakejWrap.innerHTML = '<p class="text-xs text-gray-400">Belum ada langganan.</p>';
+            } else {
+                pakejKeys.forEach(function (pk, idx) {
+                    const p = lg.byPakej[pk];
+                    const color = pakejColors[idx % pakejColors.length];
+                    const row = document.createElement('div');
+                    row.className = 'flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2';
+                    row.innerHTML =
+                        '<div class="flex items-center gap-2">' +
+                        '<span class="inline-block w-3 h-3 rounded-full" style="background:' + color + '"></span>' +
+                        '<span class="text-sm font-medium text-gray-700">' + esc(pk) + '</span>' +
+                        '<span class="text-xs text-gray-400">(' + p.bil + ' langganan)</span>' +
+                        '</div>' +
+                        '<span class="text-sm font-bold text-gray-800">RM' + p.jumlah + '</span>';
+                    pakejWrap.appendChild(row);
+                });
+            }
+
+            // Senarai customer
+            const custWrap = document.getElementById('lg-customers');
+            custWrap.innerHTML = '';
+            const custs = lg.customers || [];
+            if (custs.length === 0) {
+                custWrap.innerHTML = '<p class="text-xs text-gray-400">Belum ada customer.</p>';
+            } else {
+                custs.forEach(function (c) {
+                    const card = document.createElement('div');
+                    card.className = 'border border-gray-100 rounded-lg p-3';
+                    card.innerHTML =
+                        '<div class="flex justify-between items-start gap-2">' +
+                        '<div class="min-w-0">' +
+                        '<p class="font-semibold text-sm text-gray-800 truncate">' + esc(c.namaKedai || c.nama || '-') + '</p>' +
+                        '<p class="text-xs text-gray-500 truncate">' + esc(c.nama || '') + (c.wa ? ' &bull; ' + esc(c.wa) : '') + '</p>' +
+                        '<p class="text-xs text-gray-400">' + esc(c.masa || '') + '</p>' +
+                        '</div>' +
+                        '<div class="text-right shrink-0">' +
+                        '<span class="inline-block text-xs font-bold px-2 py-1 rounded-full bg-red-50 text-brand">' + esc(c.pakej || '-') + '</span>' +
+                        '<p class="text-sm font-bold text-gray-800 mt-1">RM' + (c.jumlah || 0) + '</p>' +
+                        '</div></div>';
+                    custWrap.appendChild(card);
+                });
+            }
+
+            renderLgChart();
+        }
+
+        function renderLgChart() {
+            if (!ADMIN_STATS || !ADMIN_STATS.langgan) return;
+            const series = ADMIN_STATS.langgan.series || {};
+            const buckets = buildLgBuckets(series, LG_PERIOD);
+
+            const ctx = document.getElementById('lg-chart');
+            if (lgChart) lgChart.destroy();
+            lgChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: buckets.labels,
+                    datasets: [
+                        {
+                            label: 'Langganan',
+                            data: buckets.bil,
+                            backgroundColor: '#dc2626',
+                            borderRadius: 4,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Pendapatan (RM)',
+                            data: buckets.jumlah,
+                            type: 'line',
+                            borderColor: '#f59e0b',
+                            backgroundColor: '#f59e0b',
+                            tension: 0.3,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { labels: { font: { size: 10 }, boxWidth: 12 } } },
+                    scales: {
+                        y: { beginAtZero: true, position: 'left', ticks: { precision: 0, font: { size: 10 } }, title: { display: true, text: 'Langganan', font: { size: 9 } } },
+                        y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { font: { size: 10 } }, title: { display: true, text: 'RM', font: { size: 9 } } },
+                        x: { ticks: { font: { size: 9 } } }
+                    }
+                }
+            });
+        }
+
+        // Bina bucket masa ikut tempoh dipilih
+        function buildLgBuckets(series, period) {
+            const labels = [], bil = [], jumlah = [];
+            const now = new Date();
+
+            function key(d) {
+                return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+            }
+
+            if (period === '7hari' || period === 'hari') {
+                const days = (period === '7hari') ? 7 : 30;
+                for (let i = days - 1; i >= 0; i--) {
+                    const d = new Date(now); d.setDate(now.getDate() - i);
+                    const k = key(d);
+                    const lbl = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+                    labels.push(lbl);
+                    bil.push(series[k] ? series[k].bil : 0);
+                    jumlah.push(series[k] ? series[k].jumlah : 0);
+                }
+            } else if (period === 'bulan') {
+                // 12 bulan terakhir
+                const monthAgg = {};
+                Object.keys(series).forEach(function (k) {
+                    const mk = k.slice(0, 7); // yyyy-MM
+                    if (!monthAgg[mk]) monthAgg[mk] = { bil: 0, jumlah: 0 };
+                    monthAgg[mk].bil += series[k].bil;
+                    monthAgg[mk].jumlah += series[k].jumlah;
+                });
+                const bulanNama = ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul', 'Ogo', 'Sep', 'Okt', 'Nov', 'Dis'];
+                for (let i = 11; i >= 0; i--) {
+                    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                    const mk = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+                    labels.push(bulanNama[d.getMonth()] + ' ' + String(d.getFullYear()).slice(2));
+                    bil.push(monthAgg[mk] ? monthAgg[mk].bil : 0);
+                    jumlah.push(monthAgg[mk] ? monthAgg[mk].jumlah : 0);
+                }
+            } else if (period === 'tahun') {
+                const yearAgg = {};
+                Object.keys(series).forEach(function (k) {
+                    const yk = k.slice(0, 4);
+                    if (!yearAgg[yk]) yearAgg[yk] = { bil: 0, jumlah: 0 };
+                    yearAgg[yk].bil += series[k].bil;
+                    yearAgg[yk].jumlah += series[k].jumlah;
+                });
+                const years = Object.keys(yearAgg).sort();
+                if (years.length === 0) { years.push(String(now.getFullYear())); }
+                years.forEach(function (y) {
+                    labels.push(y);
+                    bil.push(yearAgg[y] ? yearAgg[y].bil : 0);
+                    jumlah.push(yearAgg[y] ? yearAgg[y].jumlah : 0);
+                });
+            }
+            return { labels: labels, bil: bil, jumlah: jumlah };
+        }
+
+        // Butang tempoh
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.lg-pbtn');
+            if (!btn) return;
+            LG_PERIOD = btn.getAttribute('data-p');
+            document.querySelectorAll('.lg-pbtn').forEach(function (b) {
+                b.className = 'lg-pbtn flex-1 text-xs py-1.5 rounded-lg font-medium bg-gray-100 text-gray-600';
+            });
+            btn.className = 'lg-pbtn flex-1 text-xs py-1.5 rounded-lg font-medium bg-brand text-white';
+            renderLgChart();
+        });
+
+        async function loadAdminStats_unused() {}
 
         async function simpanChatId() {
             const chatId = document.getElementById('admin-chatid').value.replace(/[^0-9]/g, '');
