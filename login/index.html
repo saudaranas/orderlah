@@ -197,6 +197,23 @@
                     <span class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-brand after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></span>
                 </label>
             </div>
+            <!-- MOD PENGHANTARAN: Zon atau Item -->
+            <div class="border-t border-gray-100 pt-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Mod Penghantaran</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="border rounded-lg p-3 flex items-center gap-2 cursor-pointer hover:bg-gray-50">
+                        <input type="radio" name="p-mod-pos" value="zon" onchange="toggleModPos()" checked>
+                        <span class="text-sm font-medium text-gray-700">Ikut Zon / Flat</span>
+                    </label>
+                    <label class="border rounded-lg p-3 flex items-center gap-2 cursor-pointer hover:bg-gray-50">
+                        <input type="radio" name="p-mod-pos" value="item" onchange="toggleModPos()">
+                        <span class="text-sm font-medium text-gray-700">Ikut Item + Kuantiti</span>
+                    </label>
+                </div>
+                <p class="text-xs text-gray-400 mt-1.5" id="mod-pos-hint">Ikut Zon: caj sama untuk semua item, ikut kawasan. Ikut Item: setiap item ada caj pos sendiri ikut kuantiti (set di tab Menu).</p>
+            </div>
+
+            <div id="caj-flat-wrap">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Caj Penghantaran (RM)</label>
                 <div class="grid grid-cols-2 gap-3">
@@ -226,6 +243,14 @@
                 <button onclick="addZon()" id="add-zon-btn" class="hidden w-full border-2 border-dashed border-brand text-brand font-bold py-2 rounded-xl hover:bg-red-50 transition-colors text-sm mt-2">
                     <i class="fa-solid fa-plus"></i> Tambah Zon
                 </button>
+            </div>
+            </div><!-- end caj-flat-wrap -->
+
+            <div id="mod-item-info" class="hidden border-t border-gray-100 pt-4">
+                <div class="bg-blue-50 border border-blue-100 rounded-lg p-3">
+                    <p class="text-sm text-blue-800 font-medium"><i class="fa-solid fa-circle-info"></i> Mod "Ikut Item" aktif</p>
+                    <p class="text-xs text-blue-600 mt-1">Pergi ke tab <b>Menu</b> untuk set caj pos setiap item ikut kuantiti. Caj pos order = caj tertinggi antara item yang dibeli (sebab hantar sekali).</p>
+                </div>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Status Kedai</label>
@@ -455,6 +480,11 @@
             ZON = Array.isArray(KEDAI.zon) ? KEDAI.zon.slice() : [];
             document.getElementById('p-guna-zon').checked = ZON.length > 0;
             toggleZon();
+            // Mod penghantaran (zon atau item)
+            const modPos = (KEDAI.modPenghantaran === 'item') ? 'item' : 'zon';
+            const modRadio = document.querySelector('input[name="p-mod-pos"][value="' + modPos + '"]');
+            if (modRadio) modRadio.checked = true;
+            toggleModPos();
             showPreview('banner', KEDAI.banner);
             showPreview('qr', KEDAI.qr);
             const statusVal = (KEDAI.status === 'Tutup') ? 'Tutup' : 'Aktif';
@@ -574,6 +604,16 @@
 
         let ZON = [];
 
+        function toggleModPos() {
+            const modEl = document.querySelector('input[name="p-mod-pos"]:checked');
+            const mod = modEl ? modEl.value : 'zon';
+            const isItem = (mod === 'item');
+            document.getElementById('caj-flat-wrap').classList.toggle('hidden', isItem);
+            document.getElementById('mod-item-info').classList.toggle('hidden', !isItem);
+            // Render semula menu supaya UI tier postage muncul/hilang
+            if (typeof renderItems === 'function') renderItems();
+        }
+
         function toggleZon() {
             const guna = document.getElementById('p-guna-zon').checked;
             document.getElementById('add-zon-btn').classList.toggle('hidden', !guna);
@@ -658,6 +698,7 @@
                 codAktif: document.getElementById('p-cod-aktif').checked,
                 cajOnline: parseFloat(document.getElementById('p-caj-online').value) || 0,
                 zon: document.getElementById('p-guna-zon').checked ? ZON : [],
+                modPenghantaran: (document.querySelector('input[name="p-mod-pos"]:checked') || {}).value === 'item' ? 'item' : 'zon',
                 status: document.querySelector('input[name="p-status"]:checked').value
             };
 
@@ -890,7 +931,113 @@
             card.appendChild(imgRow);
             card.appendChild(stokRow);
             card.appendChild(row2);
+
+            // Tier postage per item (hanya bila mod penghantaran = item)
+            const modEl = document.querySelector('input[name="p-mod-pos"]:checked');
+            const isItemMode = modEl && modEl.value === 'item';
+            if (isItemMode) {
+                card.appendChild(buildPosTierEditor(item, idx));
+            }
+
             return card;
+        }
+
+        // UI untuk set tier postage satu item: senarai {min, max, caj}
+        function buildPosTierEditor(item, idx) {
+            const box = document.createElement('div');
+            box.className = 'border-t border-gray-100 pt-3 mt-1';
+
+            if (!Array.isArray(ITEMS[idx].posTiers)) ITEMS[idx].posTiers = [];
+
+            const head = document.createElement('div');
+            head.className = 'flex items-center justify-between mb-2';
+            head.innerHTML = '<span class="text-xs font-bold text-gray-600"><i class="fa-solid fa-truck text-gray-400"></i> Caj Pos Ikut Kuantiti</span>';
+            box.appendChild(head);
+
+            const list = document.createElement('div');
+            list.className = 'space-y-2';
+            box.appendChild(list);
+
+            function renderTiers() {
+                list.innerHTML = '';
+                const tiers = ITEMS[idx].posTiers;
+                if (tiers.length === 0) {
+                    const hint = document.createElement('p');
+                    hint.className = 'text-xs text-gray-400';
+                    hint.innerText = 'Belum ada tier. Tekan "Tambah Tier" — cth: 1 unit RM5, 2+ unit RM7.';
+                    list.appendChild(hint);
+                }
+                tiers.forEach(function (t, ti) {
+                    const row = document.createElement('div');
+                    row.className = 'flex items-center gap-2';
+
+                    const mn = document.createElement('input');
+                    mn.type = 'number'; mn.min = '0'; mn.placeholder = 'Min';
+                    mn.value = (t.min === undefined || t.min === null) ? '' : t.min;
+                    mn.className = 'w-16 px-2 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand';
+                    mn.oninput = function () { ITEMS[idx].posTiers[ti].min = parseInt(mn.value) || 0; };
+
+                    const dash = document.createElement('span');
+                    dash.className = 'text-gray-400 text-sm'; dash.innerText = '–';
+
+                    const mx = document.createElement('input');
+                    mx.type = 'number'; mx.min = '0'; mx.placeholder = 'Max';
+                    mx.value = (t.max === undefined || t.max === null || t.max >= 999999) ? '' : t.max;
+                    mx.className = 'w-16 px-2 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand';
+                    mx.oninput = function () { ITEMS[idx].posTiers[ti].max = mx.value === '' ? 999999 : (parseInt(mx.value) || 0); };
+
+                    const unitLbl = document.createElement('span');
+                    unitLbl.className = 'text-xs text-gray-400'; unitLbl.innerText = 'unit';
+
+                    const rm = document.createElement('span');
+                    rm.className = 'text-xs text-gray-500 ml-1'; rm.innerText = 'RM';
+
+                    const caj = document.createElement('input');
+                    caj.type = 'number'; caj.step = '0.50'; caj.min = '0'; caj.placeholder = 'Pos';
+                    caj.value = (t.caj === undefined || t.caj === null) ? '' : t.caj;
+                    caj.className = 'w-20 px-2 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand';
+                    caj.oninput = function () { ITEMS[idx].posTiers[ti].caj = parseFloat(caj.value) || 0; };
+
+                    const rmTier = document.createElement('button');
+                    rmTier.className = 'w-7 h-7 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 shrink-0';
+                    rmTier.innerHTML = '<i class="fa-solid fa-xmark text-xs"></i>';
+                    rmTier.onclick = function () { ITEMS[idx].posTiers.splice(ti, 1); renderTiers(); };
+
+                    row.appendChild(mn);
+                    row.appendChild(dash);
+                    row.appendChild(mx);
+                    row.appendChild(unitLbl);
+                    row.appendChild(rm);
+                    row.appendChild(caj);
+                    row.appendChild(rmTier);
+                    list.appendChild(row);
+                });
+            }
+            renderTiers();
+
+            const addBtn = document.createElement('button');
+            addBtn.className = 'w-full border-2 border-dashed border-gray-300 text-gray-500 font-medium py-1.5 rounded-lg hover:bg-gray-50 text-xs mt-2';
+            addBtn.innerHTML = '<i class="fa-solid fa-plus"></i> Tambah Tier';
+            addBtn.onclick = function () {
+                const tiers = ITEMS[idx].posTiers;
+                // Cadang nilai bermula: tier pertama 1-1, seterusnya sambung
+                if (tiers.length === 0) {
+                    tiers.push({ min: 1, max: 1, caj: 0 });
+                } else {
+                    const last = tiers[tiers.length - 1];
+                    const nextMin = (last.max >= 999999) ? (last.min + 1) : (Number(last.max) + 1);
+                    tiers.push({ min: nextMin, max: 999999, caj: 0 });
+                }
+                renderTiers();
+            };
+            box.appendChild(addBtn);
+
+            const tip = document.createElement('p');
+            tip.className = 'text-xs text-gray-400 mt-1.5';
+            tip.innerText = 'Max kosong = tiada had atas (cth: 2 unit ke atas). Caj order = pos tertinggi antara item.';
+            box.appendChild(tip);
+
+            return box;
         }
 
         function buildToggle(label, checked, onChange) {
