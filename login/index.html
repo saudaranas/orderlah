@@ -932,6 +932,9 @@
             card.appendChild(stokRow);
             card.appendChild(row2);
 
+            // Tier harga per item (sentiasa ada — promo ikut kuantiti)
+            card.appendChild(buildHargaTierEditor(item, idx));
+
             // Tier postage per item (hanya bila mod penghantaran = item)
             const modEl = document.querySelector('input[name="p-mod-pos"]:checked');
             const isItemMode = modEl && modEl.value === 'item';
@@ -940,6 +943,105 @@
             }
 
             return card;
+        }
+
+        // UI untuk set tier HARGA satu item: senarai {min, max, harga} (harga seunit)
+        function buildHargaTierEditor(item, idx) {
+            const box = document.createElement('div');
+            box.className = 'border-t border-gray-100 pt-3 mt-1';
+
+            if (!Array.isArray(ITEMS[idx].hargaTiers)) ITEMS[idx].hargaTiers = [];
+
+            const head = document.createElement('div');
+            head.className = 'flex items-center justify-between mb-2';
+            head.innerHTML = '<span class="text-xs font-bold text-gray-600"><i class="fa-solid fa-tags text-gray-400"></i> Harga Promo Ikut Kuantiti</span>';
+            box.appendChild(head);
+
+            const list = document.createElement('div');
+            list.className = 'space-y-2';
+            box.appendChild(list);
+
+            function renderTiers() {
+                list.innerHTML = '';
+                const tiers = ITEMS[idx].hargaTiers;
+                if (tiers.length === 0) {
+                    const hint = document.createElement('p');
+                    hint.className = 'text-xs text-gray-400';
+                    hint.innerText = 'Tiada tier — guna harga biasa di atas. Tekan "Tambah Tier" untuk harga promo (cth: 2+ unit lebih murah seunit).';
+                    list.appendChild(hint);
+                }
+                tiers.forEach(function (t, ti) {
+                    const row = document.createElement('div');
+                    row.className = 'flex items-center gap-2';
+
+                    const mn = document.createElement('input');
+                    mn.type = 'number'; mn.min = '1'; mn.placeholder = 'Min';
+                    mn.value = (t.min === undefined || t.min === null) ? '' : t.min;
+                    mn.className = 'w-16 px-2 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand';
+                    mn.oninput = function () { ITEMS[idx].hargaTiers[ti].min = parseInt(mn.value) || 0; };
+
+                    const dash = document.createElement('span');
+                    dash.className = 'text-gray-400 text-sm'; dash.innerText = '–';
+
+                    const mx = document.createElement('input');
+                    mx.type = 'number'; mx.min = '1'; mx.placeholder = 'Max';
+                    mx.value = (t.max === undefined || t.max === null || t.max >= 999999) ? '' : t.max;
+                    mx.className = 'w-16 px-2 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand';
+                    mx.oninput = function () { ITEMS[idx].hargaTiers[ti].max = mx.value === '' ? 999999 : (parseInt(mx.value) || 0); };
+
+                    const unitLbl = document.createElement('span');
+                    unitLbl.className = 'text-xs text-gray-400'; unitLbl.innerText = 'unit';
+
+                    const rm = document.createElement('span');
+                    rm.className = 'text-xs text-gray-500 ml-1'; rm.innerText = 'RM';
+
+                    const harga = document.createElement('input');
+                    harga.type = 'number'; harga.step = '0.10'; harga.min = '0'; harga.placeholder = '/unit';
+                    harga.value = (t.harga === undefined || t.harga === null) ? '' : t.harga;
+                    harga.className = 'w-20 px-2 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand';
+                    harga.oninput = function () { ITEMS[idx].hargaTiers[ti].harga = parseFloat(harga.value) || 0; };
+
+                    const rmBtn = document.createElement('button');
+                    rmBtn.className = 'w-7 h-7 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 shrink-0';
+                    rmBtn.innerHTML = '<i class="fa-solid fa-xmark text-xs"></i>';
+                    rmBtn.onclick = function () { ITEMS[idx].hargaTiers.splice(ti, 1); renderTiers(); };
+
+                    row.appendChild(mn);
+                    row.appendChild(dash);
+                    row.appendChild(mx);
+                    row.appendChild(unitLbl);
+                    row.appendChild(rm);
+                    row.appendChild(harga);
+                    row.appendChild(rmBtn);
+                    list.appendChild(row);
+                });
+            }
+            renderTiers();
+
+            const addBtn = document.createElement('button');
+            addBtn.className = 'w-full border-2 border-dashed border-gray-300 text-gray-500 font-medium py-1.5 rounded-lg hover:bg-gray-50 text-xs mt-2';
+            addBtn.innerHTML = '<i class="fa-solid fa-plus"></i> Tambah Tier Harga';
+            addBtn.onclick = function () {
+                const tiers = ITEMS[idx].hargaTiers;
+                if (tiers.length === 0) {
+                    // Tier pertama = harga 1 unit (guna harga biasa sedia ada)
+                    const hargaBiasa = Number(ITEMS[idx].harga) || 0;
+                    tiers.push({ min: 1, max: 1, harga: hargaBiasa });
+                } else {
+                    const last = tiers[tiers.length - 1];
+                    const nextMin = (last.max >= 999999) ? (last.min + 1) : (Number(last.max) + 1);
+                    tiers.push({ min: nextMin, max: 999999, harga: Number(last.harga) || 0 });
+                }
+                renderTiers();
+            };
+            box.appendChild(addBtn);
+
+            const tip = document.createElement('p');
+            tip.className = 'text-xs text-gray-400 mt-1.5';
+            tip.innerText = 'Harga = SEUNIT. Cth: 1 unit RM45, 2+ unit RM40/unit (2 unit jadi RM80). Bila ada tier, badge PROMO keluar.';
+            box.appendChild(tip);
+
+            return box;
         }
 
         // UI untuk set tier postage satu item: senarai {min, max, caj}
