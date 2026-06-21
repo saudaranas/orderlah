@@ -948,11 +948,19 @@
             pilihBayaran();
 
             // Papar caj penghantaran ikut kaedah bayaran
-            setCajLabel('cod-caj', KEDAI.cajPenghantaran);
-            setCajLabel('online-caj', KEDAI.cajOnline);
+            if (KEDAI.modPenghantaran === 'item') {
+                // Mod item: sembunyikan label caj flat (caj ikut item nanti)
+                document.getElementById('cod-caj').classList.add('hidden');
+                document.getElementById('online-caj').classList.add('hidden');
+            } else {
+                setCajLabel('cod-caj', KEDAI.cajPenghantaran);
+                setCajLabel('online-caj', KEDAI.cajOnline);
+            }
 
-            // Zon penghantaran (jika ada)
-            renderZon();
+            // Zon penghantaran (jika ada) — skip dalam mod item
+            if (KEDAI.modPenghantaran !== 'item') {
+                renderZon();
+            }
 
             // Card alamat gerai (papar hanya jika ada maklumat)
             renderAlamat();
@@ -1126,6 +1134,11 @@
         function cajIkutBayaran() {
             const pay = document.querySelector('input[name="payment_method"]:checked').value;
 
+            // MOD ITEM: caj ikut tier postage setiap item, ambil yang tertinggi
+            if (KEDAI.modPenghantaran === 'item') {
+                return cajIkutItem();
+            }
+
             // Jika ada zon, guna caj zon yang dipilih
             if (KEDAI.zon && KEDAI.zon.length > 0) {
                 const sel = document.getElementById('cust-zon');
@@ -1138,6 +1151,33 @@
             return (pay === 'Online Transfer')
                 ? (Number(KEDAI.cajOnline) || 0)
                 : (Number(KEDAI.cajPenghantaran) || 0);
+        }
+
+        // Kira postage mod ITEM: setiap item ada tier ikut kuantiti.
+        // Ambil caj TERTINGGI antara semua item dalam troli (sebab hantar sekali).
+        function cajIkutItem() {
+            let maxCaj = 0;
+            MENU.forEach(function (item) {
+                const q = cart[item.id] || 0;
+                if (q <= 0) return;
+                const tiers = item.posTiers || [];
+                if (tiers.length === 0) return; // item tiada tier = tak caj
+                // Cari tier yang padan dengan kuantiti item ni
+                let cajItem = 0;
+                let jumpa = false;
+                for (let i = 0; i < tiers.length; i++) {
+                    const t = tiers[i];
+                    const mn = Number(t.min) || 0;
+                    const mx = (t.max === '' || t.max === undefined || t.max === null) ? 999999 : (Number(t.max) || 999999);
+                    if (q >= mn && q <= mx) { cajItem = Number(t.caj) || 0; jumpa = true; break; }
+                }
+                // Kalau kuantiti lebih dari semua tier, guna tier terakhir (tertinggi)
+                if (!jumpa && tiers.length > 0) {
+                    cajItem = Number(tiers[tiers.length - 1].caj) || 0;
+                }
+                if (cajItem > maxCaj) maxCaj = cajItem;
+            });
+            return maxCaj;
         }
 
         function renderZon() {
