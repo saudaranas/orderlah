@@ -987,7 +987,8 @@
         function buildItemCard(item) {
             const card = document.createElement('div');
 
-            if (item.promo) {
+            const itemPromo = adaPromo(item);
+            if (itemPromo) {
                 card.className = 'item-card bg-red-50 border-2 border-brand-light p-3 rounded-xl shadow-sm flex justify-between items-center gap-2 relative overflow-hidden';
                 const badge = document.createElement('div');
                 badge.className = 'absolute top-0 right-0 bg-brand text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg';
@@ -1017,10 +1018,24 @@
             h4.className = 'font-bold text-sm leading-tight';
             h4.innerText = item.nama;
             const price = document.createElement('p');
-            price.className = (item.promo ? 'text-brand-dark' : 'text-brand') + ' font-bold text-base mt-0.5';
-            price.innerText = 'RM ' + item.harga.toFixed(2);
+            price.className = (itemPromo ? 'text-brand-dark' : 'text-brand') + ' font-bold text-base mt-0.5';
+            price.id = 'price-' + item.id;
+            const qNow = cart[item.id] || 0;
+            price.innerText = 'RM ' + hargaSeunit(item, qNow > 0 ? qNow : 1).toFixed(2);
             infoText.appendChild(h4);
             infoText.appendChild(price);
+
+            // Hint tier harga (kalau ada) — tunjuk deal pada customer
+            if (Array.isArray(item.hargaTiers) && item.hargaTiers.length > 0) {
+                const hint = document.createElement('p');
+                hint.className = 'text-[11px] text-green-600 font-semibold mt-0.5';
+                // Cari tier kedua (biasanya deal beli lebih)
+                const t2 = item.hargaTiers[1] || item.hargaTiers[item.hargaTiers.length - 1];
+                if (t2 && item.hargaTiers.length > 1) {
+                    hint.innerText = 'Beli ' + t2.min + '+ : RM' + Number(t2.harga).toFixed(2) + '/unit';
+                    infoText.appendChild(hint);
+                }
+            }
 
             if (item.freeDelivery) {
                 const fd = document.createElement('span');
@@ -1155,6 +1170,26 @@
 
         // Kira postage mod ITEM: setiap item ada tier ikut kuantiti.
         // Ambil caj TERTINGGI antara semua item dalam troli (sebab hantar sekali).
+        // Kira harga SEUNIT item ikut kuantiti (guna tier harga kalau ada)
+        function hargaSeunit(item, qty) {
+            const tiers = item.hargaTiers || [];
+            if (tiers.length === 0) return Number(item.harga) || 0; // tiada tier = harga biasa
+            const q = qty || 1;
+            for (let i = 0; i < tiers.length; i++) {
+                const t = tiers[i];
+                const mn = Number(t.min) || 0;
+                const mx = (t.max === '' || t.max === undefined || t.max === null) ? 999999 : (Number(t.max) || 999999);
+                if (q >= mn && q <= mx) return Number(t.harga) || 0;
+            }
+            // Kalau kuantiti lebih dari semua tier, guna tier terakhir
+            return Number(tiers[tiers.length - 1].harga) || 0;
+        }
+
+        // Item ada promo? (checkbox promo ATAU ada tier harga)
+        function adaPromo(item) {
+            return item.promo || (Array.isArray(item.hargaTiers) && item.hargaTiers.length > 0);
+        }
+
         function cajIkutItem() {
             let maxCaj = 0;
             MENU.forEach(function (item) {
@@ -1268,6 +1303,11 @@
 
             cart[itemId] = next;
             document.getElementById('qty-' + itemId).innerText = next;
+            // Kemaskini harga seunit dipapar (kalau item ada tier harga)
+            const priceEl = document.getElementById('price-' + itemId);
+            if (priceEl && item) {
+                priceEl.innerText = 'RM ' + hargaSeunit(item, next > 0 ? next : 1).toFixed(2);
+            }
             calculateTotal();
         }
 
@@ -1276,7 +1316,7 @@
             let hasFreeDelivery = false;
             MENU.forEach(function (item) {
                 const q = cart[item.id] || 0;
-                sub += q * item.harga;
+                sub += q * hargaSeunit(item, q);
                 if (q > 0 && item.freeDelivery) hasFreeDelivery = true;
             });
             let del = 0;
@@ -1322,7 +1362,7 @@
             MENU.forEach(function (item) {
                 const q = cart[item.id] || 0;
                 if (q > 0) {
-                    text += '- ' + q + 'x ' + item.nama + ' (RM ' + (q * item.harga).toFixed(2) + ')\n';
+                    text += '- ' + q + 'x ' + item.nama + ' (RM ' + (q * hargaSeunit(item, q)).toFixed(2) + ')\n';
                 }
             });
 
