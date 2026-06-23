@@ -969,7 +969,11 @@
             const list = document.getElementById('menu-list');
             list.innerHTML = '';
             MENU.forEach(function (item) {
-                cart[item.id] = 0;
+                if (item.varian && item.varian.length > 0) {
+                    item.varian.forEach(function (v, i) { cart[item.id + '|' + i] = 0; });
+                } else {
+                    cart[item.id] = 0;
+                }
                 list.appendChild(buildItemCard(item));
             });
 
@@ -985,6 +989,11 @@
         }
 
         function buildItemCard(item) {
+            // Item ada VARIAN: render kad menegak dengan baris setiap varian
+            if (item.varian && item.varian.length > 0) {
+                return buildVariantCard(item);
+            }
+
             const card = document.createElement('div');
 
             const itemPromo = adaPromo(item);
@@ -1100,6 +1109,119 @@
             return card;
         }
 
+        // Kad untuk item yang ada VARIAN (saiz, keju, dll) — setiap varian baris sendiri
+        function buildVariantCard(item) {
+            const habisStok = (item.stok === 0);
+            const card = document.createElement('div');
+            card.className = 'item-card bg-white p-3 rounded-xl shadow-sm border border-gray-100' + (habisStok ? ' opacity-60' : '');
+
+            // Header: gambar + nama
+            const header = document.createElement('div');
+            header.className = 'flex items-center gap-3 mb-2';
+            if (item.gambar) {
+                const thumb = document.createElement('img');
+                thumb.src = item.gambar;
+                thumb.alt = item.nama;
+                thumb.className = 'w-12 h-12 rounded-lg object-cover shrink-0 cursor-pointer border border-gray-100';
+                thumb.onclick = function (e) { e.stopPropagation(); zoomImage(item.gambar, item.nama); };
+                thumb.onerror = function () { thumb.style.display = 'none'; };
+                header.appendChild(thumb);
+            }
+            const htext = document.createElement('div');
+            htext.className = 'min-w-0';
+            const h4 = document.createElement('h4');
+            h4.className = 'font-bold text-sm leading-tight';
+            h4.innerText = item.nama;
+            htext.appendChild(h4);
+            const sub = document.createElement('p');
+            sub.className = 'text-xs text-gray-400';
+            sub.innerText = 'Pilih pilihan di bawah';
+            htext.appendChild(sub);
+            header.appendChild(htext);
+            card.appendChild(header);
+
+            if (habisStok) {
+                const hb = document.createElement('span');
+                hb.className = 'inline-block text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded font-bold';
+                hb.innerHTML = '<i class="fa-solid fa-ban"></i> HABIS STOK';
+                card.appendChild(hb);
+                return card;
+            }
+
+            // Senarai varian
+            item.varian.forEach(function (v, i) {
+                const key = item.id + '|' + i;
+                const row = document.createElement('div');
+                row.className = 'flex items-center justify-between gap-2 py-2 border-t border-gray-100';
+
+                const vinfo = document.createElement('div');
+                vinfo.className = 'min-w-0 flex-1';
+                const vname = document.createElement('div');
+                vname.className = 'text-sm font-medium leading-tight';
+                vname.innerText = v.nama;
+                const vprice = document.createElement('div');
+                vprice.className = 'text-brand font-bold text-sm';
+                vprice.innerText = 'RM ' + (Number(v.harga) || 0).toFixed(2);
+                vinfo.appendChild(vname);
+                vinfo.appendChild(vprice);
+                row.appendChild(vinfo);
+
+                const ctrl = document.createElement('div');
+                ctrl.className = 'flex items-center gap-2 shrink-0';
+
+                const minus = document.createElement('button');
+                minus.type = 'button';
+                minus.className = 'w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200';
+                minus.innerHTML = '<i class="fa-solid fa-minus"></i>';
+                minus.onclick = function () { updateVarQty(item.id, i, -1); };
+
+                const qty = document.createElement('span');
+                qty.id = 'qty-' + key.replace('|', '-');
+                qty.className = 'font-bold w-4 text-center';
+                qty.innerText = cart[key] || 0;
+
+                const plus = document.createElement('button');
+                plus.type = 'button';
+                plus.className = 'w-8 h-8 rounded-full bg-brand text-white flex items-center justify-center hover:bg-brand-dark';
+                plus.innerHTML = '<i class="fa-solid fa-plus"></i>';
+                plus.onclick = function () { updateVarQty(item.id, i, 1); };
+
+                ctrl.appendChild(minus);
+                ctrl.appendChild(qty);
+                ctrl.appendChild(plus);
+                row.appendChild(ctrl);
+                card.appendChild(row);
+            });
+
+            return card;
+        }
+
+        // Kemaskini kuantiti varian (item ada saiz/keju)
+        function updateVarQty(itemId, varIdx, change) {
+            const item = MENU.find(function (m) { return m.id === itemId; });
+            const key = itemId + '|' + varIdx;
+            let next = Math.max(0, (cart[key] || 0) + change);
+
+            // Had ikut stok keseluruhan item (jumlah semua varian)
+            if (item && item.stok >= 0) {
+                let lainVarian = 0;
+                if (item.varian) {
+                    for (let i = 0; i < item.varian.length; i++) {
+                        if (i !== varIdx) lainVarian += cart[itemId + '|' + i] || 0;
+                    }
+                }
+                if (lainVarian + next > item.stok) {
+                    next = Math.max(0, item.stok - lainVarian);
+                    if (change > 0) alert('Maaf, stok ' + item.nama + ' tinggal ' + item.stok + ' sahaja.');
+                }
+            }
+
+            cart[key] = next;
+            const el = document.getElementById('qty-' + key.replace('|', '-'));
+            if (el) el.innerText = next;
+            calculateTotal();
+        }
+
         function toggleQR(show) {
             document.getElementById('qr-section').classList.toggle('hidden', !show);
         }
@@ -1193,7 +1315,7 @@
         function cajIkutItem() {
             let maxCaj = 0;
             MENU.forEach(function (item) {
-                const q = cart[item.id] || 0;
+                const q = qtyItem(item);
                 if (q <= 0) return;
                 const tiers = item.posTiers || [];
                 if (tiers.length === 0) return; // item tiada tier = tak caj
@@ -1311,13 +1433,32 @@
             calculateTotal();
         }
 
+        // Jumlah kuantiti satu item (campur semua varian kalau ada)
+        function qtyItem(item) {
+            if (item.varian && item.varian.length > 0) {
+                let total = 0;
+                for (let i = 0; i < item.varian.length; i++) total += cart[item.id + '|' + i] || 0;
+                return total;
+            }
+            return cart[item.id] || 0;
+        }
+
         function getTotals() {
             let sub = 0;
             let hasFreeDelivery = false;
             MENU.forEach(function (item) {
-                const q = cart[item.id] || 0;
-                sub += q * hargaSeunit(item, q);
-                if (q > 0 && item.freeDelivery) hasFreeDelivery = true;
+                if (item.varian && item.varian.length > 0) {
+                    // Item ada varian: kira setiap varian ikut harga sendiri
+                    item.varian.forEach(function (v, i) {
+                        const q = cart[item.id + '|' + i] || 0;
+                        sub += q * (Number(v.harga) || 0);
+                        if (q > 0 && item.freeDelivery) hasFreeDelivery = true;
+                    });
+                } else {
+                    const q = cart[item.id] || 0;
+                    sub += q * hargaSeunit(item, q);
+                    if (q > 0 && item.freeDelivery) hasFreeDelivery = true;
+                }
             });
             let del = 0;
             if (sub > 0) del = hasFreeDelivery ? 0 : cajIkutBayaran();
@@ -1360,9 +1501,18 @@
             text += (KEDAI.jenisBisnes === 'general' ? '*Item Pesanan:*\n' : '*Item Sila Sediakan:*\n');
 
             MENU.forEach(function (item) {
-                const q = cart[item.id] || 0;
-                if (q > 0) {
-                    text += '- ' + q + 'x ' + item.nama + ' (RM ' + (q * hargaSeunit(item, q)).toFixed(2) + ')\n';
+                if (item.varian && item.varian.length > 0) {
+                    item.varian.forEach(function (v, i) {
+                        const q = cart[item.id + '|' + i] || 0;
+                        if (q > 0) {
+                            text += '- ' + q + 'x ' + item.nama + ' (' + v.nama + ') (RM ' + (q * (Number(v.harga) || 0)).toFixed(2) + ')\n';
+                        }
+                    });
+                } else {
+                    const q = cart[item.id] || 0;
+                    if (q > 0) {
+                        text += '- ' + q + 'x ' + item.nama + ' (RM ' + (q * hargaSeunit(item, q)).toFixed(2) + ')\n';
+                    }
                 }
             });
 
@@ -1382,8 +1532,15 @@
             try {
                 const logItems = [];
                 MENU.forEach(function (item) {
-                    const q = cart[item.id] || 0;
-                    if (q > 0) logItems.push({ nama: item.nama, qty: q });
+                    if (item.varian && item.varian.length > 0) {
+                        item.varian.forEach(function (v, i) {
+                            const q = cart[item.id + '|' + i] || 0;
+                            if (q > 0) logItems.push({ nama: item.nama + ' (' + v.nama + ')', qty: q });
+                        });
+                    } else {
+                        const q = cart[item.id] || 0;
+                        if (q > 0) logItems.push({ nama: item.nama, qty: q });
+                    }
                 });
                 fetch(GAS_URL, {
                     method: 'POST',
